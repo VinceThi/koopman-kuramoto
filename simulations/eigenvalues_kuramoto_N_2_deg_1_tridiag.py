@@ -19,24 +19,45 @@ def coefficient_matrix_size_2_deg_1(truncation_dimension):
 def symmetrized_coefficient_matrix_size_2_deg_1(truncation_dimension):
     trd = truncation_dimension
     M = coefficient_matrix_size_2_deg_1(trd)
-    k = np.arange(-trd, trd, 1)
-    arr = (2*k + 1)/(-2*k + 1)
-    vec = np.array([cmath.sqrt(x) for x in arr])
-    diag = np.concatenate((np.array([1]), vec))
-    D = np.diag(diag)
-    Dm1 = np.diag(diag**(-1))
+    diag_list = [1]
+    for i in range(-trd+1, trd+1):
+        print(f"i ={i}")
+        num = 1
+        denom = 1
+        for k in np.arange(-trd, i, 1):
+            num *= -2*k + 1
+            denom *= 2*k + 1
+            # print(f"-2k+1 ={-2*k + 1}")
+        print(cmath.sqrt(num/denom))
+        diag_list.append(cmath.sqrt((num/denom)))
+    # diagonal = np.concatenate((np.array([1]), np.array(diag_list)))
+    diagonal = np.array(diag_list)
+    D = np.diag(diagonal)
+    Dm1 = np.diag(diagonal**(-1))
+    # print(diagonal, diagonal**(-1))
+    # print(diagonal, diagonal**(-1))
+    # print(cmath.sqrt(-7/5), np.sqrt(35/15), cmath.sqrt(-7))
     return Dm1@M@D
+"""
+A_sym = 
+[[0.+0.j           0.-5.91607978j   0.+0.j           0.+0.j          0.+0.j            0.+0.j            0.+0.j        ]
+ [0.-5.91607978j   0.+0.j           0.+3.87298335j   0.+0.j          0.+0.j            0.+0.j            0.+0.j        ]
+ [0.+0.j           0.+3.87298335j   0.+0.j           0.-1.73205081j  0.+0.j            0.+0.j            0.+0.j        ]
+ [0.+0.j           0.+0.j           0.-1.73205081j   0.+0.j          1.+0.j            0.+0.j            0.+0.j        ]
+ [0.+0.j           0.+0.j           0.+0.j           1.+0.j          0.+0.j            0.-1.73205081j    0.+0.j        ]
+ [0.+0.j           0.+0.j           0.+0.j           0.+0.j          0.-1.73205081j    0.+0.j            0.+3.87298335j]
+ [0.+0.j           0.+0.j            0.+0.j          0.+0.j          0.+0.j          0.+3.87298335j      0.+0.j        ]]
 
-
+"""
 fontsize_legend = 7
 plt.figure(figsize=(9, 3))
 ax1 = plt.subplot(131)
 plt.title("(a)", fontsize=12)
-for td in [2, 10, 15]:  # np.arange(20, 101, 21):
+for td in [15, 10, 5]:  # np.arange(20, 101, 21):
 
     A = coefficient_matrix_size_2_deg_1(td)
-    print(symmetrized_coefficient_matrix_size_2_deg_1(td))
     # print(A)
+
     eigenvalues = eigvals(A)
     real_part_eig = np.real(eigenvalues)
     imag_part_eig = np.imag(eigenvalues)
@@ -44,13 +65,21 @@ for td in [2, 10, 15]:  # np.arange(20, 101, 21):
     plt.scatter(real_part_eig, imag_part_eig,
                 label=f"$d = {td}$", s=8)
 
+    # A_sym = symmetrized_coefficient_matrix_size_2_deg_1(td)
+    # eigenvalues_sym = eigvals(A_sym)
+    # real_part_eig_sym = np.real(eigenvalues_sym)
+    # imag_part_eig_sym = np.imag(eigenvalues_sym)
+    # plt.scatter(real_part_eig_sym, imag_part_eig_sym,
+    #             label=f"$d = {td}$", s=8)
+
+# plt.xlim([-1, 1])
 plt.ylabel("Im($\\lambda)$")
 plt.xlabel("Re($\\lambda$)")
 plt.legend(loc="best", fontsize=fontsize_legend)
 
 ax2 = plt.subplot(132)
 plt.title("(b)", fontsize=12)
-d = 1001
+d = 1000
 A = coefficient_matrix_size_2_deg_1(d)
 vaps = eigvals(A)
 vaps_imag = np.imag(eigvals(A))
@@ -85,7 +114,7 @@ plt.legend(loc=2, fontsize=fontsize_legend)
 
 ax4 = plt.subplot(133)
 plt.title("(c)", fontsize=12)
-d_array = np.array([11, 101, 1001])
+d_array = np.array([10, 100, 1000])
 # np.concatenate([np.arange(20, 101, 20), np.array([1000])])
 for td in d_array:
 
