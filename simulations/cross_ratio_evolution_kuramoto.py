@@ -41,7 +41,6 @@ plt.subplot(111)
 for j in range(0, N):
     plt.plot(timelist, x[:, j]%(2*np.pi), color=first_community_color,
              linewidth=0.3)
-print(len(x[:, 1]))
 plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))
 # plt.plot(cross_ratio_theta(x[:, 2], x[:, 3], x[:, 4], x[:, 2]))
 ylab = plt.ylabel('$\\theta_j$', labelpad=20)
