@@ -27,12 +27,12 @@ print(time2 - time1)
 
 time1 = time.time()
 
-# detect empty motifs and extract the associated invariants
-motifs_found, n, maps = detect_empty_motif(network, motif_complete)
-print(n)
-n, invariants = extract_invariants(network, n, maps, 4)
+# detect empty motifs and extract the associated invariants (TAKES TOO LONG)
+# motifs_found, n, maps = detect_empty_motif(network, motif_complete)
+# print(n)
+# n, invariants = extract_invariants(network, n, maps, 4)
 
-time2 = time.time()
+# time2 = time.time()
 
-print(n)
-print(time2 - time1)
+# print(n)
+# print(time2 - time1)
