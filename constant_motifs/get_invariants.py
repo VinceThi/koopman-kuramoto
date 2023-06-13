@@ -21,5 +21,5 @@ def extract_invariants(graph, n, maps):
                 invariants.append(list_vertices)
             else:
                 n[j] -= 1
-            n = list(filter((0).__ne__, n))
+    n = list(filter((0).__ne__, n))
     return n, invariants
