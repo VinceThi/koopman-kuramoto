@@ -12,13 +12,13 @@ motif_complete = complete_graph(4, directed=True)
 motifs_constants = [motif_3, motif_6, motif_9, motif_complete]
 
 
-# tests for motif_3
+#================================= TESTS FOR MOTIF_3 =================================#
 
 # simple isomorphism
 def test_motif3_1():
     g = Graph([[3, 0], [3, 1], [3, 2]])
     _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
-    n, invariants = extract_invariants(g, n, maps)
+    n, invariants = extract_invariants(g, n, maps, 1)
     print(invariants)
     assert (n, invariants) == ([1], [[0, 1, 2, 3]])
 
@@ -26,15 +26,15 @@ def test_motif3_1():
 def test_motif3_2():
     g = motif_complete
     _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
-    n, invariants = extract_invariants(g, n, maps)
-    assert (n, invariants) == ([], [])
+    n, invariants = extract_invariants(g, n, maps, 1)
+    assert (n, invariants) == ([0], [])
 
 # motif with additional in-edges (same for all 4 vertices)
 def test_motif3_3():
     g = motif_3.copy()
     g.add_edge_list([(4, 0), (4, 1), (4, 2), (4, 3)])
     _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
-    n, invariants = extract_invariants(g, n, maps)
+    n, invariants = extract_invariants(g, n, maps, 1)
     print(invariants)
     assert (n, invariants) == ([1], [[0, 1, 2, 3]])
 
@@ -43,5 +43,30 @@ def test_motif3_4():
     g = motif_3.copy()
     g.add_edge_list([(4, 0), (4, 2)])
     _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
-    n, invariants = extract_invariants(g, n, maps)
-    assert (n, invariants) == ([], [])
+    n, invariants = extract_invariants(g, n, maps, 1)
+    assert (n, invariants) == ([0], [])
+
+# motif with additional in-edges (same for all) and out-edges (should not affect the outcome)
+def test_motif3_5():
+    g = motif_3.copy()
+    g.add_edge_list([(4, 0), (4, 1), (4, 2), (4, 3), (0, 5), (3, 5)])
+    _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
+    n, invariants = extract_invariants(g, n, maps, 1)
+    assert (n, invariants) == ([1], [[0, 1, 2, 3]])
+
+
+#================================= TESTS FOR ALL MOTIFS (EXCEPT EMPTY GRAPH) =================================#
+
+def test_allmotifs_1():
+    g = motif_3.copy()
+    g.add_edge_list([(1, 3), (1, 4), (1, 5),
+                     (3, 1), (3, 4), (3, 5),
+                     (4, 1), (4, 3), (4, 5),
+                     (5, 1), (5, 3), (5, 4),
+                     (0, 4), (0, 5)])
+    _, n, maps = motifs(g, 4, motif_list=motifs_constants, return_maps=True)
+    print(n)
+    n, invariants = extract_invariants(g, n, maps, 4)
+    print(n)
+    assert (n, invariants) == ([0, 0, 0, 1], [[1, 3, 4, 5]])
+test_allmotifs_1()

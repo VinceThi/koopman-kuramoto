@@ -4,7 +4,7 @@ from graph_tool.generation import complete_graph
 
 
 # extract invariants from maps (WILL NEED TO BE REDONE BETTER)
-def extract_invariants(graph, n, maps):
+def extract_invariants(graph, n, maps, number_motifs):
     invariants = []
     for j in range(len(n)):
         for i in range(n[j]):
@@ -21,5 +21,5 @@ def extract_invariants(graph, n, maps):
                 invariants.append(list_vertices)
             else:
                 n[j] -= 1
-    n = list(filter((0).__ne__, n))
+    n += [0] * (number_motifs - len(n))
     return n, invariants
