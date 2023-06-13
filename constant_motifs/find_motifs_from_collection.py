@@ -4,7 +4,7 @@ import time
 
 
 # get desired network from Netzschleuder: https://networks.skewed.de/
-network = collection.ns["celegans_2019/male_chemical_synapse"]
+network = collection.ns["celegansneural"]
 
 # create all motifs associated with a constant of motion (except empty graph)
 motif_3 = Graph([(0, 1), (0, 2), (0, 3)])
