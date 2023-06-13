@@ -57,6 +57,7 @@ def test_motif3_5():
 
 #================================= TESTS FOR ALL MOTIFS (EXCEPT EMPTY GRAPH) =================================#
 
+# see personal notes for graph
 def test_allmotifs_1():
     g = motif_3.copy()
     g.add_edge_list([(1, 3), (1, 4), (1, 5),
@@ -65,8 +66,45 @@ def test_allmotifs_1():
                      (5, 1), (5, 3), (5, 4),
                      (0, 4), (0, 5)])
     _, n, maps = motifs(g, 4, motif_list=motifs_constants, return_maps=True)
-    print(n)
     n, invariants = extract_invariants(g, n, maps, 4)
-    print(n)
     assert (n, invariants) == ([0, 0, 0, 1], [[1, 3, 4, 5]])
-test_allmotifs_1()
+
+# complete graph with 4 vertices
+def test_allmotifs_2():
+    g = complete_graph(4, directed=True)
+    _, n, maps = motifs(g, 4, motif_list=motifs_constants, return_maps=True)
+    n, invariants = extract_invariants(g, n, maps, 4)
+    assert (n, invariants) == ([0, 0, 0, 1], [[0, 1, 2, 3]])
+
+# complete graph with 5 vertices
+def test_allmotifs_3():
+    g = complete_graph(5, directed=True)
+    _, n, maps = motifs(g, 4, motif_list=motifs_constants, return_maps=True)
+    n, invariants = extract_invariants(g, n, maps, 4)
+    assert (n, invariants.sort()) == ([0, 0, 0, 5], [[0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 3, 4], [0, 2, 3, 4], [1, 2, 3, 4]].sort())
+
+# complete graph with 5 vertices with motif_3
+def test_allmotifs_4():
+    g = complete_graph(5, directed=True)
+    g.add_edge_list([(5, 6), (5, 8), (5, 7),
+                     (8, 0), (8, 1), (8, 2), (8, 3), (8, 4),
+                     (0, 5), (0, 6), (0, 7), (0, 8)])
+    _, n, maps = motifs(g, 4, motif_list=motifs_constants, return_maps=True)
+    n, invariants = extract_invariants(g, n, maps, 4)
+    assert (n, invariants.sort()) == ([1, 0, 0, 5], [[0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 3, 4], [0, 2, 3, 4], [1, 2, 3, 4], [5, 6, 7, 8]].sort())
+
+# same as 4 but with one edge removed so that the motif_3 is no longer valid
+def test_allmotifs_5():
+    g = complete_graph(5, directed=True)
+    g.add_edge_list([(5, 6), (5, 8), (5, 7),
+                     (8, 0), (8, 1), (8, 2), (8, 3), (8, 4),
+                     (0, 5), (0, 6), (0, 8)])
+    _, n, maps = motifs(g, 4, motif_list=motifs_constants, return_maps=True)
+    n, invariants = extract_invariants(g, n, maps, 4)
+    assert (n, invariants.sort()) == ([0, 0, 0, 5], [[0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 3, 4], [0, 2, 3, 4], [1, 2, 3, 4]].sort())
+
+
+#================================= TESTS FOR EMPTY MOTIF =================================#
+
+# simply empty graph with 4 vertices
+
