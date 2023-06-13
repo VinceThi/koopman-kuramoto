@@ -2,6 +2,7 @@ from graph_tool.all import *
 from graph_tool.clustering import motifs
 from graph_tool.generation import complete_graph
 from constant_motifs.get_invariants import extract_invariants
+from constant_motifs.detect_empty_motif import detect_empty_motif
 
 
 # create the 4 different motifs (except the empty graph)
@@ -107,4 +108,8 @@ def test_allmotifs_5():
 #================================= TESTS FOR EMPTY MOTIF =================================#
 
 # simply empty graph with 4 vertices
-
+def test_emptymotif_1():
+    g = Graph(4, directed=True)
+    _, n, maps = detect_empty_motif(g, motif_complete)
+    n, invariants = extract_invariants(g, n, maps, 1)
+    assert (n, invariants) == ([1], [[0, 1, 2, 3]])
