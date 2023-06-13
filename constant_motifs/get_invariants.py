@@ -3,13 +3,6 @@ from graph_tool.clustering import motifs
 from graph_tool.generation import complete_graph
 
 
-# create the 4 different motifs (except the empty graph)
-motif_3 = Graph([(0, 1), (0, 2), (0, 3)])
-motif_6 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3)])
-motif_9 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3), (3, 0), (3, 1), (3, 2)])
-motif_complete = complete_graph(4, directed=True)
-motifs_constants = [motif_3, motif_6, motif_9, motif_complete]
-
 # extract invariants from maps (WILL NEED TO BE REDONE BETTER)
 def extract_invariants(graph, n, maps):
     invariants = []
@@ -30,22 +23,3 @@ def extract_invariants(graph, n, maps):
                 n[j] -= 1
             n = list(filter((0).__ne__, n))
     return n, invariants
-
-def test_motif3_3():
-    g = motif_3.copy()
-    g.add_edge_list([(4, 0), (4, 1), (4, 2), (4, 3)])
-    _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
-    n, invariants = extract_invariants(g, n, maps)
-    print(invariants)
-    assert (n, invariants) == ([1], [[0, 1, 2, 3]])
-
-# motif with additional in-edges (not the same for all 4 vertices)
-def test_motif3_4():
-    g = motif_3.copy()
-    g.add_edge_list([(4, 0), (4, 2)])
-    _, n, maps = motifs(g, 4, motif_list=[motif_3], return_maps=True)
-    n, invariants = extract_invariants(g, n, maps)
-    assert (n, invariants) == ([], [])
-
-test_motif3_3()
-test_motif3_4()
