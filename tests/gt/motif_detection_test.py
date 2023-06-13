@@ -113,3 +113,10 @@ def test_emptymotif_1():
     _, n, maps = detect_empty_motif(g, motif_complete)
     n, invariants = extract_invariants(g, n, maps, 1)
     assert (n, invariants) == ([1], [[0, 1, 2, 3]])
+
+# empty graph connected to a vertex (star with 5 vertices)
+def test_emptymotif_2():
+    g = Graph([(4, 0), (4, 1), (4, 2), (4, 3)])
+    _, n, maps = detect_empty_motif(g, motif_complete)
+    n, invariants = extract_invariants(g, n, maps, 1)
+    assert (n, invariants) == ([1], [[0, 1, 2, 3]])

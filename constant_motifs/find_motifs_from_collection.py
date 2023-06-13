@@ -1,4 +1,5 @@
 from constant_motifs.get_invariants import *
+from constant_motifs.detect_empty_motif import detect_empty_motif
 import time
 
 
@@ -17,7 +18,19 @@ time1 = time.time()
 # detect motifs and extract the associated invariants
 motifs_found, n, maps = motifs(network, 4, motif_list=motifs_constants, return_maps=True)
 print(n)
-n, invariants = extract_invariants(network, n, maps)
+n, invariants = extract_invariants(network, n, maps, 4)
+
+time2 = time.time()
+
+print(n)
+print(time2 - time1)
+
+time1 = time.time()
+
+# detect empty motifs and extract the associated invariants
+motifs_found, n, maps = detect_empty_motif(network, motif_complete)
+print(n)
+n, invariants = extract_invariants(network, n, maps, 4)
 
 time2 = time.time()
 
