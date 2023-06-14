@@ -3,12 +3,14 @@ from graph_tool.clustering import motifs
 from graph_tool.generation import complete_graph
 
 
-# extract invariants from maps (WILL NEED TO BE REDONE BETTER)
+# extract invariants from map
 def extract_invariants(graph, n, maps, number_motifs):
     invariants = []
     for j in range(len(n)):
         for i in range(n[j]):
+            # Get vertices in motif
             list_vertices = list(maps[j][i].get_array())
+            # Compare in-neighbors exluding other vertices present in the motif
             in_neighbors = []
             for vertex1 in list_vertices:
                 in_neighbors_temp = set([neighbour for neighbour in graph.get_in_neighbors(vertex1)])
@@ -18,8 +20,40 @@ def extract_invariants(graph, n, maps, number_motifs):
                 diff_in_neighbors = diff_in_neighbors | ((in_neighbors[0] | neighborhood) - (in_neighbors[0] & neighborhood))
             diff_in_neighbors = diff_in_neighbors - set(list_vertices)
             if not diff_in_neighbors:
-                invariants.append(list_vertices)
+                invariants.append(list_vertices) # motif respects the condition on in-neighbors
             else:
-                n[j] -= 1
-    n += [0] * (number_motifs - len(n))
+                n[j] -= 1 # motif does not respect the condition on in-neighbors
+    n += [0] * (number_motifs - len(n)) # zero-padding for uniform formatting
     return n, invariants
+
+# Find the vertex that is not part of the invariant in a 5-star motif
+def find_emptymotif_5star(graph, list_vertices):
+    for vertex in list_vertices[:-1]:
+        in_neighbors_lastvertex = set([neighbour for neighbour in graph.get_in_neighbors(list_vertices[-1])])
+        if vertex in in_neighbors_lastvertex:
+            list_vertices.remove(vertex)
+            return list_vertices
+    return list_vertices[:-1]
+
+# extract invariants associated to 5-star motifs
+def extract_invariants_emptymotif(graph, n, maps):
+    invariants = []
+    for i in range(n[0]):
+        list_vertices = list(maps[0][i].get_array())
+        list_vertices = find_emptymotif_5star(graph, list_vertices)
+        # Compare in-neighbors exluding other vertices present in the motif
+        in_neighbors = []
+        for vertex1 in list_vertices:
+            in_neighbors_temp = set([neighbour for neighbour in graph.get_in_neighbors(vertex1)])
+            in_neighbors.append(in_neighbors_temp)
+        diff_in_neighbors = set()
+        for neighborhood in in_neighbors[1:]:
+            diff_in_neighbors = diff_in_neighbors | ((in_neighbors[0] | neighborhood) - (in_neighbors[0] & neighborhood))
+        diff_in_neighbors = diff_in_neighbors - set(list_vertices)
+        if not diff_in_neighbors:
+            invariants.append(list_vertices) # motif respects the condition on in-neighbors
+        else:
+            n[0] -= 1 # motif does not respect the condition on in-neighbors
+    n += [0] * (1 - len(n)) # zero-padding for uniform formatting
+    return n, invariants
+            

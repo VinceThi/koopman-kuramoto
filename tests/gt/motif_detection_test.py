@@ -1,8 +1,8 @@
 from graph_tool.all import *
 from graph_tool.clustering import motifs
 from graph_tool.generation import complete_graph
-from constant_motifs.get_invariants import extract_invariants
-from constant_motifs.detect_empty_motif import detect_empty_motif
+from constant_motifs.get_invariants import extract_invariants, extract_invariants_emptymotif
+from constant_motifs.detect_empty_motif import detect_empty_motif_inverse
 
 
 # create the 4 different motifs (except the empty graph)
@@ -11,6 +11,9 @@ motif_6 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3)])
 motif_9 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3), (3, 0), (3, 1), (3, 2)])
 motif_complete = complete_graph(4, directed=True)
 motifs_constants = [motif_3, motif_6, motif_9, motif_complete]
+
+# create 5-star motif
+motif_5star = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
 
 
 #================================= TESTS FOR MOTIF_3 =================================#
@@ -107,16 +110,23 @@ def test_allmotifs_5():
 
 #================================= TESTS FOR EMPTY MOTIF =================================#
 
-# simply empty graph with 4 vertices
+# simply empty graph with 4 vertices (using complete motif)
 def test_emptymotif_1():
     g = Graph(4, directed=True)
-    _, n, maps = detect_empty_motif(g, motif_complete)
+    _, n, maps = detect_empty_motif_inverse(g, motif_complete)
     n, invariants = extract_invariants(g, n, maps, 1)
     assert (n, invariants) == ([1], [[0, 1, 2, 3]])
 
-# empty graph connected to a vertex (star with 5 vertices)
+# empty graph connected to vertex 4 (star with 5 vertices)
 def test_emptymotif_2():
     g = Graph([(4, 0), (4, 1), (4, 2), (4, 3)])
-    _, n, maps = detect_empty_motif(g, motif_complete)
-    n, invariants = extract_invariants(g, n, maps, 1)
+    _, n, maps = motifs(g, 5, motif_list=[motif_5star], return_maps=True)
+    n, invariants = extract_invariants_emptymotif(g, n, maps)
     assert (n, invariants) == ([1], [[0, 1, 2, 3]])
+
+# empty graph connected to vertex 1 (star with 5 vertices)
+def test_emptymotif_2():
+    g = Graph([(1, 0), (1, 2), (1, 3), (1, 4)])
+    _, n, maps = motifs(g, 5, motif_list=[motif_5star], return_maps=True)
+    n, invariants = extract_invariants_emptymotif(g, n, maps)
+    assert (n, invariants) == ([1], [[0, 2, 3, 4]])
