@@ -1,5 +1,4 @@
 from constant_motifs.get_invariants import *
-from constant_motifs.detect_empty_motif import detect_empty_motif
 import time
 
 
@@ -12,6 +11,9 @@ motif_6 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3)])
 motif_9 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3), (3, 0), (3, 1), (3, 2)])
 motif_complete = complete_graph(4, directed=True)
 motifs_constants = [motif_3, motif_6, motif_9, motif_complete]
+
+# create 5-star motif
+motif_5star = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
 
 time1 = time.time()
 
@@ -28,11 +30,11 @@ print(time2 - time1)
 time1 = time.time()
 
 # detect empty motifs and extract the associated invariants (TAKES TOO LONG)
-# motifs_found, n, maps = detect_empty_motif(network, motif_complete)
-# print(n)
-# n, invariants = extract_invariants(network, n, maps, 4)
+_, n_stars, maps_stars = motifs(network, 5, motif_list=[motif_5star], return_maps=True)
+print(n_stars)
+n_emptymotifs, invariants_emptymotifs = extract_invariants_emptymotif(network, n_stars, maps_stars)
 
-# time2 = time.time()
+time2 = time.time()
 
-# print(n)
-# print(time2 - time1)
+print(n_emptymotifs)
+print(time2 - time1)

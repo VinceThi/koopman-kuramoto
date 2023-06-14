@@ -38,6 +38,8 @@ def find_emptymotif_5star(graph, list_vertices):
 # extract invariants associated to 5-star motifs
 def extract_invariants_emptymotif(graph, n, maps):
     invariants = []
+    if len(n) == 0:
+        return [0], []
     for i in range(n[0]):
         list_vertices = list(maps[0][i].get_array())
         list_vertices = find_emptymotif_5star(graph, list_vertices)
