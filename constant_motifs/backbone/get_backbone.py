@@ -9,7 +9,8 @@ import networkx as nx
 import disparity_filter_weighted_graphs as dfil
 
 
-graphml_filename = '/home/benja/Reseaux/GraphML/celegansneural.graphml'
+graphml_filename = '/home/benja/Reseaux/GraphML/fly_larva.graphml'
+weight_keyword = 'count'
 
 # Gets the text from the GraphML file.
 graphml_content = Path(graphml_filename).read_text()
@@ -34,11 +35,11 @@ graph = nx.DiGraph(graph_temp)
 #print(edge_attributes)
 
 # Compute the 'alpha' value for each edge.
-dfil.compute_alpha(graph, weight="value")
+dfil.compute_alpha(graph, weight=weight_keyword)
 
 # Find the optimal value for alpha. The dataframe used to find the optimal
 #   value for alpha is saved to `finding_optimal_alpha.csv.zip`.
-dfil.find_optimal_alpha(graph, save_optimal_alpha_data=False, method='elbow', weight="value")
+dfil.find_optimal_alpha(graph, save_optimal_alpha_data=False, method='elbow', weight=weight_keyword)
 
 # Plot the position of the optimal value for alpha.
 #dfil.plot_optimal_alpha(graph)

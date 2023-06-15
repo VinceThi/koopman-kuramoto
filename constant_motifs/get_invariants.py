@@ -58,4 +58,10 @@ def extract_invariants_emptymotif(graph, n, maps):
             n[0] -= 1 # motif does not respect the condition on in-neighbors
     n += [0] * (1 - len(n)) # zero-padding for uniform formatting
     return n, invariants
-            
+
+# Delete all self-loops in graph
+def delete_self_loops(graph):
+    for vertex in graph.vertices():
+        if vertex in graph.get_out_neighbors(vertex):
+            graph.remove_edge(graph.edge(vertex, vertex))
+    return graph
