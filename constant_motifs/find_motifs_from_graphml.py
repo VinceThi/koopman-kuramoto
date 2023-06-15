@@ -3,7 +3,7 @@ import time
 
 
 # load graphml network
-path = "/home/benja/Reseaux/GraphML/celegansneural_filtered.graphml"
+path = "/home/benja/Reseaux/GraphML/hermaphrodite_chemical_synapse_filtered.graphml"
 network = load_graph(path, fmt='graphml')
 
 # create all motifs associated with a constant of motion (except empty graph)
