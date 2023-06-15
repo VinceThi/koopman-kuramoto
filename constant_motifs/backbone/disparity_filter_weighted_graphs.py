@@ -42,8 +42,8 @@ def _compute_alpha_directed(G, weight):
         k_in = G.in_degree(u)
 
         if k_out > 1:
-            sum_w_out = sum(_absolute(G[u][v][f"e{index}"][weight]) for index, v in enumerate(G.successors(u)))
-            for index, v in G.successors(u):
+            sum_w_out = sum(_absolute(G[u][v][weight]) for v in G.successors(u))
+            for v in G.successors(u):
                 w = G[u][v][weight]
                 p_ij_out = float(_absolute(w))/sum_w_out
                 alpha_ij_out = _power(1 - p_ij_out, k_out - 1)
@@ -186,7 +186,7 @@ def _filter_graph_undirected(G, alpha_t):
 
 
 
-def find_optimal_alpha(G, save_optimal_alpha_data=False, method='elbow'):
+def find_optimal_alpha(G, save_optimal_alpha_data=False, method='elbow', weight="weight"):
     ''' Finds the optimal value for alpha.
 
         Args
@@ -214,14 +214,18 @@ def find_optimal_alpha(G, save_optimal_alpha_data=False, method='elbow'):
         return g.number_of_nodes()
 
     G_copy = G.copy()
+    
+    if G_copy.is_directed():
+        for u, v in G_copy.edges():
+            G_copy[u][v]["alpha"] = min(G[u][v]["alpha_in"], G[u][v]["alpha_in"])
 
     nb_vertices = G.number_of_nodes()
     nb_edges = G.number_of_edges()
 
-    df = _DataFrame([[u, v, d['weight'], d['alpha']] for u, v, d in G_copy.edges(data=True)],
-                      columns=['v_source', 'v_target', 'weight', 'alpha'])
+    df = _DataFrame([[u, v, d[weight], d['alpha']] for u, v, d in G_copy.edges(data=True)],
+                      columns=['v_source', 'v_target', weight, 'alpha'])
 
-    df.sort_values(by=['alpha', 'weight'], ascending=False, inplace=True)
+    df.sort_values(by=['alpha', weight], ascending=False, inplace=True)
 
     df.reset_index(drop=True, inplace=True)
 
@@ -233,7 +237,7 @@ def find_optimal_alpha(G, save_optimal_alpha_data=False, method='elbow'):
     #df.drop_duplicates(subset=['alpha'], keep='last', inplace=True)
 
     last_row = {'v_source': _nan, 'v_target': _nan,
-                'weight': _nan, 'alpha': _nan,
+                weight: _nan, 'alpha': _nan,
                 'Remaining number of edges': nb_edges, 'Remaining number of vertices': nb_vertices,
                 'Remaining fraction of edges': 1, 'Remaining fraction of vertices' :1}
     df = _concat([_DataFrame([last_row]), df])
