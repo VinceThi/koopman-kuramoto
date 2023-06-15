@@ -18,6 +18,9 @@ motif_5star = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
 
 time1 = time.time()
 
+# delete all self loops
+network = delete_self_loops(network)
+
 # detect motifs and extract the associated invariants
 motifs_found, n, maps = motifs(network, 4, motif_list=motifs_constants, return_maps=True)
 print(n)
