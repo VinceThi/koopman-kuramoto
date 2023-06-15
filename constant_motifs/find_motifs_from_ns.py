@@ -29,7 +29,7 @@ print(time2 - time1)
 
 time1 = time.time()
 
-# detect empty motifs and extract the associated invariants (TAKES TOO LONG)
+# detect empty motifs and extract the associated invariants
 _, n_stars, maps_stars = motifs(network, 5, motif_list=[motif_5star], return_maps=True)
 print(n_stars)
 n_emptymotifs, invariants_emptymotifs = extract_invariants_emptymotif(network, n_stars, maps_stars)
