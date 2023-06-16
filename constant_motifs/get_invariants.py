@@ -27,13 +27,14 @@ def extract_invariants(graph, n, maps, number_motifs):
     return n, invariants
 
 # Find the vertex that is not part of the invariant in a 5-star motif
-def find_emptymotif_5star(graph, list_vertices):
-    for vertex in list_vertices[:-1]:
-        in_neighbors_lastvertex = set([neighbour for neighbour in graph.get_in_neighbors(list_vertices[-1])])
-        if vertex in in_neighbors_lastvertex:
-            list_vertices.remove(vertex)
-            return list_vertices
-    return list_vertices[:-1]
+def find_emptymotif_from_5star(graph, list_vertices):
+    for vertex in list_vertices[:]:
+        out_neighbors = set([neighbour for neighbour in graph.get_out_neighbors(vertex)])
+        other_vertices = list_vertices.copy()
+        other_vertices.remove(vertex)
+        if not (set(other_vertices) - out_neighbors):
+            return other_vertices
+    raise RuntimeError("No center vertex was found for the 5-star.")
 
 # extract invariants associated to 5-star motifs
 def extract_invariants_emptymotif(graph, n, maps):
@@ -42,7 +43,7 @@ def extract_invariants_emptymotif(graph, n, maps):
         return [0], []
     for i in range(n[0]):
         list_vertices = list(maps[0][i].get_array())
-        list_vertices = find_emptymotif_5star(graph, list_vertices)
+        list_vertices = find_emptymotif_from_5star(graph, list_vertices)
         # Compare in-neighbors exluding other vertices present in the motif
         in_neighbors = []
         for vertex1 in list_vertices:
