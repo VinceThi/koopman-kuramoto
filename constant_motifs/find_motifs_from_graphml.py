@@ -13,8 +13,19 @@ motif_9 = Graph([(0, 1), (0, 2), (0, 3), (2, 0), (2, 1), (2, 3), (3, 0), (3, 1),
 motif_complete = complete_graph(4, directed=True)
 motifs_constants = [motif_3, motif_6, motif_9, motif_complete]
 
-# create 5-star motif
-motif_5star = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
+# create 5-star motifs
+motif1_5star = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
+motif2_5star = motif1_5star.copy()
+motif2_5star.add_edge(1, 0)
+motif3_5star = motif2_5star.copy()
+motif3_5star.add_edge(2, 0)
+motif4_5star = motif3_5star.copy()
+motif4_5star.add_edge(3, 0)
+motif5_5star = motif4_5star.copy()
+motif5_5star.add_edge(4, 0)
+
+motifs_5star = [motif1_5star, motif2_5star, motif3_5star, motif4_5star, motif5_5star]
+
 
 time1 = time.time()
 
@@ -34,9 +45,9 @@ print(time2 - time1)
 time1 = time.time()
 
 # detect empty motifs and extract the associated invariants
-_, n_stars, maps_stars = motifs(network, 5, motif_list=[motif_5star], return_maps=True)
+_, n_stars, maps_stars = motifs(network, 5, motif_list=motifs_5star, return_maps=True)
 print(n_stars)
-n_emptymotifs, invariants_emptymotifs = extract_invariants_emptymotif(network, n_stars, maps_stars)
+n_emptymotifs, invariants_emptymotifs = extract_invariants_emptymotif(network, n_stars, maps_stars, 5)
 
 time2 = time.time()
 
