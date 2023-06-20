@@ -49,6 +49,8 @@ _, n_stars, maps_stars = motifs(network, 5, motif_list=motifs_5star, return_maps
 print(n_stars)
 n_emptymotifs, invariants_emptymotifs = extract_invariants(network, n_stars, maps_stars, 5, stars=True)
 
+constants = eliminate_duplicates(invariants_emptymotifs)
+
 time2 = time.time()
 
 print(n_emptymotifs)
