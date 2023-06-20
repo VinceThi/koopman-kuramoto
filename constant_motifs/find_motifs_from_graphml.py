@@ -1,9 +1,9 @@
-from constant_motifs.get_invariants import *
+from constant_motifs.get_constants import *
 import time
 
 
 # load graphml network
-path = "/home/benja/Reseaux/GraphML/celegansneural_filtered.graphml"
+path = "/home/benja/Reseaux/GraphML/male_chemical_synapse_filtered.graphml"
 network = load_graph(path, fmt='graphml')
 
 # create all motifs associated with a constant of motion (except empty graph)
@@ -53,5 +53,6 @@ constants = eliminate_duplicates(invariants_emptymotifs)
 
 time2 = time.time()
 
-print(n_emptymotifs)
+print(len(constants))
+print(constants[:10])
 print(time2 - time1)

@@ -1,4 +1,4 @@
-from constant_motifs.get_invariants import *
+from constant_motifs.get_constants import *
 import time
 
 

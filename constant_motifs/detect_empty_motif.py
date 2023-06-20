@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from constant_motifs.get_invariants import *
+from constant_motifs.get_constants import *
 from graph_tool.spectral import adjacency
 
 

@@ -1,4 +1,4 @@
-from constant_motifs.get_invariants import *
+from constant_motifs.get_constants import *
 
 
 # create the 5-star motifs

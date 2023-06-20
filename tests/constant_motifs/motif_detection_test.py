@@ -1,7 +1,7 @@
 from graph_tool.all import *
 from graph_tool.clustering import motifs
 from graph_tool.generation import complete_graph
-from constant_motifs.get_invariants import extract_invariants
+from constant_motifs.get_constants import extract_invariants
 from constant_motifs.detect_empty_motif import detect_empty_motif_inverse
 
 
