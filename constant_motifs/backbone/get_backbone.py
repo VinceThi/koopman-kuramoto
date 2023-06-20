@@ -9,8 +9,8 @@ import networkx as nx
 import disparity_filter_weighted_graphs as dfil
 
 
-graphml_filename = '/home/benja/Reseaux/GraphML/hermaphrodite_chemical_synapse.graphml'
-weight_keyword = 'synapses'
+graphml_filename = '/home/benja/Reseaux/GraphML/celegansneural.graphml'
+weight_keyword = 'value'
 
 # Gets the text from the GraphML file.
 graphml_content = Path(graphml_filename).read_text()

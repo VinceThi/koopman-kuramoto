@@ -3,7 +3,7 @@ import time
 
 
 # load graphml network
-path = "/home/benja/Reseaux/GraphML/hermaphrodite_chemical_synapse_filtered.graphml"
+path = "/home/benja/Reseaux/GraphML/celegansneural_filtered.graphml"
 network = load_graph(path, fmt='graphml')
 
 # create all motifs associated with a constant of motion (except empty graph)
@@ -47,7 +47,7 @@ time1 = time.time()
 # detect empty motifs and extract the associated invariants
 _, n_stars, maps_stars = motifs(network, 5, motif_list=motifs_5star, return_maps=True)
 print(n_stars)
-n_emptymotifs, invariants_emptymotifs = extract_invariants_emptymotif(network, n_stars, maps_stars, 5)
+n_emptymotifs, invariants_emptymotifs = extract_invariants(network, n_stars, maps_stars, 5, stars=True)
 
 time2 = time.time()
 

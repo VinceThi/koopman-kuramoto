@@ -1,7 +1,7 @@
 from graph_tool.all import *
 from graph_tool.clustering import motifs
 from graph_tool.generation import complete_graph
-from constant_motifs.get_invariants import extract_invariants, extract_invariants_emptymotif
+from constant_motifs.get_invariants import extract_invariants
 from constant_motifs.detect_empty_motif import detect_empty_motif_inverse
 
 
@@ -131,40 +131,40 @@ def test_emptymotif_1():
 def test_emptymotif_2():
     g = Graph([(4, 0), (4, 1), (4, 2), (4, 3)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
-    n, invariants = extract_invariants_emptymotif(g, n, maps, 5)
+    n, invariants = extract_invariants(g, n, maps, 5, stars=True)
     assert (n, invariants) == ([1], [[0, 1, 2, 3]])
 
 # empty graph connected to vertex 1 (star with 5 vertices)
 def test_emptymotif_2():
     g = Graph([(1, 0), (1, 2), (1, 3), (1, 4)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
-    n, invariants = extract_invariants_emptymotif(g, n, maps, 5)
+    n, invariants = extract_invariants(g, n, maps, 5, stars=True)
     assert (n, invariants) == ([1, 0, 0, 0, 0], [[0, 2, 3, 4]])
 
 # 5-star with one edge from the periphery to the center
 def test_emptymotif_3():
     g = Graph([(1, 0), (1, 2), (1, 3), (1, 4), (3, 1)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
-    n, invariants = extract_invariants_emptymotif(g, n, maps, 5)
+    n, invariants = extract_invariants(g, n, maps, 5, stars=True)
     assert (n, invariants) == ([0, 1, 0, 0, 0], [[0, 2, 3, 4]])
 
 # 5-star with two edges from the periphery to the center
 def test_emptymotif_4():
     g = Graph([(1, 0), (1, 2), (1, 3), (1, 4), (3, 1), (0, 1)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
-    n, invariants = extract_invariants_emptymotif(g, n, maps, 5)
+    n, invariants = extract_invariants(g, n, maps, 5, stars=True)
     assert (n, invariants) == ([0, 0, 1, 0, 0], [[0, 2, 3, 4]])
 
 # 5-star with three edges from the periphery to the center
 def test_emptymotif_5():
     g = Graph([(1, 0), (1, 2), (1, 3), (1, 4), (3, 1), (0, 1), (2, 1)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
-    n, invariants = extract_invariants_emptymotif(g, n, maps, 5)
+    n, invariants = extract_invariants(g, n, maps, 5, stars=True)
     assert (n, invariants) == ([0, 0, 0, 1, 0], [[0, 2, 3, 4]])
 
 # 5-star with four edges from the periphery to the center
 def test_emptymotif_6():
     g = Graph([(1, 0), (1, 2), (1, 3), (1, 4), (3, 1), (0, 1), (2, 1), (4, 1)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
-    n, invariants = extract_invariants_emptymotif(g, n, maps, 5)
+    n, invariants = extract_invariants(g, n, maps, 5, stars=True)
     assert (n, invariants) == ([0, 0, 0, 0, 1], [[0, 2, 3, 4]])
