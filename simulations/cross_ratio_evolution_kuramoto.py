@@ -2,7 +2,6 @@
 # @author: Vincent Thibeault
 
 import numpy as np
-# import networkx as nx
 from plots.config_rcparams import *
 from dynamics.dynamics import kuramoto_sakaguchi
 from dynamics.constants_of_motion import cross_ratio_theta,\
@@ -80,17 +79,12 @@ N = len(W[0])
 
 """ Dynamical parameters """
 dynamics_str = "kuramoto_sakaguchi"
-# omega = np.array([0.5, 1, 1, 1, 1])
 omega = np.array([0.5, 1, 1, 1, 1])
 coupling = 1
 alpha = 0
 
 """ Integration """
-
-                                     #            a   b  c  d
-x0 = 2*np.pi*np.random.random(N)     # np.array([0.5, 0, 1, 2, 3])  #
-print(cross_ratio_theta(x0[1], x0[2], x0[3], x0[4]))
-print(log_cross_ratio_theta(x0[1], x0[2], x0[3], x0[4]))
+x0 = 2*np.pi*np.random.random(N)
 
 args_dynamics = (coupling, omega, alpha)
 x = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi,
@@ -101,10 +95,6 @@ plt.subplot(111)
 for j in range(0, N):
     plt.plot(timelist, x[:, j] % (2*np.pi), color=first_community_color,
              linewidth=0.3)
-# plt.plot(timelist, cross_ratio_theta(x[:, 2], x[:, 3], x[:, 4], x[:, 5]),
-#          label="Cross-ratio $c_{3456}$")
-# plt.plot(timelist, cross_ratio_theta(x[:, 3], x[:, 4], x[:, 5], x[:, 6]),
-#          label="Cross-ratio $c_{4567}$")
 plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]),
          label="Cross-ratio $c_{2345}$")
 plt.plot(timelist, log_cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]),
@@ -139,9 +129,9 @@ if messagebox.askyesno("Python",
                              "coupling": coupling,
                              "t0": t0, "t1": t1, "dt": dt}
 
-    fig.savefig(path + f'{timestr}_{file}_bifurcation_diagram'
+    fig.savefig(path + f'{timestr}_{file}_trajectories_and_cross_ratios'
                 f'_{dynamics_str}_{graph_str}.pdf')
-    fig.savefig(path + f'{timestr}_{file}_bifurcation_diagram'
+    fig.savefig(path + f'{timestr}_{file}_trajectories_and_cross_ratios'
                        f'_{dynamics_str}_{graph_str}.png')
     # with open(path + f'{timestr}_{file}'
     #           f'_x_equilibrium_points_list'
