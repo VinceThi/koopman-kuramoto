@@ -1,3 +1,4 @@
+import pytest
 from constant_motifs.get_constants import *
 
 
@@ -24,6 +25,7 @@ def test_eliminate_duplicates_1():
     constants = eliminate_duplicates(invariants)
     assert constants == [[1, 2, 3, 4]]
 
+
 def test_eliminate_duplicates_2():
     graph = motif2_5star.copy()
     graph.add_edge_list([(5, 1), (5, 2), (5, 3), (5, 4)])
@@ -32,6 +34,7 @@ def test_eliminate_duplicates_2():
     constants = eliminate_duplicates(invariants)
     assert constants == [[1, 2, 3, 4]]
 
+
 def test_eliminate_duplicates_3():
     graph = motif3_5star.copy()
     graph.add_edge_list([(5, 1), (5, 2), (5, 3), (5, 4), (5, 0), (0, 5)])
@@ -39,3 +42,7 @@ def test_eliminate_duplicates_3():
     n, invariants = extract_invariants(graph, n, maps, 5, stars=True)
     constants = eliminate_duplicates(invariants)
     assert constants == [[1, 2, 3, 4]]
+
+
+if __name__ == "__main__":
+    pytest.main()
