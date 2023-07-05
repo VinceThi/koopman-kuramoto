@@ -2,10 +2,11 @@
 # @author: Vincent Thibeault
 
 import numpy as np
-import networkx as nx
+# import networkx as nx
 from plots.config_rcparams import *
 from dynamics.dynamics import kuramoto_sakaguchi
-from dynamics.constants_of_motion import cross_ratio_theta
+from dynamics.constants_of_motion import cross_ratio_theta,\
+    log_cross_ratio_theta
 from dynamics.integrate import integrate_dopri45
 import time
 import json
@@ -13,24 +14,83 @@ import tkinter.simpledialog
 from tkinter import messagebox
 
 """ Time parameters """
-t0, t1, dt = 0, 30, 0.1
+t0, t1, dt = 0, 15, 0.0001
 timelist = np.linspace(t0, t1, int(t1 / dt))
 
 """ Graph parameters """
-graph_str = "star"
-N = 5
-G = nx.star_graph(N-1)
-W = nx.to_numpy_array(G)
+graph_str = "motif"
 
+# Directed star (core to periphery
+# W = np.array([[0, 1, 1, 1, 1],
+#               [0, 0, 0, 0, 0],
+#               [0, 0, 0, 0, 0],
+#               [0, 0, 0, 0, 0],
+#               [0, 0, 0, 0, 0]])
+
+# Directed star (periphery to core)
+# W = np.array([[0, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0]])
+
+# Undirected star
+# W = np.array([[0, 1, 1, 1, 1],
+#               [1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0]])
+
+# Complete graph
+# W = np.ones((5, 5))
+
+
+# Directed star in network (periphery to core)
+# W = np.array([[0, 0, 0, 0, 0, 0, 0],
+#               [1, 0, 1, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0, 0, 0],
+#               [1, 0, 0, 0, 0, 0, 0]])
+# omega = np.array([0.5, 0.7, 0.8,  1, 1, 1, 1])
+
+# W = np.array([[0, 1, 1, 1, 1, 1],
+#               [1, 0, 1, 1, 1, 1],
+#               [0, 0, 0, 0, 0, 0],
+#               [0, 0, 0, 0, 0, 0],
+#               [0, 0, 0, 0, 0, 0],
+#               [0, 0, 0, 0, 0, 0]])
+# omega = np.array([0.5, 0.7, 1, 1, 1, 1])
+
+# W = np.array([[0, 1, 1, 1, 1],
+#               [0, 0, 0, 0, 0],
+#               [0, 1, 0, 0, 0],
+#               [0, 1, 0, 0, 0],
+#               [0, 1, 0, 0, 0]])
+
+W = np.array([[0, 1, 1, 1, 1],
+              [0, 0, 1, 0, 0],
+              [0, 1, 0, 0, 0],
+              [0, 1, 1, 0, 0],
+              [0, 1, 1, 0, 0]])
+
+
+N = len(W[0])
 
 """ Dynamical parameters """
 dynamics_str = "kuramoto_sakaguchi"
+# omega = np.array([0.5, 1, 1, 1, 1])
 omega = np.array([0.5, 1, 1, 1, 1])
 coupling = 1
 alpha = 0
 
 """ Integration """
-x0 = np.random.random(N)
+
+                                     #            a   b  c  d
+x0 = 2*np.pi*np.random.random(N)     # np.array([0.5, 0, 1, 2, 3])  #
+print(cross_ratio_theta(x0[1], x0[2], x0[3], x0[4]))
+print(log_cross_ratio_theta(x0[1], x0[2], x0[3], x0[4]))
 
 args_dynamics = (coupling, omega, alpha)
 x = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi,
@@ -39,16 +99,29 @@ x = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi,
 fig = plt.figure(figsize=(4, 4))
 plt.subplot(111)
 for j in range(0, N):
-    plt.plot(timelist, x[:, j]%(2*np.pi), color=first_community_color,
+    plt.plot(timelist, x[:, j] % (2*np.pi), color=first_community_color,
              linewidth=0.3)
-plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))
-# plt.plot(cross_ratio_theta(x[:, 2], x[:, 3], x[:, 4], x[:, 2]))
+# plt.plot(timelist, cross_ratio_theta(x[:, 2], x[:, 3], x[:, 4], x[:, 5]),
+#          label="Cross-ratio $c_{3456}$")
+# plt.plot(timelist, cross_ratio_theta(x[:, 3], x[:, 4], x[:, 5], x[:, 6]),
+#          label="Cross-ratio $c_{4567}$")
+plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]),
+         label="Cross-ratio $c_{2345}$")
+plt.plot(timelist, log_cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]),
+         label="Cross-ratio $log(c_{2345})$")
+# plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 4], x[:, 3]))
+# plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 3], x[:, 2], x[:, 4]))
+# plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 3], x[:, 4], x[:, 2]))
+# plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 4], x[:, 2], x[:, 3]))
+# plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 4], x[:, 3], x[:, 2]))
+# plt.plot(timelist, cross_ratio_theta(x[:, 0], x[:, 1], x[:, 2], x[:, 3]))
 ylab = plt.ylabel('$\\theta_j$', labelpad=20)
 ylab.set_rotation(0)
 plt.xlabel('Time $t$')
+# plt.ylim([-1, 2*np.pi + 1])
 plt.tick_params(axis='both', which='major')
 plt.tight_layout()
-# plt.legend(loc=4, fontsize=fontsize_legend)
+plt.legend(loc=1, fontsize=fontsize_legend)
 plt.show()
 if messagebox.askyesno("Python",
                        "Would you like to save the parameters,"
@@ -60,7 +133,7 @@ if messagebox.askyesno("Python",
            f'simulations/data/{dynamics_str}_data/'
     timestr = time.strftime("%Y_%m_%d_%Hh%Mmin%Ssec")
 
-    parameters_dictionary = {"graph_str": graph_str, "N": N,
+    parameters_dictionary = {"N": N, "graph_str": graph_str,
                              "omega": omega.tolist(),
                              "alpha": alpha,
                              "coupling": coupling,
