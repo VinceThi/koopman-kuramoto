@@ -145,7 +145,7 @@ def test_emptymotif_2():
     g = Graph([(4, 0), (4, 1), (4, 2), (4, 3)])
     _, n, maps = motifs(g, 5, motif_list=motifs_5star, return_maps=True)
     n, invariants = extract_invariants(g, n, maps, 5, stars=True)
-    assert (n, invariants) == ([1], [[0, 1, 2, 3]])
+    assert (n, invariants) == ([1, 0, 0, 0, 0], [[0, 1, 2, 3]])
 
 
 # empty graph connected to vertex 1 (star with 5 vertices)
