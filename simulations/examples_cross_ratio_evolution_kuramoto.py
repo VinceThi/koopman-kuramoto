@@ -10,7 +10,7 @@ import time
 time1 = time.time()
 
 """ Time parameters """
-t0, t1, dt = 0, 15, 0.00001
+t0, t1, dt = 0, 5, 0.0001
 timelist = np.arange(t0, t1, dt)
 
 """ Graph parameters """
@@ -38,7 +38,7 @@ N = len(W[0])
 
 """ Dynamical parameters """
 dynamics_str = "kuramoto_sakaguchi"
-omega = np.array([1, 1, 1, 1, 1, 1, 1, 1])
+omega = np.array([1, 1, 1, 1, 2, 2, 2, 2])
 coupling = 1
 alpha = 0
 
@@ -49,10 +49,12 @@ args_dynamics = (coupling, omega, alpha)
 x = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi,
                                W, x0, *args_dynamics))
 
+time2 = time.time()
+print("Time:", time2 - time1)
+
 
 # results
-fig = plt.figure(figsize=(4, 4))
-plt.subplot(111)
+fig, axs = plt.subplots(2)
 
 # INDIVIDUAL TIMESERIES
 # for j in range(0, N):
@@ -60,32 +62,31 @@ plt.subplot(111)
 #              linewidth=0.3)
 
 # CONSTANT CROSS-RATIOS
-plt.plot(timelist, cross_ratio_theta(x[:, 0], x[:, 1], x[:, 2], x[:, 3]),
+axs[0].plot(timelist, cross_ratio_theta(x[:, 0], x[:, 1], x[:, 2], x[:, 3]),
          label="Cross-ratio $c_{1234}$")
-# plt.plot(timelist, log_cross_ratio_theta(x[:, 0], x[:, 1], x[:, 2], x[:, 3]),
-#          label="Cross-ratio $log(c_{1234})$")
-# plt.plot(timelist, log_cross_ratio_theta(x[:, 4], x[:, 5], x[:, 6], x[:, 7]),
-#          label="Cross-ratio $log(c_{5678})$")
-plt.plot(timelist, cross_ratio_theta(x[:, 4], x[:, 5], x[:, 6], x[:, 7]),
+axs[0].plot(timelist, cross_ratio_theta(x[:, 4], x[:, 5], x[:, 6], x[:, 7]),
          label="Cross-ratio $c_{5678}$")
-#
+
 # # NON CONSTANT CROSS-RATIOS
-plt.plot(timelist, cross_ratio_theta(x[:, 2], x[:, 3], x[:, 4], x[:, 5]),
+axs[0].plot(timelist, cross_ratio_theta(x[:, 2], x[:, 3], x[:, 4], x[:, 5]),
          label="Cross-ratio $c_{3456}$")
-plt.plot(timelist, cross_ratio_theta(x[:, 0], x[:, 3], x[:, 6], x[:, 7]),
+axs[0].plot(timelist, cross_ratio_theta(x[:, 0], x[:, 3], x[:, 6], x[:, 7]),
          label="Cross-ratio $c_{1478}$")
 
 
-time2 = time.time()
-print("Time:", time2 - time1)
+axs[0].legend(loc=1, fontsize=fontsize_legend)
+
+axs[0].set_ylim(-10, 10)
 
 
+# INDIVIDUAL TIMESERIES
+for j in range(0, 4):
+    axs[1].plot(timelist, x[:, j] % (2*np.pi), label=f"{j+1}", linewidth=0.3)
+axs[1].legend()
 
 ylab = plt.ylabel('$\\theta_j$', labelpad=20)
 ylab.set_rotation(0)
 plt.xlabel('Time $t$')
 # plt.ylim([-1, 2*np.pi + 1])
 plt.tick_params(axis='both', which='major')
-plt.tight_layout()
-plt.legend(loc=1, fontsize=fontsize_legend)
 plt.show()
