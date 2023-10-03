@@ -2,12 +2,12 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib import animation, colormaps
+from dynamics.constants_of_motion import cross_ratio_theta
 
 n_iter = 1000
 n = 5
 thetas_init = np.random.rand(n) % (2*np.pi) - np.pi
 # thetas_init[1:] = np.random.rand(1) % (2*np.pi) - np.pi + np.random.rand(4) * 0.01    # same initial positions with small perturbation
-print(thetas_init)
 omegas = np.array([2, 1, 1, 1, 1])
 alpha = 0
 # a = np.ones((n, n))
@@ -33,7 +33,7 @@ print(f"matrice de connectivité: {a}")
 #     return 0.01 * t
 
 def k(t):
-    return 1
+    return 2
 
 def kuramoto(temps, thetas):
     vitesses = []
@@ -63,7 +63,7 @@ for i in range(n_iter):
     temps.append(integrator.t)
     thetas.append(integrator.y)
     valeurs_k.append(k(temps[-1]))
-    params_ordre.append(param_ordre(thetas[-1]))
+    params_ordre.append(param_ordre(thetas[-1] % (2*np.pi) - np.pi))
     if integrator.status == 'finished':
         break
 thetas = np.array(thetas) % (2*np.pi) - np.pi
@@ -92,6 +92,9 @@ scat = ax.scatter(thetas_init, [1 for _ in range(n)], c=omegas, cmap=cm)
 line, = ax.plot([], [], marker="o", color="black")
 text_k = ax.text(1.8, 2, '')
 
+c_1234 = cross_ratio_theta(thetas[:, 1], thetas[:, 2], thetas[:, 3], thetas[:, 4])
+c_0123 = cross_ratio_theta(thetas[:, 0], thetas[:, 1], thetas[:, 2], thetas[:, 3])
+
 # R vs k
 # ax2.set_xlim(0, max(valeurs_k))
 # ax2.set_ylim(0, 1)
@@ -112,7 +115,7 @@ line3, = ax2.plot([], [], ".", markersize=1, label="$\delta_{23}$")
 line4, = ax2.plot([], [], ".", markersize=1, label="$\delta_{34}$")
 line5, = ax2.plot([], [], ".", markersize=1, label="$\delta_{41}$")
 
-ax2.legend()
+ax2.legend(loc="upper right")
 
 ax3.set_xlim(0, temps[-1])
 ax3.set_ylim(-np.pi, np.pi)
@@ -122,10 +125,16 @@ line6, = ax3.plot([], [], linewidth=0.5, label="$θ_1$")
 line7, = ax3.plot([], [], linewidth=0.5, label="$θ_2$")
 line8, = ax3.plot([], [], linewidth=0.5, label="$θ_3$")
 line9, = ax3.plot([], [], linewidth=0.5, label="$θ_4$")
-ax3.legend()
+ax3.legend(loc="upper right")
 
-line10, = ax4.plot([], [], label="c_{1234}")
-line11, = ax4.plot([], [], label="c_{0123}")
+
+ax4.set_xlim(0, temps[-1])
+ax4.set_ylim(-10, 10)
+ax4.set_xlabel("$t$")
+
+line10, = ax4.plot([], [], label="$c_{1234}$")
+line11, = ax4.plot([], [], label="$c_{0123}$")
+ax4.legend(loc="upper right")
 
 
 lines = [line, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11]
@@ -144,6 +153,8 @@ def animate(i):
     lines[6].set_data(temps[0:i+1], thetas[0:i+1, 2])
     lines[7].set_data(temps[0:i+1], thetas[0:i+1, 3])
     lines[8].set_data(temps[0:i+1], thetas[0:i+1, 4])
+    lines[9].set_data(temps[0:i+1], c_1234[0:i+1])
+    lines[10].set_data(temps[0:i+1], c_0123[0:i+1])
     return scat, text_k, lines,
 
 anim = animation.FuncAnimation(fig, animate, interval=5, frames=1000, repeat=False)
