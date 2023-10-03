@@ -2,7 +2,7 @@ import numpy as np
 
 
 # bounds = [zero_limit, infty_limit]
-def corr_divergence_crossings(cr_timeseries, indiv_timeseries, bounds):
+def mindist_at_divergence(cr_timeseries, indiv_timeseries, bounds):
     zero_limit, infty_limit = bounds   # extract upper and lower boundaries from argument
     time = []
     crossings = []

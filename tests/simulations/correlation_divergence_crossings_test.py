@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from simulations.correlation_divergence_crossings import corr_divergence_crossings
+from simulations.divergence_and_crossings import mindist_at_divergence
 
 
 # fake data
@@ -21,7 +21,7 @@ bounds = [0.01, 100]
 #========================= TESTS =========================#
 
 def test_1_corr_divergence_crossings():
-    time, crossings = corr_divergence_crossings(cr_activity, individual_timeseries, bounds)
+    time, crossings = mindist_at_divergence(cr_activity, individual_timeseries, bounds)
     assert crossings == [1, 4, 6, 3]
     assert time == [1, 3, 6, 7]
 
