@@ -67,17 +67,20 @@ r = [param[0] for param in params_ordre]
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(221, projection="polar")
 ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(224)
-ax4 = fig.add_subplot(223)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+
 ax.get_xaxis().set_visible(False)
 ax.set_ylim(0, 1.5)
-ax.set_rticks([0, 0.5, 1])
+ax.set_rticks([0.5, 1])
 ax.set_xticks([])
+
 ax2.plot(np.linspace(0, 100, n_iter), [0 for i in range(n_iter)], color=dark_grey, lw=0.2)
-ax3.plot(np.linspace(0, 100, n_iter), [np.pi/2 for i in range(n_iter)], color=dark_grey, lw=0.4)
-ax3.plot(np.linspace(0, 100, n_iter), [-np.pi/2 for i in range(n_iter)], color=dark_grey, lw=0.4)
-cm = colormaps.get_cmap('inferno')
-scat = ax.scatter(thetas_init, [1 for _ in range(n)], c=omegas, cmap=cm)
+ax4.plot(np.linspace(0, 100, n_iter), [np.pi/2 for i in range(n_iter)], color=dark_grey, lw=0.4)
+ax4.plot(np.linspace(0, 100, n_iter), [-np.pi/2 for i in range(n_iter)], color=dark_grey, lw=0.4)
+
+cm = colormaps.get_cmap('coolwarm')
+scat = ax.scatter(thetas_init, [1 for _ in range(n)], marker="o", c=omegas, cmap=cm, linewidth=1, edgecolors=dark_grey)
 line, = ax.plot([], [], marker="o", color=dark_grey)
 text_k = ax.text(1.8, 2, '')
 
@@ -95,36 +98,35 @@ diff_sigma_34_k = ((thetas[:, 3] + thetas[:, 4])/2 - thetas[:, 0] + np.pi) % (2*
 diff_sigma_41_k = ((thetas[:, 4] + thetas[:, 1])/2 - thetas[:, 0] + np.pi) % (2*np.pi) - np.pi
 
 
-# theta_a, theta_b, theta_c, theta_d
 ax2.set_xlim(0, temps[-1])
 ax2.set_ylim(-np.pi, np.pi)
 ax2.set_xlabel("$t$")
 
-line2, = ax2.plot([], [], ".", markersize=1, label="$\delta_{12}$")
-line3, = ax2.plot([], [], ".", markersize=1, label="$\delta_{23}$")
-line4, = ax2.plot([], [], ".", markersize=1, label="$\delta_{34}$")
-line5, = ax2.plot([], [], ".", markersize=1, label="$\delta_{41}$")
+line2, = ax2.plot([], [], ".", markersize=1, label="$\delta_{12}$", color=first_community_color)
+line3, = ax2.plot([], [], ".", markersize=1, label="$\delta_{23}$", color=second_community_color)
+line4, = ax2.plot([], [], ".", markersize=1, label="$\delta_{34}$", color=third_community_color)
+line5, = ax2.plot([], [], ".", markersize=1, label="$\delta_{41}$", color=fourth_community_color)
 
 ax2.legend(loc="upper right")
 
-ax3.set_xlim(0, temps[-1])
-ax3.set_ylim(-np.pi, np.pi)
-ax3.set_xlabel("$t$")
-
-line6, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{12}/2 - θ_0$")
-line7, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{23}/2 - θ_0$")
-line8, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{34}/2 - θ_0$")
-line9, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{41}/2 - θ_0$")
-ax3.legend(loc="upper right")
-
-
 ax4.set_xlim(0, temps[-1])
-ax4.set_ylim(-20, 20)
+ax4.set_ylim(-np.pi, np.pi)
 ax4.set_xlabel("$t$")
 
-line10, = ax4.plot([], [], label="$c_{1234}$")
-line11, = ax4.plot([], [], label="$c_{0123}$")
+line6, = ax4.plot([], [], ".", markersize=1, label="$\sigma_{12}/2 - θ_0$", color=first_community_color)
+line7, = ax4.plot([], [], ".", markersize=1, label="$\sigma_{23}/2 - θ_0$", color=second_community_color)
+line8, = ax4.plot([], [], ".", markersize=1, label="$\sigma_{34}/2 - θ_0$", color=third_community_color)
+line9, = ax4.plot([], [], ".", markersize=1, label="$\sigma_{41}/2 - θ_0$", color=fourth_community_color)
 ax4.legend(loc="upper right")
+
+
+ax3.set_xlim(0, temps[-1])
+ax3.set_ylim(-20, 20)
+ax3.set_xlabel("$t$")
+
+line10, = ax3.plot([], [], label="$c_{1234}$", color=first_community_color)
+line11, = ax3.plot([], [], label="$c_{0123}$", color=second_community_color)
+ax3.legend(loc="upper right")
 
 
 lines = [line, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11]
