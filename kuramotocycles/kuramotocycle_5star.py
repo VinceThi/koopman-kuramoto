@@ -3,25 +3,15 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib import animation, colormaps
 from dynamics.constants_of_motion import cross_ratio_theta
+from plots.config_rcparams import *
+
 
 n_iter = 1000
 n = 5
 thetas_init = np.random.rand(n) % (2*np.pi) - np.pi
-# thetas_init[1:] = np.random.rand(1) % (2*np.pi) - np.pi + np.random.rand(4) * 0.01    # same initial positions with small perturbation
+# thetas_init[1:] = np.random.rand(1) % (2*np.pi) - np.pi + np.random.rand(4) * 0.1    # same initial positions with small perturbation
 omegas = np.array([2, 1, 1, 1, 1])
 alpha = 0
-# a = np.ones((n, n))
-# a = np.array([[1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-#               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-#               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-#               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-#               [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-#               [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
-#               [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
-#               [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-#               [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-#               [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-#               ])
 a = np.array([[0, 1, 1, 1, 1],
               [1, 0, 0, 0, 0],
               [1, 0, 0, 0, 0],
@@ -33,7 +23,7 @@ print(f"matrice de connectivité: {a}")
 #     return 0.01 * t
 
 def k(t):
-    return 2
+    return 1
 
 def kuramoto(temps, thetas):
     vitesses = []
@@ -63,16 +53,13 @@ for i in range(n_iter):
     temps.append(integrator.t)
     thetas.append(integrator.y)
     valeurs_k.append(k(temps[-1]))
-    params_ordre.append(param_ordre(thetas[-1] % (2*np.pi) - np.pi))
+    params_ordre.append(param_ordre((thetas[-1] + np.pi) % (2*np.pi) - np.pi))
     if integrator.status == 'finished':
         break
-thetas = np.array(thetas) % (2*np.pi) - np.pi
+thetas = np.array(thetas)
+thetas_mod = (thetas + np.pi) % (2*np.pi) - np.pi
 r = [param[0] for param in params_ordre]
 
-# plt.figure()
-# for i in range(n):
-#     plt.plot(temps, thetas[:, i])
-# plt.show()
 
 
 ### ANIMATION ###
@@ -86,29 +73,32 @@ ax.get_xaxis().set_visible(False)
 ax.set_ylim(0, 1.5)
 ax.set_rticks([0, 0.5, 1])
 ax.set_xticks([])
-ax2.plot(np.linspace(0, 100, n_iter), [0 for i in range(n_iter)], "black", lw=0.2)
-cm = colormaps.get_cmap('copper')
+ax2.plot(np.linspace(0, 100, n_iter), [0 for i in range(n_iter)], color=dark_grey, lw=0.2)
+ax3.plot(np.linspace(0, 100, n_iter), [np.pi/2 for i in range(n_iter)], color=dark_grey, lw=0.4)
+ax3.plot(np.linspace(0, 100, n_iter), [-np.pi/2 for i in range(n_iter)], color=dark_grey, lw=0.4)
+cm = colormaps.get_cmap('inferno')
 scat = ax.scatter(thetas_init, [1 for _ in range(n)], c=omegas, cmap=cm)
-line, = ax.plot([], [], marker="o", color="black")
+line, = ax.plot([], [], marker="o", color=dark_grey)
 text_k = ax.text(1.8, 2, '')
 
 c_1234 = cross_ratio_theta(thetas[:, 1], thetas[:, 2], thetas[:, 3], thetas[:, 4])
 c_0123 = cross_ratio_theta(thetas[:, 0], thetas[:, 1], thetas[:, 2], thetas[:, 3])
 
-# R vs k
-# ax2.set_xlim(0, max(valeurs_k))
-# ax2.set_ylim(0, 1)
-# ax2.set_xlabel("Constante de couplage $K$")
-# ax2.set_ylabel("Paramètre d'ordre $R$")
-# #ax2.set_xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
-# ax2.set_yticks([0, 0.25, 0.5, 0.75, 1])
-# line2, = ax2.plot([], [])
+delta_12 = (thetas[:, 1] - thetas[:, 2] + np.pi) % (2*np.pi) - np.pi
+delta_23 = (thetas[:, 2] - thetas[:, 3] + np.pi) % (2*np.pi) - np.pi
+delta_34 = (thetas[:, 3] - thetas[:, 4] + np.pi) % (2*np.pi) - np.pi
+delta_41 = (thetas[:, 4] - thetas[:, 1] + np.pi) % (2*np.pi) - np.pi
+
+diff_sigma_12_k = ((thetas[:, 1] + thetas[:, 2])/2 - thetas[:, 0] + np.pi) % (2*np.pi) - np.pi
+diff_sigma_23_k = ((thetas[:, 2] + thetas[:, 3])/2 - thetas[:, 0] + np.pi) % (2*np.pi) - np.pi
+diff_sigma_34_k = ((thetas[:, 3] + thetas[:, 4])/2 - thetas[:, 0] + np.pi) % (2*np.pi) - np.pi
+diff_sigma_41_k = ((thetas[:, 4] + thetas[:, 1])/2 - thetas[:, 0] + np.pi) % (2*np.pi) - np.pi
+
 
 # theta_a, theta_b, theta_c, theta_d
 ax2.set_xlim(0, temps[-1])
 ax2.set_ylim(-np.pi, np.pi)
 ax2.set_xlabel("$t$")
-
 
 line2, = ax2.plot([], [], ".", markersize=1, label="$\delta_{12}$")
 line3, = ax2.plot([], [], ".", markersize=1, label="$\delta_{23}$")
@@ -121,15 +111,15 @@ ax3.set_xlim(0, temps[-1])
 ax3.set_ylim(-np.pi, np.pi)
 ax3.set_xlabel("$t$")
 
-line6, = ax3.plot([], [], linewidth=0.5, label="$θ_1$")
-line7, = ax3.plot([], [], linewidth=0.5, label="$θ_2$")
-line8, = ax3.plot([], [], linewidth=0.5, label="$θ_3$")
-line9, = ax3.plot([], [], linewidth=0.5, label="$θ_4$")
+line6, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{12}/2 - θ_0$")
+line7, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{23}/2 - θ_0$")
+line8, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{34}/2 - θ_0$")
+line9, = ax3.plot([], [], ".", markersize=1, linewidth=0.5, label="$\sigma_{41}/2 - θ_0$")
 ax3.legend(loc="upper right")
 
 
 ax4.set_xlim(0, temps[-1])
-ax4.set_ylim(-10, 10)
+ax4.set_ylim(-20, 20)
 ax4.set_xlabel("$t$")
 
 line10, = ax4.plot([], [], label="$c_{1234}$")
@@ -140,23 +130,25 @@ ax4.legend(loc="upper right")
 lines = [line, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11]
 
 def animate(i):
-    data = np.array([[thetas[i, j], 1] for j in range(n)])
+    data = np.array([[thetas_mod[i, j], 1] for j in range(n)])
     scat.set_offsets(data)
     text_k.set_text(f"k={valeurs_k[i]:.3f}")
     lines[0].set_data([0, params_ordre[i][1]], [0, params_ordre[i][0]])
-    # lines[1].set_data(valeurs_k[0:i + 1], r[0:i + 1])
-    lines[1].set_data(temps[0:i+1], thetas[0:i+1, 1] - thetas[0:i+1, 2])
-    lines[2].set_data(temps[0:i+1], thetas[0:i+1, 2] - thetas[0:i+1, 3])
-    lines[3].set_data(temps[0:i+1], thetas[0:i+1, 3] - thetas[0:i+1, 4])
-    lines[4].set_data(temps[0:i+1], thetas[0:i+1, 4] - thetas[0:i+1, 1])
-    lines[5].set_data(temps[0:i+1], thetas[0:i+1, 1])
-    lines[6].set_data(temps[0:i+1], thetas[0:i+1, 2])
-    lines[7].set_data(temps[0:i+1], thetas[0:i+1, 3])
-    lines[8].set_data(temps[0:i+1], thetas[0:i+1, 4])
+    lines[1].set_data(temps[0:i+1], delta_12[0:i+1])
+    lines[2].set_data(temps[0:i+1], delta_23[0:i+1])
+    lines[3].set_data(temps[0:i+1], delta_34[0:i+1])
+    lines[4].set_data(temps[0:i+1], delta_41[0:i+1])
+    lines[5].set_data(temps[0:i+1], diff_sigma_12_k[0:i+1])
+    lines[6].set_data(temps[0:i+1], diff_sigma_23_k[0:i+1])
+    lines[7].set_data(temps[0:i+1], diff_sigma_34_k[0:i+1])
+    lines[8].set_data(temps[0:i+1], diff_sigma_41_k[0:i+1])
     lines[9].set_data(temps[0:i+1], c_1234[0:i+1])
     lines[10].set_data(temps[0:i+1], c_0123[0:i+1])
     return scat, text_k, lines,
 
 anim = animation.FuncAnimation(fig, animate, interval=5, frames=1000, repeat=False)
+
+mp4writer = animation.FFMpegWriter(fps=30)
+anim.save('/Users/benja/Desktop/5star_undir.mp4', writer=mp4writer)
 
 plt.show()
