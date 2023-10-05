@@ -8,7 +8,7 @@ from plots.config_rcparams import *
 
 n_iter = 1000
 n = 5
-thetas_init = np.random.rand(n) % (2*np.pi) - np.pi
+thetas_init = np.random.rand(n) * (2*np.pi) - np.pi
 # thetas_init[1:] = np.random.rand(1) % (2*np.pi) - np.pi + np.random.rand(4) * 0.1    # same initial positions with small perturbation
 omegas = np.array([2, 1, 1, 1, 1])
 alpha = 0
