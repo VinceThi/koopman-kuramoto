@@ -3,21 +3,21 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from matplotlib import animation, colormaps
 from dynamics.constants_of_motion import cross_ratio_theta
-from plots.config_rcparams import *
+# from plots.config_rcparams import *
 
 
 
 #TEMP
-# dark_grey = '#404040'                       # RGB: 48, 48, 48     dark grey
-# first_community_color = "#4c72b0"   # "#2171b5" # RGB: 33, 113, 181   blue
-# second_community_color = "#e66816"  # "#f16913" # RGB: 241, 105, 19   orange
-# third_community_color = "#238b45"           # RGB: 35, 139, 69    green
-# fourth_community_color = "#6a51a3"          # RGB: 106, 81, 163   purple
+dark_grey = '#404040'                       # RGB: 48, 48, 48     dark grey
+first_community_color = "#4c72b0"   # "#2171b5" # RGB: 33, 113, 181   blue
+second_community_color = "#e66816"  # "#f16913" # RGB: 241, 105, 19   orange
+third_community_color = "#238b45"           # RGB: 35, 139, 69    green
+fourth_community_color = "#6a51a3"          # RGB: 106, 81, 163   purple
 
 
-n_iter = 500
+n_iter = 1000
 n = 5
-thetas_init = np.random.rand(n) * (2*np.pi) - np.pi
+thetas_init = np.random.rand(n) - np.pi
 # thetas_init[1:] = np.random.rand(1) % (2*np.pi) - np.pi + np.random.rand(4) * 0.1    # same initial positions with small perturbation
 omegas = np.array([2, 1, 1, 1, 1])
 alpha = 0
@@ -32,7 +32,7 @@ print(f"matrice de connectivité: {a}")
 #     return 0.01 * t
 
 def k(t):
-    return 0.1
+    return 1
 
 def kuramoto(temps, thetas):
     vitesses = []
@@ -162,7 +162,7 @@ def animate(i):
 
 anim = animation.FuncAnimation(fig, animate, interval=5, frames=n_iter, repeat=False)
 
-mp4writer = animation.FFMpegWriter(fps=30)
-anim.save('/Users/benja/Desktop/complete_motif.mp4', writer=mp4writer)
+# mp4writer = animation.FFMpegWriter(fps=30)
+# anim.save('/Users/benja/Desktop/complete_motif.mp4', writer=mp4writer)
 
 plt.show()
