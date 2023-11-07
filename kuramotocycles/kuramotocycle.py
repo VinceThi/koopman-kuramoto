@@ -21,18 +21,18 @@ thetas_init = np.random.rand(n) - np.pi
 # thetas_init[1:] = np.random.rand(1) % (2*np.pi) - np.pi + np.random.rand(4) * 0.1    # same initial positions with small perturbation
 omegas = np.array([2, 1, 1, 1, 1])
 alpha = 0
-a = np.array([[0, 1, 1, 0, 0],
-              [1, 0, 1, 1, 1],
-              [1, 0, 0, 0, 1],
-              [1, 1, 1, 0, 1],
-              [1, 1, 1, 1, 0]])
+a = np.array([[0, 1, 1, 1, 1],
+              [1, 0, 0, 0, 0],
+              [1, 0, 0, 1, 1],
+              [1, 0, 0, 0, 0],
+              [1, 0, 0, 0, 0]])
 print(f"matrice de connectivité: {a}")
 
-def k(t):
-    return 0.1 * t
-
 # def k(t):
-#     return 1
+#     return 0.1 * t
+
+def k(t):
+    return 2
 
 def kuramoto(temps, thetas):
     vitesses = []
