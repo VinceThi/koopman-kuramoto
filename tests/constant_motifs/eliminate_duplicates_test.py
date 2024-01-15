@@ -1,5 +1,5 @@
 import pytest
-from constant_motifs.get_constants import *
+from graphs.get_constants import *
 
 
 # create the 5-star motifs

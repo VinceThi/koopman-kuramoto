@@ -1,5 +1,5 @@
 import pytest
-from constant_motifs.get_constants import *
+from graphs.get_constants import *
 
 
 # create a complete graph with 4 vertices

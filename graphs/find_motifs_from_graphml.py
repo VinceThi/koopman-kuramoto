@@ -1,4 +1,4 @@
-from constant_motifs.get_constants import *
+from graphs.get_constants import *
 import time
 
 
