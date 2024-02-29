@@ -38,12 +38,12 @@ def constraints_phi(phi, cross_ratios):
 
 # find the solutions using different sets of random initial values for the constants
 success = False
-for i in range(50):
+for i in range(100):
     init_w_angles = np.random.random(n) * np.pi
     init_w = np.exp(1j * init_w_angles)
     solution = root(constraints_phi, init_w_angles, args=(cross_ratios), method='hybr')
     success = solution.success
-    print(f'{i}:', success)
+    print(f'success {i}:', success)
     if success:
         break
 print('final success:', success)
