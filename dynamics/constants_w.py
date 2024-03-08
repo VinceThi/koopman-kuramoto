@@ -20,7 +20,7 @@ def constraints_psi(psi, cross_ratios):
     output.append(last_constraint_real)
     output.append(last_constraint_imag)
 
-    # add the 2 constraints that ensure that |Z| = 0 can be interpreted as incoherence (see Watanabe, Strogatz, 1994)
+    # add the 2 constraints ensuring that |Z| = 0 can be interpreted as incoherence (see Watanabe, Strogatz, 1994)
     output.append(np.sum(np.sin(psi)))
     output.append(np.sum(np.cos(psi)))
 
