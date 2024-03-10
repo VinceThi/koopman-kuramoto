@@ -1,6 +1,6 @@
 import numpy as np
 from dynamics.constants_of_motion import get_independent_cross_ratios_complete_graph
-from dynamics.constants_w import get_w
+from tests.zold.constants_w import get_w
 from plots.config_rcparams import *
 import pytest
 

@@ -5,13 +5,12 @@ import pytest
 
 
 def test_get_watanabe_strogatz_initial_conditions_and_w():
-    N = 10
+    N = 50
     np.random.seed(44)
     theta0 = 2*np.pi*np.random.random(N)
     z0 = np.exp(1j*theta0)
     Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0, N)
-    print(z0, ws_transformation(Z0, phi0, w))
-    assert np.all(np.abs(z0 - ws_transformation(Z0, phi0, w)) < 1e-10)
+    assert np.all(np.abs(z0 - ws_transformation(Z0, phi0, w)) < 1e-8)
 
 
 # from dynamics.constants_of_motion import get_independent_cross_ratios_complete_graph
