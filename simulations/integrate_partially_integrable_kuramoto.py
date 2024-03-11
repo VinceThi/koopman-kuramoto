@@ -33,13 +33,13 @@ for i, size in enumerate(sizes[1:]):
     else:
         omega += size*[Omega_integrable[i]]
 coupling = 1   # np.linspace(0.1, 1, 50)
-x0 = np.random.uniform(0, 2*np.pi, N)
+theta0 = np.random.uniform(0, 2*np.pi, N)
 # np.concatenate([np.random.uniform(0, 2*np.pi, 42), np.ones(56),
 #  np.array([0.8]), np.array([1.2]), np.random.uniform(0, 2*np.pi, 400)])
 
 """ Integrate """
-args_dynamics = (coupling, omega, alpha)
-theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, W, x0, *args_dynamics))
+args_dynamics = (W, coupling, omega, alpha)
+theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args_dynamics))
 
 """ Measure synchro """
 
