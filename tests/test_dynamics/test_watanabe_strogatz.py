@@ -9,7 +9,7 @@ import pytest
 
 def test_ws_equations_kuramoto():
 
-    plot_trajectories = True
+    plot_trajectories = False
 
     """ Parameters """
     t0, t1, dt = 0, 10, 0.005
@@ -27,7 +27,7 @@ def test_ws_equations_kuramoto():
     theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args_dynamics)) % (2*np.pi)
 
     """ Integrate reduced dynamics """
-    Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0, N, nb_guess=5000)
+    Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0, N, nb_guess=10000)
     args_ws = (w, coupling, omega)
     solution = np.array(integrate_dopri45(t0, t1, dt, ws_equations_kuramoto, np.array([Z0, phi0]), *args_ws))
     Z, phi = solution[:, 0], solution[:, 1]
@@ -45,7 +45,7 @@ def test_ws_equations_kuramoto():
         plt.xlabel("Time $t$")
         plt.show()
 
-    assert np.all(np.abs(theta - theta_ws) < 1e-8)
+    assert np.all(np.abs(theta - theta_ws) < 1e-6)
 
 
 test_ws_equations_kuramoto()

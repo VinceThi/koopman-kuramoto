@@ -29,7 +29,7 @@ def jacobian_matrix_objective_function(x, theta0):
     return dfdx
 
 
-def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=True, nb_guess=5000, tol=1e-10):
+def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=False, nb_guess=5000, tol=1e-10):
     """ Warning: Choosing a too low tolerance can cause problems, the unit test
      'test_get_watanabe_strogatz_initial_conditions' is not successful for tol=1e-8. tol=1e-10 seems to be sufficient.
      Note that theta0 must not be a state of majority cluster (see Watanabe-Strogatz, Sec. 4.2.3., 1994). """
