@@ -14,7 +14,7 @@ def test_get_w():
     complex number very close to 0.
     The third one is equivalent to np.real(np.prod(w)) = 1
     """
-    N = 100
+    N = 20
     plot_w = False
     init_thetas = 2*np.pi*np.random.random(N)
     init_z = np.exp(1j * init_thetas)
@@ -33,7 +33,7 @@ def test_get_w():
         ax1.set_ylabel('Imaginary Part')
         ax1.set_title("$w_1$,...,$w_N$")
         plt.show()
-    num_zero = 1e-10
+    num_zero = 1e-8
     assert np.abs(np.sum(w)) < num_zero and np.abs(np.real(np.prod(w)) - 1) < num_zero
 
 

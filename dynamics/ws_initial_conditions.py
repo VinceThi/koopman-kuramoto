@@ -11,7 +11,7 @@ def objective_function_init_cond(x, theta0):
                            np.array([np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), x[3]])])
 
 
-def get_watanabe_strogatz_initial_conditions(theta0, N, nb_iter=5000):
+def get_watanabe_strogatz_initial_conditions(theta0, N, nb_iter=5000, tol=1e-10):
     for _ in tqdm(range(nb_iter)):
         R = np.random.uniform(0, 1)
         Theta = 2*np.pi*np.random.random()
@@ -20,7 +20,7 @@ def get_watanabe_strogatz_initial_conditions(theta0, N, nb_iter=5000):
         initial_guess = np.concatenate([np.array([R, Theta, Phi]), psi])
         # bounds = ([0] + (N+2)*[float('-inf')], [1] + (N+2)*[float('inf')])
         # solution = least_squares(objective_function_init_cond, initial_guess, args=(theta0,), bounds=bounds)
-        solution = root(objective_function_init_cond, initial_guess, args=(theta0,), method='hybr', tol=1e-8)
+        solution = root(objective_function_init_cond, initial_guess, args=(theta0,), method='hybr', tol=tol)
         if solution.success:
             if 0 < solution.x[0] < 1:
                 break
