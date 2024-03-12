@@ -40,10 +40,13 @@ def test_ws_equations_kuramoto():
 
     if plot_trajectories:
         plt.figure(figsize=(6, 6))
-        plt.plot(timelist, theta, color=deep[0])
-        plt.plot(timelist, theta_ws, color=deep[1], linestyle="--")
+        plt.plot(timelist, theta[:, 0], color=deep[0], label="original system")
+        plt.plot(timelist, theta[:, 1:], color=deep[0])
+        plt.plot(timelist, theta_ws[:, 0], color=deep[1], linestyle="--", label="watanabe-strogatz")
+        plt.plot(timelist, theta_ws[:, 1:], color=deep[1], linestyle="--")
         plt.ylabel("Phases $\\theta_1(t), ..., \\theta_N(t)$")
         plt.xlabel("Time $t$")
+        plt.legend()
         plt.show()
 
     assert np.all(np.abs(theta - theta_ws) < 1e-6)
