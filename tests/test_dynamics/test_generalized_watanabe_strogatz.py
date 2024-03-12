@@ -21,3 +21,28 @@ def test_z_dot_shape():
 
     print("test_z_dot_shape result :", result)
     assert result.shape == (3, 1)
+
+
+def test_Z_dot_shape():
+    omegas_Z = np.array([[1],
+                         [2],
+                         [3]])
+    Z = np.array([[0.2*np.exp(3j)],
+                  [0.8*np.exp(2j)],
+                  [0.3*np.exp(1j)]])
+    p_1 = np.array([[1],
+                    [0.3],
+                    [3]])
+    p_m1 = np.array([[2],
+                     [1.8],
+                     [1]])
+    result = Z_dot(Z, omegas_Z, p_1, p_m1)
+
+    print(result)
+    assert result.shape == (3, 1)
+
+
+
+
+
+

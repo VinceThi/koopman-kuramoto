@@ -13,8 +13,8 @@ def inverse_ws_transform(Z, phi, z):
     return np.exp(-1j*phi)*(z - Z)/(1 - np.conjugate(Z)*z)
 
 
-def Z_dot(Z, omegas, p_1, p_m1):
-    return 1j*omegas * Z + p_1 - p_m1 * Z**2
+def Z_dot(Z, omegas_Z, p_1, p_m1):
+    return 1j*omegas_Z * Z + p_1 - p_m1 * Z**2
 
 
 def z_dot(z, omegas_z, adj_matrix, z_and_zeta):
