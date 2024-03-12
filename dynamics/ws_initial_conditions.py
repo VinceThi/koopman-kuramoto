@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.optimize import root
-from scipy.sparse import csr_matrix
 from tqdm import tqdm
 
 
@@ -29,31 +28,27 @@ def jacobian_matrix_objective_function(x, theta0):
     return dfdx
 
 
-def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=True, nb_guess=5000, tol=1e-10):
-    """ Warning: Choosing a too low tolerance can cause problems, the unit test
-     'test_get_watanabe_strogatz_initial_conditions' is not successful for tol=1e-8. tol=1e-10 seems to be sufficient.
-     Note that theta0 must not be a state of majority cluster (see Watanabe-Strogatz, Sec. 4.2.3., 1994). """
-    if dispersed_guess:
-        R_upper = 0.2
-    else:
-        R_upper = 1
+def get_watanabe_strogatz_initial_conditions(theta0, N, nb_guess=10000, tol=1e-10, tol_ws=1e-6):
+    """ Note that theta0 must not be a state of majority cluster (see Watanabe-Strogatz, Sec. 4.2.3., 1994). """
+
     for _ in tqdm(range(nb_guess)):
-        R = np.random.uniform(0.01, R_upper)
+        R = np.random.uniform(0, 1)
         Theta = 2*np.pi*np.random.random()
         Phi = 2*np.pi*np.random.random()
         psi = 2*np.pi*np.random.random(N)
         initial_guess = np.concatenate([np.array([R, Theta, Phi]), psi])
         solution = root(objective_function_init_cond, initial_guess, jac=jacobian_matrix_objective_function,
                         args=(theta0,), method='hybr', options={'xtol': tol, 'col_deriv': True})
+        R0, Theta0, Phi0 = solution.x[0], solution.x[1], solution.x[2]
         if solution.success:
             if 0 < solution.x[0] < 1:
-                break
+                if np.all(np.abs(np.tan((theta0-Theta0)/2) - (1-R0)/(1+R0)*np.tan((solution.x[3:]-Phi0)/2)) < tol_ws):
+                    break
 
     if not solution.success:
         raise ValueError("The optimization did not converge to successful values such that 0 < R0 < 1.")
 
     R0, Theta0, Phi0 = solution.x[0], solution.x[1], solution.x[2]
-    print(R0)
     w = np.exp(1j*solution.x[3:])
 
     return R0*np.exp(1j*Theta0), Theta0 - Phi0, w

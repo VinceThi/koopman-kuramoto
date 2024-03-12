@@ -6,7 +6,8 @@ import pytest
 
 def test_get_watanabe_strogatz_initial_conditions():
     N = 100
-    np.random.seed(42)
+    np.random.seed(42)  # Fails for N = 100 with 10000 initial guesses, succeeds for N = 10
+    # np.random.seed(44)  # Succeeds for N = 10, 100
     theta0 = 2*np.pi*np.random.random(N)
     z0 = np.exp(1j*theta0)
     Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0, N)

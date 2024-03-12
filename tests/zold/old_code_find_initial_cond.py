@@ -1,4 +1,11 @@
 import numpy as np
+from scipy.optimize import least_squares
+from scipy.sparse import csr_matrix
+from dynamics.watanabe_strogatz import ws_transformation
+# bounds = ([0] + (N+2)*[float('-inf')], [1] + (N+2)*[float('inf')])
+# solution = least_squares(objective_function_init_cond, initial_guess, jac=jacobian_matrix_objective_function,
+#                          args=(theta0,), method='trf',  bounds=bounds, ftol=tol, xtol=tol, gtol=tol)
+# ^ Pour une raison que j'ignore, l'algorithme ne trouve pas de zéro ... même pour N = 10, vraiment étrange
 
 def ws_transformation_real_params(X, Y, phi, psi):
     return (np.exp(1j*(phi + psi)) + X + 1j*Y)/(1 + np.exp(1j*(phi + psi))*(X - 1j*Y))
@@ -6,6 +13,9 @@ def ws_transformation_real_params(X, Y, phi, psi):
 # return np.concatenate([np.tan((theta0 - x[1]) / 2) - (1 - x[0]) / (1 + x[0]) * np.tan((x[3:] - x[2])),
 #                        np.array([np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), np.sum(x[3:])])])
 
+
+print(R0, Theta0, Phi0)  # , w)
+print(objective_function_init_cond(np.concatenate([np.array([R0, Theta0, Phi0]), solution.x[3:]]), theta0))
 
 # from dynamics.constants_of_motion import get_independent_cross_ratios_complete_graph
 # from dynamics.constants_w import get_w
