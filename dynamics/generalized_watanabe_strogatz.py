@@ -17,13 +17,15 @@ def Z_dot(Z, omegas, p_1, p_m1):
     return 1j*omegas * Z + p_1 - p_m1 * Z**2
 
 
-def z_dot(z, omegas, adj_submatrix, zeta_and_z):
-    # TODO
-    pass
+def z_dot(z, omegas_z, adj_matrix, z_and_zeta):
+    n = len(z)
+    q = (adj_matrix @ z_and_zeta)[0:n]
+    q_tilde = (adj_matrix @ np.conj(z_and_zeta))[0:n]
+    return 1j * omegas_z * z + q - z**2 * q_tilde
 
 
-def phi_dot(Z, omegas, p_m1):
-    return omegas - 2 * np.imag(p_m1 * Z)
+def phi_dot(Z, omegas_Z, p_m1):
+    return omegas_Z - 2 * np.imag(p_m1 * Z)
 
 
 def ws_equations_kuramoto(t, state, w_allparts, omegas, adj_matrix, N):

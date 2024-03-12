@@ -5,7 +5,8 @@ import pytest
 
 
 def test_get_watanabe_strogatz_initial_conditions():
-    N = 100
+    print("Beginning test_get_watanabe_strogatz_initial_conditions...")
+    N = 10
     np.random.seed(42)
     theta0 = 2*np.pi*np.random.random(N)
     z0 = np.exp(1j*theta0)

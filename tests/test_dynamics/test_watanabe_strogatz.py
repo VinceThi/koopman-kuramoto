@@ -9,6 +9,7 @@ import pytest
 
 def test_ws_equations_kuramoto():
 
+    print("Beginning test_ws_equations_kuramoto...")
     plot_trajectories = False
 
     """ Parameters """
