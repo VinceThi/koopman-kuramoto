@@ -33,6 +33,7 @@ def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=False, n
     """ Warning: Choosing a too low tolerance can cause problems, the unit test
      'test_get_watanabe_strogatz_initial_conditions' is not successful for tol=1e-8. tol=1e-10 seems to be sufficient.
      Note that theta0 must not be a state of majority cluster (see Watanabe-Strogatz, Sec. 4.2.3., 1994). """
+     # Maybe replace the argument N with len(theta0), since it is that anyway for WS on a graph
     if dispersed_guess:
         R_upper = 0.2
     else:
