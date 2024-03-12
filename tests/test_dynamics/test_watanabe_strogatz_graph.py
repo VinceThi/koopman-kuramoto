@@ -1,5 +1,5 @@
 import numpy as np
-from dynamics.generalized_watanabe_strogatz import *
+from dynamics.watanabe_strogatz_graph import *
 
 
 def test_z_dot_shape():
@@ -17,7 +17,7 @@ def test_z_dot_shape():
     adj_submatrix = np.array([[0, 3, 0, 0, 2],
                               [1, 0, 1, 1, 0],
                               [6, 0, 0, 1, 0]])
-    result = z_dot(z, omegas_z, adj_submatrix, z_and_zeta)
+    result = z_dot_g(z, omegas_z, adj_submatrix, z_and_zeta)
 
     print("test_z_dot_shape result :", result)
     assert result.shape == (3, 1)
@@ -36,7 +36,7 @@ def test_Z_dot_shape():
     p_m1 = np.array([[2],
                      [1.8],
                      [1]])
-    result = Z_dot(Z, omegas_Z, p_1, p_m1)
+    result = Z_dot_g(Z, omegas_Z, p_1, p_m1)
 
     print(result)
     assert result.shape == (3, 1)
@@ -52,7 +52,7 @@ def test_phi_dot_shape():
     p_m1 = np.array([[2],
                      [1.8],
                      [1]])
-    result = phi_dot(Z, omegas_Z, p_m1)
+    result = phi_dot_g(Z, omegas_Z, p_m1)
 
     print(result)
     assert result.shape == (3, 1)
