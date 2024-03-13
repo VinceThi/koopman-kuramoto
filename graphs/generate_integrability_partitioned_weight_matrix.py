@@ -15,7 +15,7 @@ def generate_partially_integrable_block(size, row):
     row: (array) contains the weights of the ingoing edges of each vertex in the integrable part
          it will be a repeated row in the weight matrix of the graph
 
-    Returns : an array with the row concatenated one below each other "size" amount of time.
+    Returns : an array with the row concatenated one below each other "size" times.
               The shape of the array is (size, len(row)).
     """
     return np.tile(row, (size, 1))
@@ -72,7 +72,7 @@ if __name__ == "__main__":
           [0.2, 0.01, 0.9, 0.1, 0.3],
           [0.1, 0, 0.2, 0.9, 0.3],
           [0.4, 0.5, 0, 0.3, 0.9]]
-    sizes = [38, 4, 58, 150, 250]
+    sizes = [13, 6, 33, 22, 15]
     max_nbs_zeros_nonintegrable = sizes[0]*np.array(sizes)
     max_nbs_zeros_integrable = np.tile(np.array(sizes), (len(sizes)-1, 1))
     max_nbs_zeros = np.concatenate([np.array([max_nbs_zeros_nonintegrable]), max_nbs_zeros_integrable])
@@ -97,6 +97,8 @@ if __name__ == "__main__":
             [0.04, 0.05, 0.05, 0.1, 0.6]]
 
     W = integrability_partitioned_block_weight_matrix(pq, sizes, nbs_zeros, means, stds, self_loops=True)
+
+    # np.save('../plots/integrability_partitioned_graph/part_int_graph1.npy', W)
 
     plt.matshow(W, aspect="auto")
     plt.show()

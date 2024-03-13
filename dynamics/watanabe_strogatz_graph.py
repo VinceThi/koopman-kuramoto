@@ -30,18 +30,24 @@ def phi_dot_g(Z, omegas_Z, p_m1):
 
 def ws_equations_graph(t, state, w_allparts, omegas_Z, omegas_z, adj_matrix):
     # extract the variables from the arguments
-    Z, phi, z = state
+    Z = np.array([state[:len(omegas_Z)]]).T
+    phi = np.array([state[len(omegas_Z):2*len(omegas_Z)]]).T
+    z = np.array([state[-len(omegas_z):]]).T
 
     # compute zeta, p_1, p_m1
     zeta = []
     for mu, Z_mu in enumerate(Z):
-        zeta.append(ws_transformation(Z_mu, phi[mu], w_allparts[mu]))
+        zeta_partmu = ws_transformation(Z_mu, phi[mu], w_allparts[mu])
+        zeta += zeta_partmu.tolist()
     zeta = np.array([zeta]).T
     z_and_zeta = np.concatenate((z, zeta), axis=0)
-    p_1 = adj_matrix @ z_and_zeta
-    p_m1 = adj_matrix @ z_and_zeta**(-1)
+    adj_matrix_reduced = np.concatenate((adj_matrix[:len(z[0])], np.unique(adj_matrix[len(z[0]):], axis=0)), axis=0)
+    p_1 = (adj_matrix_reduced @ z_and_zeta)[-len(Z):]
+    p_m1 = (adj_matrix_reduced @ z_and_zeta**(-1))[-len(Z):]
 
-    return [Z_dot_g(Z, omegas_Z, p_1, p_m1), phi_dot_g(Z, omegas_Z, p_m1), z_dot_g(z, omegas_z, adj_matrix, z_and_zeta)] # return list with Z_dot, phi_dot and z_dot
+    derivatives = [Z_dot_g(Z, omegas_Z, p_1, p_m1), phi_dot_g(Z, omegas_Z, p_m1), z_dot_g(z, omegas_z, adj_matrix, z_and_zeta)]
+    derivatives = np.concatenate(list(map(lambda x: x.flatten(), derivatives)))
+    return derivatives
 
 
 
