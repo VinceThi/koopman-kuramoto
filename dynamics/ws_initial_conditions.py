@@ -4,6 +4,8 @@ from scipy.sparse import csr_matrix
 from tqdm import tqdm
 
 
+# TODO (maybe): modify code such that psi[0] is not optimized since it is arbitrarily set to 0
+
 def objective_function_init_cond(x, theta0):
     """ R, Theta, Phi, psi_1, ..., psi_N = x
      where Z = R e^(i Theta), w_j = e^(i psi_j), Phi = Theta - phi """
