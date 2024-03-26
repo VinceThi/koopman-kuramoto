@@ -1,7 +1,5 @@
-from math import cos
 import numpy as np
 from scipy.optimize import root
-from scipy.sparse import csr_matrix
 from tqdm import tqdm
 
 

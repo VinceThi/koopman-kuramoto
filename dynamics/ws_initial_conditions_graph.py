@@ -1,6 +1,4 @@
 import numpy as np
-from scipy.optimize import root
-from tqdm import tqdm
 from dynamics.ws_initial_conditions import *
 
 
