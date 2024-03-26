@@ -15,6 +15,6 @@ def test_get_watanabe_strogatz_initial_conditions():
     assert np.all(np.abs(z0 - ws_transformation(Z0, phi0, w)) < 1e-6)
 
 
-test_get_watanabe_strogatz_initial_conditions()
+# test_get_watanabe_strogatz_initial_conditions()
 if __name__ == "__main__":
     pytest.main()
