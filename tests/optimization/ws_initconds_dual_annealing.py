@@ -11,6 +11,14 @@ def objective_function_init_cond(x, theta0):
     return np.sum(conditions ** 2)
 
 
+def objective_function_init_cond_ReIm(x, theta0):
+    """ R, Theta, Phi, psi_1, ..., psi_N = x
+     where Z = R e^(i Theta), w_j = e^(i psi_j), Phi = Theta - phi """
+    conditions = np.concatenate([np.cos(theta0) + x[0]*np.cos(x[3:] + theta0 - x[2]) - np.cos(x[1] - x[2] + x[3:]) - x[0]*np.cos(x[1]),
+                           np.sin(theta0) + x[0]*np.sin(x[3:] + theta0 - x[2]) - np.sin(x[1] - x[2] + x[3:]) - x[0]*np.sin(x[1]),
+                           np.array([np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), x[3]])])
+    return np.sum(conditions ** 2)
+
 def get_watanabe_strogatz_initial_conditions(theta0, dispersed_guess=False, nb_guess=1, tol=1e-10):
     """ Warning: Choosing a too low tolerance can cause problems, the unit test
      'test_get_watanabe_strogatz_initial_conditions' is not successful for tol=1e-8. tol=1e-10 seems to be sufficient.

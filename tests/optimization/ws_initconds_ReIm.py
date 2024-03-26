@@ -1,26 +1,30 @@
 import numpy as np
 from scipy.optimize import root
-from scipy.sparse import csr_matrix
 from tqdm import tqdm
 
-
-# TODO: (maybe): modify code such that psi[0] is not optimized since it is arbitrarily set to 0
-
-# OLD VERSION
-# def objective_function_init_cond(x, theta0):
-    # """ R, Theta, Phi, psi_1, ..., psi_N = x
-     # where Z = R e^(i Theta), w_j = e^(i psi_j), Phi = Theta - phi """
-    # return np.concatenate([np.tan((theta0 - x[1])/2) - (1 - x[0])/(1 + x[0])*np.tan((x[3:] - x[2])/2),
-                           # np.array([np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), x[3]])])
 
 def objective_function_init_cond(x, theta0):
     """ R, Theta, Phi, psi_1, ..., psi_N = x
      where Z = R e^(i Theta), w_j = e^(i psi_j), Phi = Theta - phi """
-    return np.concatenate([((np.cos(theta0) + x[0]*np.cos(x[3:] + theta0 - x[2]) - np.cos(x[1] - x[2] + x[3:]) - x[0]*np.cos(x[1]))**2 +
-                           (np.sin(theta0) + x[0]*np.sin(x[3:] + theta0 - x[2]) - np.sin(x[1] - x[2] + x[3:]) - x[0]*np.sin(x[1]))**2)**(1/2),
+    return np.concatenate([np.cos(theta0[:-1]) + x[0]*np.cos(x[3:-1] + theta0[:-1] - x[2]) - np.cos(x[1] - x[2] + x[3:-1]) - x[0]*np.cos(x[1]),
+                           np.array([np.sin(theta0[-2]) + x[0]*np.sin(x[-2] + theta0[-2] - x[2]) - np.sin(x[1] - x[2] + x[-2]) - x[0]*np.sin(x[1]),
+                                     np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), x[3]])])
+
+
+def objective_function_init_cond_add(x, theta0):
+    """ R, Theta, Phi, psi_1, ..., psi_N = x
+     where Z = R e^(i Theta), w_j = e^(i psi_j), Phi = Theta - phi """
+    return np.concatenate([(np.cos(theta0) + x[0]*np.cos(x[3:] + theta0 - x[2]) - np.cos(x[1] - x[2] + x[3:]) - x[0]*np.cos(x[1]))**2 +
+                           (np.sin(theta0) + x[0]*np.sin(x[3:] + theta0 - x[2]) - np.sin(x[1] - x[2] + x[3:]) - x[0]*np.sin(x[1]))**2,
                            np.array([np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), x[3]])])
 
-# OLD VERSION
+def objective_function_init_cond_verif(x, theta0):
+    """ R, Theta, Phi, psi_1, ..., psi_N = x
+     where Z = R e^(i Theta), w_j = e^(i psi_j), Phi = Theta - phi """
+    return (np.cos(theta0) + x[0]*np.cos(x[3:] + theta0 - x[2]) - np.cos(x[1] - x[2] + x[3:]) - x[0]*np.cos(x[1]),
+           np.sin(theta0) + x[0]*np.sin(x[3:] + theta0 - x[2]) - np.sin(x[1] - x[2] + x[3:]) - x[0]*np.sin(x[1]),
+           np.array([np.sum(np.sin(x[3:])), np.sum(np.cos(x[3:])), x[3]]))
+
 # def jacobian_matrix_objective_function(x, theta0):
     # """ Define Jacobian and add non zero entries """
     # N = len(theta0)
@@ -39,12 +43,11 @@ def objective_function_init_cond(x, theta0):
     # return dfdx
 
 
-def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=False, nb_guess=1, tol=1e-10):
-    """Warning: since the objective function is squared, the tolerance specified here is smaller than the actual difference."""
-    """ Warning (OLD): Choosing a too low tolerance can cause problems, the unit test
+def get_watanabe_strogatz_initial_conditions(theta0, dispersed_guess=False, nb_guess=5000, tol=1e-10):
+    """ Warning: Choosing a too low tolerance can cause problems, the unit test
      'test_get_watanabe_strogatz_initial_conditions' is not successful for tol=1e-8. tol=1e-10 seems to be sufficient.
      Note that theta0 must not be a state of majority cluster (see Watanabe-Strogatz, Sec. 4.2.3., 1994). """
-     # Maybe replace the argument N with len(theta0), since it is that anyway for WS on a graph
+    N = len(theta0)
     if dispersed_guess:
         R_upper = 0.2
     else:
@@ -55,7 +58,7 @@ def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=False, n
         Phi = 2*np.pi*np.random.random()
         psi = 2*np.pi*np.random.random(N)
         initial_guess = np.concatenate([np.array([R, Theta, Phi]), psi])
-        solution = root(objective_function_init_cond, initial_guess,
+        solution = root(objective_function_init_cond_add, initial_guess,
                         args=(theta0,), method='hybr', options={'xtol': tol, 'col_deriv': True})
         if solution.success:
             if 0 < solution.x[0] < 1:
@@ -67,5 +70,10 @@ def get_watanabe_strogatz_initial_conditions(theta0, N, dispersed_guess=False, n
     R0, Theta0, Phi0 = solution.x[0], solution.x[1], solution.x[2]
     print(R0)
     w = np.exp(1j*solution.x[3:])
+
+    print('constraints after optimization', objective_function_init_cond_add(solution.x, theta0))
+    print('constraints_verif after optimization', objective_function_init_cond_verif(solution.x, theta0))
+
+    # print('w', w)
 
     return R0*np.exp(1j*Theta0), Theta0 - Phi0, w

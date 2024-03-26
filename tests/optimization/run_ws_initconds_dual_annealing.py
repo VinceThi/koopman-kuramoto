@@ -5,7 +5,7 @@ from dynamics.watanabe_strogatz import ws_transformation
 
 
 print("\nBeginning 'dual annealing' method...")
-N = 30
+N = 10
 np.random.seed(42)
 beginning = time.time()
 for _ in range(10):

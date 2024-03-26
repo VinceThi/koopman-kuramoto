@@ -10,7 +10,7 @@ import pytest
 def test_ws_equations_kuramoto():
 
     print("\nBeginning test_ws_equations_kuramoto...")
-    plot_trajectories = False
+    plot_trajectories = True
 
     """ Parameters """
     t0, t1, dt = 0, 10, 0.005
