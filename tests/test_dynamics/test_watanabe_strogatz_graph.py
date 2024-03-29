@@ -63,12 +63,12 @@ def test_phi_dot_shape():
 
 def test_ws_equations_graph_identical_osc():
     print("\nBeginning test_ws_equations_graph_identical_osc ...")
-    plot_trajectories = False
+    plot_trajectories = True
 
 
     # STEP 1 - GENERATE THE GRAPH
 
-    N = 30
+    N = 500
     sizes = [N]
     W = np.ones((N, N))
 
@@ -78,13 +78,13 @@ def test_ws_equations_graph_identical_osc():
     theta0 = [2*np.pi*np.random.random(size) for size in sizes]
     z0 = [np.exp(1j*theta0_mu) for theta0_mu in theta0]
     print('N', np.sum(sizes))
-    Z0, phi0, w = get_ws_initial_conditions_graph(theta0, non_integrable_part=False, nb_guess=10000)
-    err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0[1:])]
+    Z0, phi0, w = get_ws_initial_conditions_graph(theta0, non_integrable_part=False, nb_guess=20)
+    err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0)]
     print("|z0 - ws_transformation(Z0, phi0, w)| = ", err)
 
     # STEP 3 - INTEGRATE THE ORIGINAL DYNAMICS
 
-    t0, t1, dt = 0, 10, 0.005
+    t0, t1, dt = 0, 10, 0.001
     timelist = np.linspace(t0, t1, int(t1 / dt))
     alpha = 0
     omega = 1
@@ -120,6 +120,7 @@ def test_ws_equations_graph_identical_osc():
         plt.plot(timelist, theta_ws[:, 1:], color=deep[1], linestyle="--")
         plt.ylabel("Phases $\\theta_1(t), ..., \\theta_N(t)$")
         plt.xlabel("Time $t$")
+        plt.title('test_ws_equations_graph_identical_osc')
         plt.legend()
         plt.show()
 
@@ -205,8 +206,8 @@ def test_ws_equations_graph_smallgraph():
 
 def test_ws_equations_graph_general_case():
     print("\nBeginning ws_equations_graph_general_case ...")
-    plot_trajectories = True
-    plot_some_trajectories = True
+    plot_trajectories = False
+    plot_some_trajectories = False
     plot_Z_modulus = False
 
 

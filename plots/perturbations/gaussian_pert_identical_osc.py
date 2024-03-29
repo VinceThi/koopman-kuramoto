@@ -18,7 +18,7 @@ N = 500
 W = np.ones((N, N))
 omega = 1
 coupling = 1/N
-np.random.seed(499)
+np.random.seed(50)
 theta0 = np.random.uniform(0, 2*np.pi, N)
 
 # """ Integrate complete dynamics """
@@ -54,7 +54,7 @@ theta_ws = np.where(theta_ws < 0, 2*np.pi + theta_ws, theta_ws)
 
 """ STEP 2: PERTURBATION """
 
-np.random.seed(10)
+np.random.seed(36)
 std_devs = [1, 2, 5, 7, 10]
 order_params = []
 for std_dev in std_devs:

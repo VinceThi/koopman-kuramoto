@@ -1,0 +1,97 @@
+import numpy as np
+from dynamics.integrate import integrate_dopri45
+from dynamics.dynamics import kuramoto_sakaguchi
+from dynamics.watanabe_strogatz_graph import *
+from dynamics.ws_initial_conditions_graph import *
+from plots.config_rcparams import *
+
+
+np.random.seed(100)
+
+""" STEP 1: REDUCED SYSTEM """
+
+plot_trajectories = True
+
+""" Parameters """
+t0, t1, dt = 0, 25, 0.005
+timelist = np.linspace(t0, t1, int(t1 / dt))
+alpha = 0
+N = 100
+sizes = [N]
+# row = np.random.random((N, 1)) * 2
+# W = np.concatenate([row for _ in range(N)], axis=1).T
+W = np.ones((N, N))
+print(W)
+omega = 1
+coupling = 1/N
+theta0 = [2*np.pi*np.random.random(size) for size in sizes]
+z0 = [np.exp(1j*theta0_mu) for theta0_mu in theta0]
+all_init_theta = np.concatenate(tuple(map(lambda x: x.tolist(), theta0)))
+
+""" WS transform and integration """
+Z0, phi0, w = get_ws_initial_conditions_graph(theta0, non_integrable_part=False, nb_guess=20)
+err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0)]
+print("|z0 - ws_transformation(Z0, phi0, w)| = ", err)
+
+omegas_Z = np.array([[omega for _ in Z0]]).T
+omegas_z = np.array([[]]).T
+W_intparts = np.array([W[0]])
+
+print('reduced system integration')
+args_ws = (w, coupling, omegas_Z, omegas_z, W, W_intparts)
+solution = integrate_dopri45(t0, t1, dt, ws_equations_graph, np.concatenate([Z0, phi0]), *args_ws)
+Z = np.array([state[:len(omegas_Z)] for state in solution])
+phi = np.array([state[len(omegas_Z):2*len(omegas_Z)] for state in solution])
+
+
+""" STEP 2: PERTURBATION """
+
+std_devs = [1, 2, 5, 7, 10]
+order_params = []
+for std_dev in std_devs:
+    gauss_pert = np.random.normal(0, std_dev, W.shape)
+    W_pert = W + gauss_pert
+
+    """ STEP 3: INTEGRATE PERTURBED SYSTEM """
+
+    print('perturbed system integration')
+    args_dynamics = (W_pert, coupling, omega, alpha)
+    theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, all_init_theta, *args_dynamics)) % (2*np.pi)
+
+
+    """ STEP 4: COMPUTE ORDER PARAM AND SHOW RESULTS """
+
+    order_param = np.abs(1/N * np.sum(np.exp(1j * theta), axis=1))
+    order_params.append(order_param)
+
+# PANEL FIGURE
+# fig, axs = plt.subplots(nrows=1, ncols=len(order_params), figsize=(30, 6))
+# for i, ax in enumerate(axs):
+    # ax.set_title(f'stddev: {std_devs[i]}', fontsize=15)
+    # ax.plot(timelist, np.abs(Z), color=deep[0], label='reduced (no pert)')
+    # ax.plot(timelist, order_params[i], color=deep[1], label='complete (pert)')
+    # ax.set_ylabel("Order parameter $R$", fontsize=15)
+    # ax.set_xlabel("Time $t$", fontsize=15)
+    # ax.legend()
+# plt.suptitle('N=500, MPIN (random uniform [0, 1])', fontsize=15)
+# plt.savefig('/Users/benja/Desktop/gaussian_pert_MPIN.png')
+# plt.show()
+
+# SINGLE GRAPH
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(9, 6), dpi=200)
+ax.plot(timelist, np.abs(Z), color=deep[0], linewidth=1.5, label='reduced (no pert)')
+for i, order_param in enumerate(order_params):
+    ax.plot(timelist, order_param, '--', color=deep[i+1], label=f'stddev: {std_devs[i]}')
+ax.set_ylabel("Order parameter $R$")
+ax.set_xlabel("Time $t$")
+plt.subplots_adjust(right=1.)
+ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+plt.suptitle('N=100, complete graph')
+plt.savefig('/Users/benja/Desktop/gaussian_pert_completegraph.png')
+plt.show()
+
+# Show difference between original and perturbed matrices
+# plt.figure()
+# plt.imshow(W - W_pert)
+# plt.colorbar()
+# plt.show()
