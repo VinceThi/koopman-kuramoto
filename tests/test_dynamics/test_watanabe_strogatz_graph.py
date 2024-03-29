@@ -68,8 +68,8 @@ def test_ws_equations_graph_identical_osc():
 
     # STEP 1 - GENERATE THE GRAPH
 
-    N = 500
-    sizes = [N]
+    N = 50
+    sizes = [0, N]
     W = np.ones((N, N))
 
     # STEP 2 - FIND THE WATANABE-STROGATZ INITIAL CONDITIONS
@@ -78,8 +78,8 @@ def test_ws_equations_graph_identical_osc():
     theta0 = [2*np.pi*np.random.random(size) for size in sizes]
     z0 = [np.exp(1j*theta0_mu) for theta0_mu in theta0]
     print('N', np.sum(sizes))
-    Z0, phi0, w = get_ws_initial_conditions_graph(theta0, non_integrable_part=False, nb_guess=20)
-    err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0)]
+    Z0, phi0, w = get_ws_initial_conditions_graph(theta0, nb_guess=20)
+    err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0[1:])]
     print("|z0 - ws_transformation(Z0, phi0, w)| = ", err)
 
     # STEP 3 - INTEGRATE THE ORIGINAL DYNAMICS

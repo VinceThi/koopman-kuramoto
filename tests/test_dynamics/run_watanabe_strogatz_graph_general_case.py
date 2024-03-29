@@ -7,7 +7,6 @@ from graphs.generate_integrability_partitioned_weight_matrix import *
 from plots.config_rcparams import *
 
 
-print("\nBeginning ws_equations_graph_general_case ...")
 plot_trajectories = False
 plot_some_trajectories = True
 plot_Z_modulus = True

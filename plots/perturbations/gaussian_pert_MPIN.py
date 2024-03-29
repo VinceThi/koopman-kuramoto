@@ -13,15 +13,14 @@ np.random.seed(100)
 plot_trajectories = True
 
 """ Parameters """
-t0, t1, dt = 0, 25, 0.005
+t0, t1, dt = 0, 100, 0.005
 timelist = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-N = 100
-sizes = [N]
-# row = np.random.random((N, 1)) * 2
-# W = np.concatenate([row for _ in range(N)], axis=1).T
-W = np.ones((N, N))
-print(W)
+N = 20
+sizes = [0, N]
+row = np.random.random((N, 1)) * 2
+W = np.concatenate([row for _ in range(N)], axis=1).T
+# W = np.ones((N, N))
 omega = 1
 coupling = 1/N
 theta0 = [2*np.pi*np.random.random(size) for size in sizes]
@@ -29,8 +28,8 @@ z0 = [np.exp(1j*theta0_mu) for theta0_mu in theta0]
 all_init_theta = np.concatenate(tuple(map(lambda x: x.tolist(), theta0)))
 
 """ WS transform and integration """
-Z0, phi0, w = get_ws_initial_conditions_graph(theta0, non_integrable_part=False, nb_guess=20)
-err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0)]
+Z0, phi0, w = get_ws_initial_conditions_graph(theta0, nb_guess=20)
+err = [np.abs(z0_mu - ws_transformation(Z0[mu], phi0[mu], w[mu])) for mu, z0_mu in enumerate(z0[1:])]
 print("|z0 - ws_transformation(Z0, phi0, w)| = ", err)
 
 omegas_Z = np.array([[omega for _ in Z0]]).T
@@ -42,12 +41,17 @@ args_ws = (w, coupling, omegas_Z, omegas_z, W, W_intparts)
 solution = integrate_dopri45(t0, t1, dt, ws_equations_graph, np.concatenate([Z0, phi0]), *args_ws)
 Z = np.array([state[:len(omegas_Z)] for state in solution])
 phi = np.array([state[len(omegas_Z):2*len(omegas_Z)] for state in solution])
+zeta = ws_transformation(Z, phi, w)
+
+order_param_WS = np.abs(1/N * np.sum(zeta, axis=1))
+
 
 
 """ STEP 2: PERTURBATION """
 
-std_devs = [1, 2, 5, 7, 10]
+std_devs = [1, 2, 3, 4, 5]
 order_params = []
+thetas = []
 for std_dev in std_devs:
     gauss_pert = np.random.normal(0, std_dev, W.shape)
     W_pert = W + gauss_pert
@@ -57,7 +61,7 @@ for std_dev in std_devs:
     print('perturbed system integration')
     args_dynamics = (W_pert, coupling, omega, alpha)
     theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, all_init_theta, *args_dynamics)) % (2*np.pi)
-
+    thetas.append(theta)
 
     """ STEP 4: COMPUTE ORDER PARAM AND SHOW RESULTS """
 
@@ -79,7 +83,7 @@ for std_dev in std_devs:
 
 # SINGLE GRAPH
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(9, 6), dpi=200)
-ax.plot(timelist, np.abs(Z), color=deep[0], linewidth=1.5, label='reduced (no pert)')
+ax.plot(timelist, order_param_WS, color=deep[0], linewidth=1.5, label='reduced (no pert)')
 for i, order_param in enumerate(order_params):
     ax.plot(timelist, order_param, '--', color=deep[i+1], label=f'stddev: {std_devs[i]}')
 ax.set_ylabel("Order parameter $R$")
@@ -94,4 +98,9 @@ plt.show()
 # plt.figure()
 # plt.imshow(W - W_pert)
 # plt.colorbar()
+# plt.show()
+
+# plot some trajectories
+# plt.figure()
+# plt.plot(timelist, thetas[0], color='orange')
 # plt.show()
