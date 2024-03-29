@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.integrate import solve_ivp
 from dynamics.integrate import integrate_dopri45
 from dynamics.dynamics import kuramoto_sakaguchi
 from dynamics.watanabe_strogatz_graph import *
@@ -6,7 +7,7 @@ from dynamics.ws_initial_conditions_graph import *
 from plots.config_rcparams import *
 
 
-np.random.seed(100)
+np.random.seed(80)
 
 """ STEP 1: REDUCED SYSTEM """
 
@@ -14,9 +15,9 @@ plot_trajectories = True
 
 """ Parameters """
 t0, t1, dt = 0, 100, 0.005
-timelist = np.linspace(t0, t1, int(t1 / dt))
+time = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-N = 20
+N = 500
 sizes = [0, N]
 row = np.random.random((N, 1)) * 2
 W = np.concatenate([row for _ in range(N)], axis=1).T
@@ -38,9 +39,10 @@ W_intparts = np.array([W[0]])
 
 print('reduced system integration')
 args_ws = (w, coupling, omegas_Z, omegas_z, W, W_intparts)
-solution = integrate_dopri45(t0, t1, dt, ws_equations_graph, np.concatenate([Z0, phi0]), *args_ws)
-Z = np.array([state[:len(omegas_Z)] for state in solution])
-phi = np.array([state[len(omegas_Z):2*len(omegas_Z)] for state in solution])
+solution = solve_ivp(ws_equations_graph, (t0, t1), np.concatenate([Z0, phi0]), method='DOP853', args=args_ws,
+                     t_eval=time, atol=1e-10, rtol=1e-10)
+Z = np.array([state[:len(omegas_Z)] for state in solution.y.T])
+phi = np.array([state[len(omegas_Z):2*len(omegas_Z)] for state in solution.y.T])
 zeta = ws_transformation(Z, phi, w)
 
 order_param_WS = np.abs(1/N * np.sum(zeta, axis=1))
@@ -60,7 +62,11 @@ for std_dev in std_devs:
 
     print('perturbed system integration')
     args_dynamics = (W_pert, coupling, omega, alpha)
-    theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, all_init_theta, *args_dynamics)) % (2*np.pi)
+    solution = solve_ivp(kuramoto_sakaguchi, (t0, t1), all_init_theta, method='DOP853', args=args_dynamics,
+                     t_eval=time, atol=1e-10, rtol=1e-10)
+    print('success', solution.success)
+    theta = solution.y.T
+    # theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, all_init_theta, *args_dynamics)) % (2*np.pi)
     thetas.append(theta)
 
     """ STEP 4: COMPUTE ORDER PARAM AND SHOW RESULTS """
@@ -83,15 +89,15 @@ for std_dev in std_devs:
 
 # SINGLE GRAPH
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(9, 6), dpi=200)
-ax.plot(timelist, order_param_WS, color=deep[0], linewidth=1.5, label='reduced (no pert)')
+ax.plot(time, order_param_WS, color=deep[0], linewidth=1.5, label='reduced (no pert)')
 for i, order_param in enumerate(order_params):
-    ax.plot(timelist, order_param, '--', color=deep[i+1], label=f'stddev: {std_devs[i]}')
+    ax.plot(time, order_param, '--', color=deep[i+1], label=f'stddev: {std_devs[i]}')
 ax.set_ylabel("Order parameter $R$")
 ax.set_xlabel("Time $t$")
 plt.subplots_adjust(right=1.)
 ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
-plt.suptitle('N=100, complete graph')
-plt.savefig('/Users/benja/Desktop/gaussian_pert_completegraph.png')
+plt.suptitle('N=500, MPIN')
+plt.savefig('/Users/benja/Desktop/gaussian_pert_MPIN.png')
 plt.show()
 
 # Show difference between original and perturbed matrices
