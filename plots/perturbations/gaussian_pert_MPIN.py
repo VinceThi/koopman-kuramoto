@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.integrate import solve_ivp
-from dynamics.integrate import integrate_dopri45
 from dynamics.dynamics import kuramoto_sakaguchi
 from dynamics.watanabe_strogatz_graph import *
 from dynamics.ws_initial_conditions_graph import *
@@ -14,10 +13,10 @@ np.random.seed(80)
 plot_trajectories = True
 
 """ Parameters """
-t0, t1, dt = 0, 100, 0.005
+t0, t1, dt = 0, 2000, 0.005
 time = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-N = 500
+N = 200
 sizes = [0, N]
 row = np.random.random((N, 1)) * 2
 W = np.concatenate([row for _ in range(N)], axis=1).T
@@ -51,7 +50,8 @@ order_param_WS = np.abs(1/N * np.sum(zeta, axis=1))
 
 """ STEP 2: PERTURBATION """
 
-std_devs = [1, 2, 3, 4, 5]
+sigmas = [0.1, 0.2, 0.3, 0.4, 0.5]
+std_devs = [sigma * np.sqrt(N) for sigma in sigmas]
 order_params = []
 thetas = []
 for std_dev in std_devs:
@@ -83,21 +83,21 @@ for std_dev in std_devs:
     # ax.set_ylabel("Order parameter $R$", fontsize=15)
     # ax.set_xlabel("Time $t$", fontsize=15)
     # ax.legend()
-# plt.suptitle('N=500, MPIN (random uniform [0, 1])', fontsize=15)
+# plt.suptitle('N=, MPIN (random uniform [0, 1])', fontsize=15)
 # plt.savefig('/Users/benja/Desktop/gaussian_pert_MPIN.png')
 # plt.show()
 
 # SINGLE GRAPH
-fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(9, 6), dpi=200)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(9, 6), dpi=201)
 ax.plot(time, order_param_WS, color=deep[0], linewidth=1.5, label='reduced (no pert)')
 for i, order_param in enumerate(order_params):
-    ax.plot(time, order_param, '--', color=deep[i+1], label=f'stddev: {std_devs[i]}')
+    ax.plot(time, order_param, '--', color=deep[i+1], label=f'std_dev: {std_devs[i]:.2f}')
 ax.set_ylabel("Order parameter $R$")
 ax.set_xlabel("Time $t$")
 plt.subplots_adjust(right=1.)
 ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
-plt.suptitle('N=500, MPIN')
-plt.savefig('/Users/benja/Desktop/gaussian_pert_MPIN.png')
+plt.suptitle('N=200, MPIN')
+plt.savefig('/Users/benja/Desktop/gaussian_pert_200_MPIN.png')
 plt.show()
 
 # Show difference between original and perturbed matrices
