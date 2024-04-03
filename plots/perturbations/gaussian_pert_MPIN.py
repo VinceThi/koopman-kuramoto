@@ -16,11 +16,16 @@ plot_trajectories = True
 t0, t1, dt = 0, 2000, 0.005
 time = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-N = 200
+N = 100
+graph_type = 'MPIN'
 sizes = [0, N]
-row = np.random.random((N, 1)) * 2
-W = np.concatenate([row for _ in range(N)], axis=1).T
-# W = np.ones((N, N))
+if graph_type == 'MPIN':
+    row = np.random.random((N, 1)) * 2
+    W = np.concatenate([row for _ in range(N)], axis=1).T
+elif graph_type == 'complete':
+    W = np.ones((N, N))
+else:
+    raise ValueError('Invalid graph type.')
 omega = 1
 coupling = 1/N
 theta0 = [2*np.pi*np.random.random(size) for size in sizes]
@@ -96,8 +101,8 @@ ax.set_ylabel("Order parameter $R$")
 ax.set_xlabel("Time $t$")
 plt.subplots_adjust(right=1.)
 ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
-plt.suptitle('N=200, MPIN')
-plt.savefig('/Users/benja/Desktop/gaussian_pert_200_MPIN.png')
+plt.suptitle(f'N={N}, {graph_type}')
+plt.savefig(f'/Users/benja/Desktop/gaussian_pert_{N}_{graph_type}.png')
 plt.show()
 
 # Show difference between original and perturbed matrices

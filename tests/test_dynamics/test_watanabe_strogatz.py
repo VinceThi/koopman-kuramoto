@@ -28,7 +28,7 @@ def test_ws_equations_kuramoto():
     theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args_dynamics)) % (2*np.pi)
 
     """ Integrate reduced dynamics """
-    Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0, N, nb_guess=10000)
+    Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0, nb_guess=20)
     args_ws = (w, coupling, omega)
     solution = np.array(integrate_dopri45(t0, t1, dt, ws_equations_kuramoto, np.array([Z0, phi0]), *args_ws))
     Z, phi = solution[:, 0], solution[:, 1]
