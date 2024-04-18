@@ -17,6 +17,12 @@ def rfun(Z, Zbar, phi):
     y = np.sqrt((1 - np.exp(-1j*phi))**2 + 4*np.exp(-1j*phi)*Z*Zbar)
     return np.log((x + y)/(x - y))/y
 
+def watanabe_strogatz_generator_on_z(z, Z, phi):
+    Zbar = np.conjugate(Z)                                       ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
+    zeta = np.exp(-1j * phi)                                     ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
+    zetabar = np.exp(1j * phi)                                   ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
+    return rfun(Z, Zbar, phi)*(zeta*Z + (1-zeta)*z - Zbar*z**2)  ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
+
 
 def infinitesimal_condition_symmetry_kuramoto(t, state, w, coupling, omega):
     Z, Zbar, phi = state
