@@ -13,15 +13,16 @@ from dynamics.watanabe_strogatz import ws_transformation, Z_dot
 
 
 def rfun(Z, Zbar, phi):
-    x = 1 + np.exp(-1j*phi)
-    y = np.sqrt((1 - np.exp(-1j*phi))**2 + 4*np.exp(-1j*phi)*Z*Zbar)
+    zeta = np.exp(-1j*phi)
+    x = 1 + zeta
+    y = np.sqrt((1 - zeta)**2 + 4*zeta*Z*Zbar)
     return np.log((x + y)/(x - y))/y
 
-def watanabe_strogatz_generator_on_z(z, Z, phi):
-    Zbar = np.conjugate(Z)                                       ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
-    zeta = np.exp(-1j * phi)                                     ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
-    zetabar = np.exp(1j * phi)                                   ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
-    return rfun(Z, Zbar, phi)*(zeta*Z + (1-zeta)*z - Zbar*z**2)  ## Réféchir et vérif siiii tout est okkkkkkkkkkkkkkkkkkkk
+
+def watanabe_strogatz_generator_on_w(w, Z, phi):
+    Zbar = np.conjugate(Z)
+    zeta = np.exp(-1j*phi)
+    return rfun(Z, Zbar, phi)*(zeta*Z + (1-zeta)*w - Zbar*w**2)
 
 
 def infinitesimal_condition_symmetry_kuramoto(t, state, w, coupling, omega):
