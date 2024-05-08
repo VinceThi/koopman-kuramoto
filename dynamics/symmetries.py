@@ -1,53 +1,62 @@
 import numpy as np
-from dynamics.watanabe_strogatz import ws_transformation, Z_dot
-
-
-# def infinitesimal_condition_symmetry_kuramoto(t, state, w, coupling, omega):
-#     Z, phi = state
-#     F_bar = coupling / (2 * 1j) * np.sum(ws_transformation(Z, phi, w))
-#     G = omega
-#     F = np.conjugate(F_bar)
-#
-#     dphidt = F*Z + 2*F_bar*np.conjugate(Z) + (np.exp(1j*phi) - 1)*F_bar/Z + F*Z*np.exp(1j*phi)
-#     return np.array([Z_dot(Z, F, G, F_bar), np.real(dphidt)])
 
 
 def rfun(Z, Zbar, phi):
     zeta = np.exp(-1j*phi)
     x = 1 + zeta
     y = np.sqrt((1 - zeta)**2 + 4*zeta*Z*Zbar)
-    return np.log((x + y)/(x - y))/y
+    ratio = (x + y)/(x - y)
+    module = np.abs(ratio)
+    argument = np.angle(ratio)
+    return (np.log(module) + 1j*argument)/y
+    # return np.log((x + y)/(x - y))/y
 
 
-def watanabe_strogatz_generator_on_w(w, Z, phi):
-    Zbar = np.conjugate(Z)
-    zeta = np.exp(-1j*phi)
-    return rfun(Z, Zbar, phi)*(zeta*Z + (1-zeta)*w - Zbar*w**2)
-
-
-def infinitesimal_condition_symmetry_kuramoto(t, state, w, coupling, omega):
+def infinitesimal_condition_symmetry_kuramoto(t, state, p1, current_index, omega):
     Z, Zbar, phi = state
     r = rfun(Z, Zbar, phi)
-    p1 = coupling/2*np.sum(ws_transformation(Z, phi, w))
-    pm1 = np.conjugate(p1)
+    normZ2 = Z*Zbar
     zeta = np.exp(-1j*phi)
     zetabar = np.exp(1j*phi)
-    gamma = (1-zeta)**2 + 4*zeta*Z*Zbar
+    gamma = (1 - zeta)**2 + 4*zeta*Z*Zbar
     alpha = (1 - zetabar - r*zeta + r - 2*r*Z*Zbar)/gamma
     beta = ((1 + zeta)/(1 - Z*Zbar) - 2*r*zeta)/gamma
+    k = current_index
+    pm1 = np.conjugate(p1[k])
 
-    A = np.array([[r + alpha*(zeta-1) + beta*Z*Zbar, - beta*Zbar**2, beta*(1 - zeta)*Zbar],
-                  [-beta*zetabar*Z**2, r + alpha*(zeta - 1) + beta*zetabar*Z*Zbar, beta*(1 - zeta)*Z],
-                  [-(r*zetabar + alpha + beta*zetabar*Z*Zbar)*Z, (beta*zetabar*Z*Zbar - alpha)*Zbar, r+2*beta*Z*Zbar]])
-    b = np.array([1j*omega*Z + (1-zetabar)*p1, -1j*omega*Zbar + (1-zeta)*pm1, 2*pm1*Z*zeta - 2*p1*Zbar])
-    return (1-Z*Zbar)*zeta*(A@b)
+    A = np.array([[r + alpha*(zeta-1) + beta*normZ2, - beta*Zbar**2, beta*(1 - zeta)*Zbar],
+                  [-beta*zetabar*Z**2, r + alpha*(zeta - 1) + beta*zetabar*normZ2, beta*(1 - zeta)*Z],
+                  [-(r*zetabar + alpha + beta*zetabar*normZ2)*Z, (beta*zetabar*normZ2 - alpha)*Zbar, r+2*beta*normZ2]])
+    b = np.array([1j*omega*Z + (1-zetabar)*p1[k], -1j*omega*Zbar + (1-zeta)*pm1, 2*pm1*Z*zeta - 2*p1[k]*Zbar])
+    dZdt, dZbardt, dzetadt = (1-normZ2)*zeta*(A@b)
+    return np.array([dZdt, dZbardt, np.angle(dzetadt)])
 
 
-def infinitesimal_condition_symmetry_kuramoto_simplified(t, state, w, coupling, omega):
-    Z, phi = state
-    F_bar = coupling / (2*1j) * np.sum(ws_transformation(Z, phi, w))
-    G = omega
-    F = np.conjugate(F_bar)
+def infinitesimal_condition_symmetry_kuramoto_2(t, state, p1, current_index, omega):
+    X, Y, phi = state
+    Z = X + 1j*Y
+    Zbar = X - 1j*Y
+    normZ2 = X**2 + Y**2
+    r = rfun(Z, Zbar, phi)
+    zeta = np.exp(-1j*phi)
+    zetabar = np.exp(1j*phi)
+    gamma = (1 - zeta)**2 + 4*zeta*normZ2
+    alpha = (1 - zetabar - r*zeta + r - 2*r*normZ2)/gamma
+    beta = ((1 + zeta)/(1 - normZ2) - 2*r*zeta)/gamma
+    k = current_index
+    pm1 = np.conjugate(p1[k])
 
-    dphidt = F*Z + 2*F_bar*np.conjugate(Z) + (np.exp(1j*phi) - 1)*F_bar/Z + F*Z*np.exp(1j*phi)
-    return np.array([Z_dot(Z, F, G, F_bar), np.real(dphidt)])
+    A = np.array([[1j*beta*(1 - zetabar)*X*Y + r + alpha*(zeta - 1) + beta*(1 + zetabar)*Y**2,
+                   beta*X*(1j*X*(zetabar-1)-Y*(zetabar+1)),
+                   2*beta*(1 - zeta)*X],
+                  [beta*Y*(1j*Y*(1 - zetabar) - X*(zetabar + 1)),
+                   1j*beta*(zetabar - 1)*X*Y + r + alpha*(zeta - 1) + beta*(1 + zetabar)*X**2,
+                   2*beta*(1 - zeta)*Y],
+                  [-2*alpha*X - r*zetabar*(X + 1j*Y) - 2*1j*beta*zetabar*Y*normZ2,
+                   -2*alpha*Y + 1j*r*zetabar*(X + 1j*Y) + 2*1j*beta*zetabar*X*normZ2,
+                   2*r+4*beta*normZ2]])
+    b = np.array([-omega*Y + ((1-zetabar)*p1[k] + (1-zeta)*pm1)/2,
+                  omega*X + ((1-zetabar)*p1[k] - (1-zeta)*pm1)/(2*1j),
+                  (pm1*zeta - p1[k])*X + 1j*(pm1*zeta + p1[k])*Y])
+    dXdt, dYdt, dzetadt = (1-normZ2)*zeta*(A@b)
+    return np.array([dXdt, dYdt, np.angle(dzetadt)])
