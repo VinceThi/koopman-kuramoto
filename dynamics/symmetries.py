@@ -60,3 +60,42 @@ def infinitesimal_condition_symmetry_kuramoto_2(t, state, p1, current_index, ome
                   (pm1*zeta - p1[k])*X + 1j*(pm1*zeta + p1[k])*Y])
     dXdt, dYdt, dzetadt = (1-normZ2)*zeta*(A@b)
     return np.array([dXdt, dYdt, np.angle(dzetadt)])
+
+
+def determining_equations_disk_automorphism(t, state, theta, current_index, omega, coupling):
+    V, Y = state
+    Vbar = np.conjugate(V)
+    p0 = len(theta[0, :])*coupling/2
+    p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+    p2 = coupling/2*np.sum(np.exp(2*1j*theta[current_index, :]))
+    dVdt = (p0 + 1j*omega)*V - p2*Vbar
+    dYdt = 1j*(np.conjugate(p1)*V - p1*Vbar)
+    return np.array([dVdt, dYdt])
+
+
+def nu_function(X):
+    Gamma = np.sqrt(X**2 - 1)
+    ratio = (X + Gamma)/(X - Gamma)
+    return np.log(ratio)/(2*Gamma)
+
+
+def mu_function(X, nu):
+    return (1 - nu*X)/(X**2 - 1)
+
+
+def determining_equations_real_disk_automorphism(t, state, theta, current_index, omega, coupling):
+    R, Phi, X, Y = state
+    nu = nu_function(X)
+    mu = mu_function(X, nu)
+    p0 = len(theta[0, :])*coupling/2
+    p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+    p2 = coupling/2*np.sum(np.exp(2*1j*theta[current_index, :]))
+    rho1, phi1 = np.abs(p1), np.angle(p1)
+    rho2, phi2 = np.abs(p2), np.angle(p2)
+    chi1 = 2*rho1*np.sin(2*Phi - phi1)
+    chi2 = p0 - rho2*np.cos(2*Phi - phi2)
+    dRdt = chi2*R - mu*chi1*R**2 - mu*chi2*R**3
+    dPhidt = omega + rho2*np.sin(2*Phi - phi2)
+    dXdt = nu*(chi1*Y*R + chi2*R**2)
+    dYdt = -chi1*R - mu*(chi1*R*Y**2 + chi2*R**2*Y)
+    return np.array([dRdt, dPhidt, dXdt, dYdt])
