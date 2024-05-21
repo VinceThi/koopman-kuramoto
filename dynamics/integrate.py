@@ -39,6 +39,19 @@ def integrate_dopri45(t0, t1, dt, dynamics, init_cond, *args):
     return sol
 
 
+def integrate_rk4_non_autonomous(t0, t1, dt, dynamics, init_cond, non_autonomous_term, *args):
+    f = dynamics
+    tvec = np.arange(t0, t1, dt)
+    sol = [init_cond]
+    for i, t in enumerate(tvec[0:-1]):
+        k1 = f(t, sol[i], non_autonomous_term, i, *args)
+        k2 = f(t+dt/2, sol[i] + k1/2, non_autonomous_term, i, *args)
+        k3 = f(t+dt/2, sol[i] + k2/2, non_autonomous_term, i, *args)
+        k4 = f(t+dt, sol[i] + k3, non_autonomous_term, i, *args)
+        sol.append(sol[i] + dt*(k1 + 2*k2 + 2*k3 + k4)/6)
+    return sol
+
+
 def integrate_dopri45_non_autonomous(t0, t1, dt, dynamics, init_cond, non_autonomous_term, *args):
     f = dynamics
     tvec = np.arange(t0, t1, dt)

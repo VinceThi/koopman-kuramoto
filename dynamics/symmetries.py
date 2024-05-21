@@ -17,11 +17,30 @@ def determining_equations_real_disk_automorphism(t, state, theta, current_index,
     rho2, phi2 = np.abs(p2), np.angle(p2)
     chi1 = 2*rho1*np.sin(Phi - phi1)
     chi2 = p0 - rho2*np.cos(2*Phi - phi2)
-    mu = (1 - nu_function(R, Y)*np.sqrt(R**2 - Y**2 + 1))/(R**2 - Y**2)*(chi1*Y*R + chi2*R**2)
+    mu = ((1 - nu_function(R, Y)*np.sqrt(R**2 - Y**2 + 1))/(R**2 - Y**2))*(chi1*Y*R + chi2*R**2)
     dRdt = (chi2 - mu)*R
     dPhidt = omega + rho2*np.sin(2*Phi - phi2)
     dYdt = -mu*Y - chi1*R
     return np.array([dRdt, dPhidt, dYdt])
+
+
+def determining_equations_real_disk_automorphism_kuramoto(t, state, W, omega, coupling):
+    N = len(W[0])
+    theta = state[:N]
+    R, Phi, Y = state[-3], state[-2], state[-1]
+    dthetadt = omega + coupling*(np.cos(theta)*(W@np.sin(theta)) - np.sin(theta)*(W@np.cos(theta)))
+    p0 = N*coupling/2
+    p1 = coupling/2*np.sum(np.exp(1j*theta))
+    p2 = coupling/2*np.sum(np.exp(2*1j*theta))
+    rho1, phi1 = np.abs(p1), np.angle(p1)
+    rho2, phi2 = np.abs(p2), np.angle(p2)
+    chi1 = 2*rho1*np.sin(Phi - phi1)
+    chi2 = p0 - rho2*np.cos(2*Phi - phi2)
+    mu = ((1 - nu_function(R, Y)*np.sqrt(R**2 - Y**2 + 1))/(R**2 - Y**2))*(chi1*Y*R + chi2*R**2)
+    dRdt = (chi2 - mu)*R
+    dPhidt = omega + rho2*np.sin(2*Phi - phi2)
+    dYdt = -mu*Y - chi1*R
+    return np.concatenate([dthetadt, np.array([dRdt, dPhidt, dYdt])])
 
 
 # def determining_equations_real_disk_automorphism(t, state, timesteps, theta, current_index, omega, coupling):
