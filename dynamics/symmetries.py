@@ -8,6 +8,12 @@ def nu_function(R, Y):
     return np.log(ratio) / (2 * Gamma)
 
 
+def nu_function_bounded(rho, phi, X):
+    Gamma = np.sqrt(X**2 - 1)
+    ratio = (X + Gamma)/(X - Gamma)
+    return np.log(ratio)/(2*Gamma)
+
+
 def determining_equations_real_disk_automorphism(t, state, theta, current_index, omega, coupling):
     R, Phi, Y = state
     p0 = len(theta[0, :])*coupling/2
@@ -41,6 +47,41 @@ def determining_equations_real_disk_automorphism_kuramoto(t, state, W, omega, co
     dPhidt = omega + rho2*np.sin(2*Phi - phi2)
     dYdt = -mu*Y - chi1*R
     return np.concatenate([dthetadt, np.array([dRdt, dPhidt, dYdt])])
+
+
+def determining_equations_disk_automorphism_bounded(t, state, theta, current_index, omega, coupling):
+    rho, Psi, phi = state
+    p0 = len(theta[0, :])*coupling/2
+    p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+    p2 = coupling/2*np.sum(np.exp(2*1j*theta[current_index, :]))
+    rho1, phi1 = np.abs(p1), np.angle(p1)
+    rho2, phi2 = np.abs(p2), np.angle(p2)
+    chi1 = 2*rho1*np.sin(Psi - phi/2 - phi1)
+    chi2 = p0 - rho2*np.cos(2*Psi - phi - phi2)
+    X = np.cos(phi/2)/np.sqrt(1 - rho**2)
+    nu = nu_function_bounded(rho, phi, X)
+    mu = rho*(1 - nu*X)/((X**2 - 1)*(1 - rho**2))*(np.sin(phi/2)*chi1 + rho*chi2)
+    drhodt = (chi2 - mu)*rho*(1 - rho**2)
+    dphidt = -2*np.tan(phi/2)*((1 - rho**2)*mu + rho**2*chi2) - 2*rho*chi1/np.cos(phi/2)
+    dPsidt = omega + rho2*np.sin(2*Psi - phi - phi2) + dphidt/2
+    return np.array([drhodt, dPsidt, dphidt])
+
+
+# def determining_equations_disk_automorphism_bounded(t, state, theta, current_index, omega, coupling):
+#     rho, Psi, phi = state
+#     p0 = len(theta[0, :])*coupling/2
+#     p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+#     p2 = coupling/2*np.sum(np.exp(2*1j*theta[current_index, :]))
+#     rho1, phi1 = np.abs(p1), np.angle(p1)
+#     rho2, phi2 = np.abs(p2), np.angle(p2)
+#     chi1 = 2*rho1*np.sin(Psi - phi/2 - phi1)
+#     chi2 = p0 - rho2*np.cos(2*Psi - phi - phi2)
+#     nu = nu_function_bounded(rho, phi)
+#     mu = ((1 + nu*np.cos(phi/2)/np.sqrt(1 - rho**2))/(rho**2 + np.cos(phi/2)**2 - 1))*(chi1*rho*np.sin(phi/2) + chi2*rho**2)
+#     drhodt = (chi2 - mu)*rho*(1 - rho**2)
+#     dphidt = 2*mu*np.tan(phi/2) + 2*rho*chi1/np.cos(phi/2) - 2*(rho**2*np.sin(phi/2))/(np.sqrt(1 - rho**2))*(chi2 - mu)
+#     dPsidt = omega + rho2*np.sin(2*Psi - phi - phi2) + dphidt/2
+#     return np.array([drhodt, dPsidt, dphidt])
 
 
 # def determining_equations_real_disk_automorphism(t, state, timesteps, theta, current_index, omega, coupling):
