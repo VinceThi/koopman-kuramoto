@@ -29,6 +29,7 @@ def extract_invariants(graph, n, maps, number_motifs, stars=False):
     n += [0] * (number_motifs - len(n)) # zero-padding for uniform formatting
     return n, invariants
 
+
 # Find the vertex that is not part of the invariant in a 5-star motif
 def find_emptymotif_from_5star(graph, list_vertices):
     for vertex in list_vertices[:]:
@@ -39,12 +40,14 @@ def find_emptymotif_from_5star(graph, list_vertices):
             return other_vertices
     raise RuntimeError("No center vertex was found for the 5-star.")
 
+
 # Delete all self-loops in graph
 def delete_self_loops(graph):
     for vertex in graph.vertices():
         if vertex in graph.get_out_neighbors(vertex):
             graph.remove_edge(graph.edge(vertex, vertex))
     return graph
+
 
 # delete all duplicates from constants
 def eliminate_duplicates(constants):
