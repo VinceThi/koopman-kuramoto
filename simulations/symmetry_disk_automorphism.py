@@ -7,8 +7,8 @@ from dynamics.integrate import integrate_dopri45, integrate_dopri45_non_autonomo
 from scipy.integrate import solve_ivp
 from dynamics.constants_of_motion import log_cross_ratio_theta
 from dynamics.dynamics import kuramoto_sakaguchi
-from dynamics.symmetries import (determining_equations_real_disk_automorphism, determining_equations_disk_automorphism,
-                                 determining_equations_real_disk_automorphism_kuramoto, nu_function,
+from dynamics.symmetries import (determining_equations_real_disk_automorphism, #determining_equations_disk_automorphism,
+                                 determining_equations_real_disk_automorphism_kuramoto, nu_function, nu_derivative,
                                  determining_equations_disk_automorphism_bounded)
 
 
@@ -19,13 +19,14 @@ N = 4
 W = np.ones((N, N))
 
 """ Dynamical parameters """
-t0, t1, dt = 0, 20, 0.005
+t0, t1, dt = 0, 12, 0.001
 timelist = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-omega = 0
+omega = 1
 coupling = 0.5/N
 # np.random.seed(2333)
 theta0 = 2*np.pi*np.random.random(N)  # np.array([0, 2, 4, 6])  #
+print(theta0)
 
 """ Integrate Kuramoto model """
 args_dynamics = (W, coupling, omega, alpha)
@@ -34,10 +35,11 @@ theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args
 """ Integrate determining equations """
 args_determining = (omega, coupling)
 
-R0 = 0.3
-Phi0 = np.pi/3
-Y0 = 0.2
-assert R0 > Y0
+R0 = 0.1
+Phi0 = 2*np.pi/3
+Y0 = 0.3
+assert R0**2 - Y0**2 + 1 >= 0
+print(R0, Phi0, Y0)
 
 solution = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, determining_equations_real_disk_automorphism,
                                                      np.array([R0, Phi0, Y0]), theta, *args_determining))
@@ -290,8 +292,9 @@ plt.xlabel("Re")
 
 plt.subplot(235)  
 plt.plot(timelist, X, label="$X$")
-plt.plot(timelist, Y, label="$Y$")
-plt.plot(timelist, R, label="$R$")
+# plt.plot(timelist, Y, label="$Y$")
+# plt.plot(timelist, R, label="$R$")
+plt.plot(timelist, R**2 - Y**2 + 1, label="$R^2 - Y^2 + 1$")
 # plt.ylabel("$X$")
 plt.xlabel("Time $t$")
 plt.legend(loc=1, frameon=True, fontsize=7)  
@@ -305,11 +308,17 @@ rho2, phi2 = np.abs(p2), np.angle(p2)
 chi1 = 2*rho1*np.sin(Phi - phi1)
 chi2 = p0 - rho2*np.cos(2*Phi - phi2)
 X = np.sqrt(R**2 - Y**2 + 1)
-mu = ((1 - nu_function(X)*np.sqrt(R**2 - Y**2 + 1))/(R**2 - Y**2))*(chi1*Y*R + chi2*R**2)
+# mu = ((1 - nu_function(X)*np.sqrt(R**2 - Y**2 + 1))/(R**2 - Y**2))*(chi1*Y*R + chi2*R**2)
+nu_list = []
+nup_list = []
+for i in X:
+    nu_list.append(nu_function(i))
+    nup_list.append(nu_derivative(i))
 plt.subplot(236)
-plt.plot(timelist, np.real(mu), label="Re $\\dot{\\nu}/\\nu$")
-plt.plot(timelist, np.imag(mu), label="Im $\\dot{\\nu}/\\nu$")
-plt.plot(timelist, nu_function(X), label="$\\nu$")
+# plt.plot(timelist, np.real(mu), label="Re $\\dot{\\nu}/\\nu$")
+# plt.plot(timelist, np.imag(mu), label="Im $\\dot{\\nu}/\\nu$")
+plt.plot(timelist, nu_list, label="$\\nu(t) = f(X(t))$")
+plt.plot(timelist, nup_list, label="$f'(X(t))$")
 # plt.ylabel("Im")
 # plt.xlabel("Re")
 # plt.ylabel("$\\dot{\\nu}/\\nu$")

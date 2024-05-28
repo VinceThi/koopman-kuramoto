@@ -27,19 +27,21 @@ N = 4
 W = np.ones((N, N))
 
 """ Dynamical parameters """
-t0, t1, dt = 0, 10, 0.01
+t0, t1, dt = 0, 10, 0.001
 timelist = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-omega = 0
-coupling = 0.5/N
-args_dynamics = (W, coupling, omega, alpha)
-args_determining = (omega, coupling)
-rho0_array = np.linspace(0.2, 0.99, 5)
-nb_initial_conditions = 5
+rho0_array = np.linspace(0.01, 0.99, 5)
+nb_experiments = 5
 average_L1_error_array = np.zeros((len(timelist), len(rho0_array)))
 for i, rho0 in enumerate(rho0_array):
+    print(rho0)
     average_L1_error = np.zeros(len(timelist))
-    for _ in range(nb_initial_conditions):
+    for _ in range(nb_experiments):
+        omega = np.random.random()
+        coupling = np.random.random() / N
+        print(omega, coupling)
+        args_dynamics = (W, coupling, omega, alpha)
+        args_determining = (omega, coupling)
         theta0 = 2*np.pi*np.random.random(N)
 
         """ Integrate Kuramoto model """
@@ -95,30 +97,49 @@ for i, rho0 in enumerate(rho0_array):
 
             plt.subplot(233)
             X = np.cos(phi/2) / np.sqrt(1 - rho**2)
-            plt.plot(timelist, nu_function(X))
+            nulist = []
+            for i in range(len(timelist)):
+                nulist.append(nu_function(X[i]))
+            plt.plot(timelist, nulist)
             plt.ylabel("$\\nu$")
             plt.xlabel("Time $t$")
 
+            vartheta = np.linspace(0, 2 * np.pi, 1000)
+            x = np.cos(vartheta)
+            y = np.sin(vartheta)
+
             plt.subplot(234)
+            plt.plot(x, y, color=total_color, linewidth=1)
             for i in range(len(theta[0, :])):
                 mobius_numerator = np.exp(1j*phi)*z[:, i] + Z
                 if i == 0:
                     plt.plot(np.real(mobius_numerator), np.imag(mobius_numerator), label="Numerator")
+                    plt.scatter(np.real(mobius_numerator[0]), np.imag(mobius_numerator[0]))
                 else:
                     plt.plot(np.real(mobius_numerator), np.imag(mobius_numerator))
+                    plt.scatter(np.real(mobius_numerator[0]), np.imag(mobius_numerator[0]))
             plt.ylabel("Im")
             plt.xlabel("Re")
+            plt.axis("equal")
+            plt.axhline(0, color='black',linewidth=0.5)
+            plt.axvline(0, color='black',linewidth=0.5)
             plt.legend(loc=1, frameon=True, fontsize=7)
 
             plt.subplot(235)
+            plt.plot(x, y, color=total_color, linewidth=1)
             for i in range(len(theta[0, :])):
                 mobius_denominator = np.exp(1j*phi)*np.conjugate(Z)*z[:, i] + 1
                 if i == 0:
                     plt.plot(np.real(mobius_denominator), np.imag(mobius_denominator), label="Denominator")
+                    plt.scatter(np.real(mobius_denominator[0]), np.imag(mobius_denominator[0]))
                 else:
                     plt.plot(np.real(mobius_denominator), np.imag(mobius_denominator))
+                    plt.scatter(np.real(mobius_denominator[0]), np.imag(mobius_denominator[0]))
             plt.ylabel("Im")
-            plt.xlabel("Re")                                                                                   
+            plt.xlabel("Re")
+            plt.axis("equal")                             
+            plt.axhline(0, color='black',linewidth=0.5)   
+            plt.axvline(0, color='black',linewidth=0.5)   
             plt.legend(loc=1, frameon=True, fontsize=7)
 
             plt.subplot(236)
@@ -130,11 +151,11 @@ for i, rho0 in enumerate(rho0_array):
 
         """ Compare transformed solution with expected transformed solution """
         # average_L1_error += np.sum(np.abs(np.angle(hatz_expected - hatz)), axis=1)/N/nb_initial_conditions
-        average_L1_error += np.nansum(phase_difference(hattheta_expected, hattheta), axis=1)/N/nb_initial_conditions
+        average_L1_error += np.nansum(phase_difference(hattheta_expected, hattheta), axis=1)/N/nb_experiments
         # TODO WARNING         ^^^
 
     average_L1_error_array[:, i] = average_L1_error
-    print(average_L1_error_array)
+    # print(average_L1_error_array)
 
 
 plt.figure(figsize=(6, 4))
