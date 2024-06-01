@@ -84,6 +84,7 @@ def determining_equations_disk_automorphism_bounded(t, state, theta, current_ind
     chi1 = 2*rho1*np.sin(Psi - phi/2 - phi1)
     chi2 = p0 - rho2*np.cos(2*Psi - phi - phi2)
     X = np.cos(phi/2)/np.sqrt(1 - rho**2)
+    assert X**2 >= 0
     mu = nu_derivative(X)*rho/(1 - rho**2)*(np.sin(phi/2)*chi1 + rho*chi2)
     drhodt = (chi2 - mu)*rho*(1 - rho**2)
     dphidt = -2*np.tan(phi/2)*((1 - rho**2)*mu + rho**2*chi2) - 2*rho*chi1/np.cos(phi/2)

@@ -7,7 +7,7 @@ from dynamics.integrate import integrate_dopri45, integrate_dopri45_non_autonomo
 from scipy.integrate import solve_ivp
 from dynamics.constants_of_motion import log_cross_ratio_theta
 from dynamics.dynamics import kuramoto_sakaguchi
-from dynamics.symmetries import (determining_equations_real_disk_automorphism, #determining_equations_disk_automorphism,
+from dynamics.symmetries import (determining_equations_real_disk_automorphism, # determining_equations_disk_automorphism,
                                  determining_equations_real_disk_automorphism_kuramoto, nu_function, nu_derivative,
                                  determining_equations_disk_automorphism_bounded)
 
@@ -19,14 +19,14 @@ N = 4
 W = np.ones((N, N))
 
 """ Dynamical parameters """
-t0, t1, dt = 0, 12, 0.001
+t0, t1, dt = 0, 12, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
 omega = 1
 coupling = 0.5/N
 # np.random.seed(2333)
 theta0 = 2*np.pi*np.random.random(N)  # np.array([0, 2, 4, 6])  #
-print(theta0)
+print("theta0 = ", theta0)
 
 """ Integrate Kuramoto model """
 args_dynamics = (W, coupling, omega, alpha)
@@ -35,11 +35,11 @@ theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args
 """ Integrate determining equations """
 args_determining = (omega, coupling)
 
-R0 = 0.1
-Phi0 = 2*np.pi/3
-Y0 = 0.3
+R0 = 0.2  # np.random.random() + 0.1
+Phi0 = 2*np.pi*np.random.random()
+Y0 = 0.2  # R0 - R0*np.random.random()
+print("R0, Phi0, Y0 = ", R0, Phi0, Y0)
 assert R0**2 - Y0**2 + 1 >= 0
-print(R0, Phi0, Y0)
 
 solution = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, determining_equations_real_disk_automorphism,
                                                      np.array([R0, Phi0, Y0]), theta, *args_determining))
@@ -112,16 +112,31 @@ def disk_automorphism(U, V, z): return (U*z + V)/(np.conjugate(V)*z + np.conjuga
 def disk_automorphism_bounded(Z, phi, z): return (np.exp(1j*phi)*z + Z)/(np.exp(1j*phi)*np.conjugate(Z)*z + 1)
 
 
+def disk_automorphism_real(X, Y, R, Phi, theta):
+    # denom = 2*R**2 + 1 + 2*X*R*np.cos(theta - Phi) - 2*Y*R*np.sin(theta - Phi)
+    real_num = (X**2 - Y**2)*np.cos(theta) \
+        - 2*X*Y*np.sin(theta) + 2*X*R*np.cos(Phi) - 2*Y*R*np.sin(Phi) + R**2*np.cos(theta - 2*Phi)
+    imag_num = (X**2 - Y**2)*np.sin(theta) \
+        + 2*X*Y*np.cos(theta) + 2*X*R*np.sin(Phi) + 2*Y*R*np.cos(Phi) - R**2*np.sin(theta - 2*Phi)
+    return np.arctan2(imag_num, real_num)
+
+
 hattheta = []
 for i in range(len(timelist)):
     hattheta.append(np.angle(disk_automorphism(U[i], V[i], np.exp(1j*theta[i, :]))))
 hattheta = np.array(hattheta)
 
 
-hattheta_b = []
-for i in range(len(timelist)):
-    hattheta_b.append(np.angle(disk_automorphism_bounded(Z[i], phi[i], np.exp(1j*theta[i, :]))))
-hattheta_b = np.array(hattheta_b)
+# hattheta_b = []
+# for i in range(len(timelist)):
+#     hattheta_b.append(np.angle(disk_automorphism_bounded(Z[i], phi[i], np.exp(1j*theta[i, :]))))
+# hattheta_b = np.array(hattheta_b)
+# 
+# 
+# hattheta_r = []
+# for i in range(len(timelist)):
+#     hattheta_r.append(disk_automorphism_real(X[i], Y[i], R[i], Phi[i], theta[i, :]))
+# hattheta_r = np.array(hattheta_r)
 
 
 # hattheta_b2 = []
@@ -146,8 +161,12 @@ hattheta_b = np.array(hattheta_b)
 hattheta0 = hattheta[0, :]
 hattheta_expected = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta0, *args_dynamics))
 
-hattheta0_b = hattheta_b[0, :]
-hattheta_expected_b = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta0_b, *args_dynamics))
+# hattheta0_b = hattheta_b[0, :]
+# hattheta_expected_b = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta0_b, *args_dynamics))
+#
+# hattheta0_r = hattheta_r[0, :]
+# hattheta_expected_r = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta0_r, *args_dynamics))
+
 
 # hattheta0_b2 = hattheta_b2[0, :]
 # hattheta_expected_b2 = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta0_b2, *args_dynamics))
@@ -194,29 +213,35 @@ plt.xlabel("Time $t$")
 
 plt.subplot(232)
 hattheta = np.where(hattheta < 0, 2*np.pi + hattheta, hattheta)
-hattheta_b = np.where(hattheta_b < 0, 2*np.pi + hattheta_b, hattheta_b)
+# hattheta_b = np.where(hattheta_b < 0, 2*np.pi + hattheta_b, hattheta_b)
+# hattheta_r = np.where(hattheta_r < 0, 2*np.pi + hattheta_r, hattheta_r)
 # hattheta_b2 = np.where(hattheta_b2 < 0, 2*np.pi + hattheta_b2, hattheta_b2)
 # hattheta1 = np.where(hattheta1 < 0, 2*np.pi + hattheta1, hattheta1)
 # hattheta2 = np.where(hattheta2 < 0, 2*np.pi + hattheta2, hattheta2)
 hattheta_expected = hattheta_expected % (2*np.pi)
-hattheta_expected_b = hattheta_expected_b % (2*np.pi)
+# hattheta_expected_b = hattheta_expected_b % (2*np.pi)
+# hattheta_expected_r = hattheta_expected_r % (2*np.pi)
 # hattheta_expected_b2 = hattheta_expected_b2 % (2*np.pi)
 for i in range(len(theta[0, :])):
     if i == 0:
         # plt.plot(timelist, theta[:, i], color=deep[0], label="Solution $\\theta(t)$")
         # plt.plot(timelist, theta1[:, i], color=deep[3], label="Solution $\\theta(t)$ ***")
-        plt.plot(timelist, hattheta[:, i], color=deep[1],
+        plt.plot(timelist, hattheta[:, i], color=deep[1], zorder=10,
                  linestyle="--", label="Transformed $\\hat{\\theta}(t)$")
-        plt.plot(timelist, hattheta_b[:, i], color=deep[3],
-                 linestyle="dotted", label="Transformed $\\hat{\\theta}(t)$ (bounded)")
+        # plt.plot(timelist, hattheta_b[:, i], color=deep[3],
+        #          linestyle="dotted", label="Transformed $\\hat{\\theta}(t)$ (bounded)")
+        # plt.plot(timelist, hattheta_r[:, i], color=deep[4],
+        #          linestyle="dashdot", label="Transformed $\\hat{\\theta}(t)$ (real)")
         # plt.plot(timelist, hattheta_b2[:, i], color=deep[5],
         #          linestyle="dotted", label="Transformed $\\bar{\\theta}(t)$")
         # plt.plot(timelist, hattheta1[:, i], color=deep[3],
         #          linestyle="dotted", label="Transformed solution $\\hat{\\theta}(t)$ *")
         # plt.plot(timelist_bdf, hattheta2[:, i], color=deep[4],
         #          linestyle.="dashdot", label="Transformed solution $\\hat{\\theta}(t)$ **")
-        plt.plot(timelist, hattheta_expected[:, i], color=deep[2],
-                 linestyle="--", label="Expected $\\hat{\\theta}(t)$")
+        plt.plot(timelist, hattheta_expected[:, i], color=total_color,
+                 linestyle="-", label="Expected $\\hat{\\theta}(t)$")
+        # plt.plot(timelist, hattheta_expected_r[:, i], color=deep[9],
+        #          linestyle="dashdot", label="Expected $\\hat{\\theta}(t)$ (real)")
         # plt.plot(timelist, hattheta_expected_b[:, i], color=deep[4],
         #          linestyle="dotted", label="Expected $\\tilde{\\theta}(t)$")
         # plt.plot(timelist, hattheta_expected_b2[:, i], color=deep[6],
@@ -224,12 +249,14 @@ for i in range(len(theta[0, :])):
     else:
         # plt.plot(timelist, theta[:, i], color=deep[0])
         # plt.plot(timelist, theta1[:, i], color=deep[3])
-        plt.plot(timelist, hattheta[:, i], color=deep[1], linestyle="--")
-        plt.plot(timelist, hattheta_b[:, i], color=deep[3], linestyle="dotted")
+        plt.plot(timelist, hattheta[:, i], color=deep[1], linestyle="--", zorder=10)
+        # plt.plot(timelist, hattheta_b[:, i], color=deep[3], linestyle="dotted")
+        # plt.plot(timelist, hattheta_r[:, i], color=deep[4], linestyle="dashdot")
         # plt.plot(timelist, hattheta_b2[:, i], color=deep[5], linestyle="dotted")
         # plt.plot(timelist, hattheta1[:, i], color=deep[3], linestyle="dotted")
         # plt.plot(timelist_bdf, hattheta2[:, i], color=deep[4], linestyle="dashdot")
-        plt.plot(timelist, hattheta_expected[:, i], color=deep[2], linestyle="--")
+        plt.plot(timelist, hattheta_expected[:, i], color=total_color, linestyle="-")
+        # plt.plot(timelist, hattheta_expected_r[:, i], color=deep[9], linestyle="dashdot")
         # plt.plot(timelist, hattheta_expected_b[:, i], color=deep[4], linestyle="dotted")
         # plt.plot(timelist, hattheta_expected_b2[:, i], color=deep[6], linestyle="dotted")
 
@@ -268,8 +295,8 @@ plt.legend(loc=1, frameon=True, fontsize=7)
 
 # plt.subplot(232)
 plt.subplot(234)
-# plt.plot(np.real(U), np.imag(U), label="$U$")
-# plt.plot(np.real(V), np.imag(V), label="$V$")
+plt.plot(np.real(U), np.imag(U), label="$U$")
+plt.plot(np.real(V), np.imag(V), label="$V$")
 plt.plot(np.real(Z1), np.imag(Z1), label="$Z$ from $U,V$", color=deep[0])
 plt.plot(np.real(Z), np.imag(Z), label="$Z$", color=deep[1], linestyle="--")
 # plt.plot(np.real(Z2), np.imag(Z2), label="$Z$ *", color=deep[2], linestyle="dotted")
@@ -290,15 +317,6 @@ plt.xlabel("Re")
 # plt.xlabel("Time $t$")
 # plt.legend(loc=1, frameon=True, fontsize=7)
 
-plt.subplot(235)  
-plt.plot(timelist, X, label="$X$")
-# plt.plot(timelist, Y, label="$Y$")
-# plt.plot(timelist, R, label="$R$")
-plt.plot(timelist, R**2 - Y**2 + 1, label="$R^2 - Y^2 + 1$")
-# plt.ylabel("$X$")
-plt.xlabel("Time $t$")
-plt.legend(loc=1, frameon=True, fontsize=7)  
-
 
 p0 = N*coupling/2
 p1 = coupling/2*np.sum(np.exp(1j*theta))
@@ -308,22 +326,45 @@ rho2, phi2 = np.abs(p2), np.angle(p2)
 chi1 = 2*rho1*np.sin(Phi - phi1)
 chi2 = p0 - rho2*np.cos(2*Phi - phi2)
 X = np.sqrt(R**2 - Y**2 + 1)
-# mu = ((1 - nu_function(X)*np.sqrt(R**2 - Y**2 + 1))/(R**2 - Y**2))*(chi1*Y*R + chi2*R**2)
+mu_list = []
 nu_list = []
 nup_list = []
-for i in X:
-    nu_list.append(nu_function(i))
-    nup_list.append(nu_derivative(i))
+for i in range(len(X)):
+    mu_list.append(nu_derivative(X[i])*(chi1[i]*Y[i]*R[i] + chi2[i]*R[i]**2))
+    nu_list.append(nu_function(X[i]))
+    nup_list.append(nu_derivative(X[i]))
+nu_array = np.array(nu_list)
+# mu = np.array(mu_list)
 plt.subplot(236)
 # plt.plot(timelist, np.real(mu), label="Re $\\dot{\\nu}/\\nu$")
 # plt.plot(timelist, np.imag(mu), label="Im $\\dot{\\nu}/\\nu$")
 plt.plot(timelist, nu_list, label="$\\nu(t) = f(X(t))$")
 plt.plot(timelist, nup_list, label="$f'(X(t))$")
+plt.plot(timelist, mu_list, label="$\\mu(t)$")
 # plt.ylabel("Im")
 # plt.xlabel("Re")
 # plt.ylabel("$\\dot{\\nu}/\\nu$")
 plt.xlabel("Time $t$")
 plt.legend(loc=1, frameon=True, fontsize=7)
+
+
+plt.subplot(235)
+# plt.plot(timelist, X, label="$X$")
+# plt.plot(timelist, Y, label="$Y$")
+# plt.plot(timelist, R, label="$R$")
+plt.plot(timelist, nu_array*R*np.cos(Phi), label="$\\nu R \\cos(\\Phi)$")
+plt.plot(timelist, nu_array*R*np.sin(Phi), label="$\\nu R \\sin(\\Phi)$")
+plt.plot(timelist, 2*nu_array*Y, label="$-i\\nu(U - \\bar{U}) = 2\\nu Y$")
+# plt.plot(timelist, R**2 - Y**2 + 1, label="$R^2 - Y^2 + 1$")
+# plt.plot(timelist, R/np.sqrt(X**2 + Y**2), label="$R(t)/\\sqrt{X(t)^2 + Y(t)^2}$")
+# plt.plot(timelist, np.arctan2(imag_num, real_num))
+# plt.plot(timelist, )
+# plt.ylabel("$X$")
+# plt.ylim([0, 1])
+plt.xlabel("Time $t$")
+plt.legend(loc=4, frameon=True, fontsize=7)
+
+
 # plt.subplot(235)
 # plt.plot(timelist, np.abs(U), label="$|U|$")
 # plt.plot(timelist, np.abs(V), label="$|V|$")
