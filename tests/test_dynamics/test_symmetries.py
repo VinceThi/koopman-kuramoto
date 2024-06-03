@@ -6,8 +6,6 @@ import numpy as np
 from dynamics.integrate import integrate_dopri45, integrate_dopri45_non_autonomous
 from dynamics.dynamics import kuramoto_sakaguchi
 from dynamics.symmetries import determining_equations_disk_automorphism_bounded, nu_function, nu_derivative
-# from tqdm import tqdm
-# import pytest
 
 
 def numerator_disk_automorphism(Z, phi, z):
@@ -62,7 +60,8 @@ for i, rho0 in enumerate(rho0_array):
         Phi0 = 2*np.pi*np.random.random()
         phi0 = 2*np.arcsin(Y0/np.sqrt(1 + R0**2))
         Psi0 = Phi0 + phi0/2
-        solution = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, determining_equations_disk_automorphism_bounded,
+        solution = np.array(integrate_dopri45_non_autonomous(t0, t1, dt,
+                                                             determining_equations_disk_automorphism_bounded,
                                                              np.array([rho0, Psi0, phi0]), theta, *args_determining))
         rho, Psi, phi = solution[:, 0], solution[:, 1], solution[:, 2]
         Z = rho*np.exp(1j*Psi)
@@ -97,12 +96,12 @@ for i, rho0 in enumerate(rho0_array):
             plt.xlabel("Time $t$")
 
             plt.subplot(232)
-            for i in range(len(theta[0, :])):
-                if i == 0:
-                    plt.plot(timelist, hattheta_expected[:, i], color=dark_grey,
+            for k in range(len(theta[0, :])):
+                if k == 0:
+                    plt.plot(timelist, hattheta_expected[:, k], color=dark_grey,
                              label="Expected $\\hat{\\theta}(t)$")                                                   
                 else:
-                    plt.plot(timelist, hattheta_expected[:, i], color=dark_grey)
+                    plt.plot(timelist, hattheta_expected[:, k], color=dark_grey)
             plt.plot(timelist, hattheta, linestyle="--")
             plt.ylabel("Transformed $\\hat{\\theta}(t)$")
             plt.xlabel("Time $t$")
@@ -119,10 +118,10 @@ for i, rho0 in enumerate(rho0_array):
             mu_list = []
             nu_list = []
             nup_list = []
-            for i in range(len(X)):
-                mu_list.append(nu_derivative(X[i]) * (chi1[i] * Y[i] * R[i] + chi2[i] * R[i] ** 2))
-                nu_list.append(nu_function(X[i]))
-                nup_list.append(nu_derivative(X[i]))
+            for s in range(len(X)):
+                mu_list.append(nu_derivative(X[s]) * (chi1[s] * Y[s] * R[s] + chi2[s] * R[s] ** 2))
+                nu_list.append(nu_function(X[s]))
+                nup_list.append(nu_derivative(X[s]))
             plt.plot(timelist, X, label="X(t)")
             plt.plot(timelist, nu_list, label="$\\nu(t) = f(X(t))$")
             plt.plot(timelist, nup_list, label="$f'(X(t))$")
@@ -138,13 +137,13 @@ for i, rho0 in enumerate(rho0_array):
 
             plt.subplot(234)
             plt.plot(x, y, color=total_color, linewidth=1)
-            for i in range(len(theta[0, :])):
-                mobius_numerator = np.exp(1j*phi)*z[:, i] + Z
+            for j in range(len(theta[0, :])):
+                mobius_numerator = np.exp(1j*phi)*z[:, j] + Z
                 # real_num = (X**2 - Y**2)*np.cos(theta) - 2*X*Y*np.sin(theta) + 2*X*R*np.cos(Phi)\
                 #     - 2*Y*R*np.sin(Phi) + R**2*np.cos(theta - 2*Phi)
                 # imag_num = (X**2 - Y**2)*np.sin(theta) + 2*X*Y*np.cos(theta) + 2*X*R*np.sin(Phi)\
                 #     + 2*Y*R*np.cos(Phi) - R**2*np.sin(theta - 2*Phi)
-                if i == 0:
+                if j == 0:
                     plt.plot(np.real(mobius_numerator), np.imag(mobius_numerator), label="Numerator")
                     plt.scatter(np.real(mobius_numerator[0]), np.imag(mobius_numerator[0]))
                 else:
@@ -153,15 +152,15 @@ for i, rho0 in enumerate(rho0_array):
             plt.ylabel("Im")
             plt.xlabel("Re")
             plt.axis("equal")
-            plt.axhline(0, color='black',linewidth=0.5)
-            plt.axvline(0, color='black',linewidth=0.5)
+            plt.axhline(0, color='black', linewidth=0.5)
+            plt.axvline(0, color='black', linewidth=0.5)
             plt.legend(loc=1, frameon=True, fontsize=7)
 
             plt.subplot(235)
             plt.plot(x, y, color=total_color, linewidth=1)
-            for i in range(len(theta[0, :])):
-                mobius_denominator = np.exp(1j*phi)*np.conjugate(Z)*z[:, i] + 1
-                if i == 0:
+            for q in range(len(theta[0, :])):
+                mobius_denominator = np.exp(1j*phi)*np.conjugate(Z)*z[:, q] + 1
+                if q == 0:
                     plt.plot(np.real(mobius_denominator), np.imag(mobius_denominator), label="Denominator")
                     plt.scatter(np.real(mobius_denominator[0]), np.imag(mobius_denominator[0]))
                 else:
@@ -197,6 +196,3 @@ plt.ylabel("Average L1 error")
 plt.xlabel("Time $t$")
 plt.legend(loc=1, frameon=True, fontsize=7)
 plt.show()
-
-# if __name__ == "__main__":
-#     pytest.main()

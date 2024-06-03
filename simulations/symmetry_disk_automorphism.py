@@ -25,7 +25,7 @@ alpha = 0
 omega = 1
 coupling = 0.5/N
 # np.random.seed(2333)
-theta0 = 2*np.pi*np.random.random(N)  # np.array([0, 2, 4, 6])  #
+theta0 = np.array([0, 2, 4, 6])  # 2*np.pi*np.random.random(N)  #
 print("theta0 = ", theta0)
 
 """ Integrate Kuramoto model """
@@ -36,7 +36,7 @@ theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args
 args_determining = (omega, coupling)
 
 R0 = 0.2  # np.random.random() + 0.1
-Phi0 = 2*np.pi*np.random.random()
+Phi0 = 4.5  # 2*np.pi*np.random.random()
 Y0 = 0.2  # R0 - R0*np.random.random()
 print("R0, Phi0, Y0 = ", R0, Phi0, Y0)
 assert R0**2 - Y0**2 + 1 >= 0
@@ -355,7 +355,7 @@ plt.subplot(235)
 plt.plot(timelist, nu_array*R*np.cos(Phi), label="$\\nu R \\cos(\\Phi)$")
 plt.plot(timelist, nu_array*R*np.sin(Phi), label="$\\nu R \\sin(\\Phi)$")
 plt.plot(timelist, 2*nu_array*Y, label="$-i\\nu(U - \\bar{U}) = 2\\nu Y$")
-# plt.plot(timelist, R**2 - Y**2 + 1, label="$R^2 - Y^2 + 1$")
+plt.plot(timelist, R**2 - Y**2 + 1, label="$R^2 - Y^2 + 1$")
 # plt.plot(timelist, R/np.sqrt(X**2 + Y**2), label="$R(t)/\\sqrt{X(t)^2 + Y(t)^2}$")
 # plt.plot(timelist, np.arctan2(imag_num, real_num))
 # plt.plot(timelist, )
