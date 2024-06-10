@@ -33,7 +33,7 @@ N = 4
 W = np.ones((N, N))
 
 """ Dynamical parameters """
-t0, t1, dt = 0, 10, 0.001
+t0, t1, dt = 0, 18, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
 rho0_array = np.linspace(0.3, 0.99, 5)
@@ -43,7 +43,7 @@ for i, rho0 in enumerate(rho0_array):
     print(f"rho0 = {rho0}")
     average_L1_error = np.zeros(len(timelist))
     for _ in range(nb_experiments):
-        omega = np.random.random()
+        omega = 0  # np.random.random()
         coupling = np.random.random() / N
         print(f"omega = {omega}, ", f"coupling = {coupling}")
         args_dynamics = (W, coupling, omega, alpha)
@@ -92,6 +92,7 @@ for i, rho0 in enumerate(rho0_array):
 
             plt.subplot(231)
             plt.plot(timelist, theta)
+            plt.ylim([-0.05, 2 * np.pi + 0.05])
             plt.ylabel("Solution $\\theta(t)$")
             plt.xlabel("Time $t$")
 
@@ -103,13 +104,14 @@ for i, rho0 in enumerate(rho0_array):
                 else:
                     plt.plot(timelist, hattheta_expected[:, k], color=dark_grey)
             plt.plot(timelist, hattheta, linestyle="--")
+            plt.ylim([-0.05, 2 * np.pi + 0.05])
             plt.ylabel("Transformed $\\hat{\\theta}(t)$")
             plt.xlabel("Time $t$")
 
             plt.subplot(233)
             p0 = N * coupling / 2
-            p1 = coupling / 2 * np.sum(np.exp(1j * theta))
-            p2 = coupling / 2 * np.sum(np.exp(2 * 1j * theta))
+            p1 = coupling / 2 * np.sum(np.exp(1j * theta), axis=1)
+            p2 = coupling / 2 * np.sum(np.exp(2 * 1j * theta), axis=1)
             rho1, phi1 = np.abs(p1), np.angle(p1)
             rho2, phi2 = np.abs(p2), np.angle(p2)
             chi1 = 2 * rho1 * np.sin(Phi - phi1)

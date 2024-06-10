@@ -35,6 +35,36 @@ def nu_derivative(X):
         raise ValueError(f"in function nu_derivative, X must be a real number. In this case, X = {X}")
 
 
+def disk_automorphism(U, V, z):
+    # return (np.conjugate(U)*z - V) / (-np.conjugate(V)*z + U)
+    return (U*z + V)/(np.conjugate(V)*z + np.conjugate(U))
+
+
+def determining_equations_disk_automorphism(t, state, hattheta, current_index, omega, coupling):
+    R, Phi, Y = state
+    assert R**2 - Y**2 + 1 > 0
+    p1 = coupling/2*np.sum(np.exp(1j*hattheta[current_index, :]))
+    rho1, phi1 = np.abs(p1), np.angle(p1)
+    dRdt = -2*rho1*Y*np.sin(Phi - phi1)
+    dPhidt = omega - 2*rho1*Y/R*np.cos(Phi - phi1)
+    dYdt = -2*rho1*R*np.sin(Phi - phi1)
+    return np.array([dRdt, dPhidt, dYdt])
+
+
+# def determining_equations_disk_automorphism(t, state, W, omega, coupling):
+#     N = len(W[0])
+#     theta = state[:N]
+#     R, Phi, Y = state[-3], state[-2], state[-1]
+#     assert R**2 - Y**2 + 1 > 0
+#     p1 = coupling/2*np.sum(np.exp(1j*theta))
+#     rho1, phi1 = np.abs(p1), np.angle(p1)
+#     dthetadt = omega + coupling*(np.cos(theta)*(W@np.sin(theta)) - np.sin(theta)*(W@np.cos(theta)))
+#     dRdt = -2*rho1*Y*np.sin(Phi - phi1)
+#     dPhidt = omega - 2*rho1*Y/R*np.cos(Phi - phi1)
+#     dYdt = -2*rho1*R*np.sin(Phi - phi1)
+#     return np.concatenate([dthetadt, np.array([dRdt, dPhidt, dYdt])])
+
+
 def determining_equations_real_disk_automorphism(t, state, theta, current_index, omega, coupling):
     R, Phi, Y = state
     p0 = len(theta[0, :])*coupling/2
