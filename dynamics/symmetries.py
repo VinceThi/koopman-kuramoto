@@ -40,6 +40,7 @@ def disk_automorphism(U, V, z):
     return (U*z + V)/(np.conjugate(V)*z + np.conjugate(U))
 
 
+# For the non-autonomous model (but this was a mistake, we in fact have the same determining equations!)
 def determining_equations_disk_automorphism(t, state, hattheta, current_index, omega, coupling):
     R, Phi, Y = state
     assert R**2 - Y**2 + 1 > 0

@@ -56,16 +56,15 @@ hattheta_b0 = np.angle(disk_automorphism_bounded(Z0, phi0, np.exp(1j*theta0)))
 """ For the initial conditions of the transformed system, what is the expected dynamics ? """
 hattheta_expected_b = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta_b0, *args_dynamics))
 
-hattheta_b0 = hattheta_b0.reshape((N, 1))
-hattheta_init = hattheta_b0@np.ones((1, len(timelist)))
-hattheta_init = hattheta_init.T
+# hattheta_b0 = hattheta_b0.reshape((N, 1))
+# hattheta_init = hattheta_b0@np.ones((1, len(timelist)))
+# hattheta_init = hattheta_init.T
 
 
 solution_b = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, determining_equations_disk_automorphism_bounded,
-                                                       np.array([rho0, Psi0, phi0]), hattheta_init, # hattheta_expected_b,
-                                                       *args_determining))
+                                                       np.array([rho0, Psi0, phi0]), hattheta_expected_b,
+                                                       *args_determining))          #  hattheta_init, #
 rho, Psi, phi = solution_b[:, 0], solution_b[:, 1], solution_b[:, 2]
-
 Z = rho*np.exp(1j*Psi)
 
 
