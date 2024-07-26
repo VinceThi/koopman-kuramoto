@@ -27,7 +27,7 @@ alpha = 0
 omega = 0
 coupling = 0.5/N
 print(f"omega = {omega}", f"coupling = {coupling}", f"N*coupling/2 = {N*coupling/2}")
-theta0 = np.array([0, 1.5, 3, 4.5])  # 2*np.pi*np.random.random(N)  #
+theta0 = 2*np.pi*np.random.random(N)  # np.array([0, 1.5, 3, 4.5])  #
 print("theta0 = ", theta0)
 
 """ Integrate Kuramoto model """
@@ -44,7 +44,7 @@ args_determining = (omega, coupling)
 
 rho0 = 0.5  # R0/np.sqrt(1 + R0**2)
 phi0 = 1  # 2*np.arcsin(Y0/np.sqrt(1 + R0**2))
-Psi0 = 1    # Phi0 + phi0/2
+Psi0 = 3    # Phi0 + phi0/2
 print("rho0, phi0, Psi0", rho0, phi0, Psi0)
 # theta_initial = np.array([[0], [2], [4], [6]])
 # theta_init = theta_initial@np.ones((1, len(timelist)))
@@ -60,7 +60,11 @@ hattheta_expected_b = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi,
 # hattheta_init = hattheta_b0@np.ones((1, len(timelist)))
 # hattheta_init = hattheta_init.T
 
-
+# TODO WARNING Les expériences sont plus claires pour omega = 0. Dans ce cas, si nous choisissons les p_1, ...
+#  des équations déterminantes comme hatp1,... (calculé avec hattheta_expected_b), alors le point d'équilibre est au
+#  bon endroit. J'avais remarqué que lorsque je choisissais p_1 comme ceux de la solution non transformé, alors le
+#  point d'équilibre suite à la transformation correspondait à celui de la solution non transformé, ce qui est
+#  évidemment un gros problème.
 solution_b = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, determining_equations_disk_automorphism_bounded,
                                                        np.array([rho0, Psi0, phi0]), hattheta_expected_b,
                                                        *args_determining))          #  hattheta_init, #
@@ -189,6 +193,7 @@ plt.legend(loc=1, frameon=True, fontsize=7)
 
 
 hatp1 = coupling/2*np.sum(np.exp(1j*hattheta_b), axis=1)
+hatp1_expected = coupling/2*np.sum(np.exp(1j*hattheta_expected_b), axis=1)
 plt.subplot(234)
 plt.plot(np.sin(np.linspace(0, 2*np.pi, 1000)), np.cos(np.linspace(0, 2*np.pi, 1000)),
          linewidth=0.5, linestyle="--", color=total_color)
@@ -197,6 +202,7 @@ plt.plot(N*coupling/2*np.sin(np.linspace(0, 2*np.pi, 1000)), N*coupling/2*np.cos
          linewidth=0.5, linestyle="--", color=total_color)
 plt.plot(np.real(p1), np.imag(p1), label="$p_1$")
 plt.plot(np.real(hatp1), np.imag(hatp1), label="$\\hat{p}_1$")
+plt.plot(np.real(hatp1_expected), np.imag(hatp1_expected), label="Expected $\\hat{p}_1$")
 plt.legend(loc=1, frameon=True, fontsize=7)
 plt.ylabel("Im")
 plt.xlabel("Re")
