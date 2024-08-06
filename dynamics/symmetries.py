@@ -40,11 +40,16 @@ def disk_automorphism(U, V, z):
     return (U*z + V)/(np.conjugate(V)*z + np.conjugate(U))
 
 
-# For the non-autonomous model (but this was a mistake, we in fact have the same determining equations!)
-def determining_equations_disk_automorphism(t, state, hattheta, current_index, omega, coupling):
+# For the non-autonomous model
+def ricatti_equations(t, z, theta, current_index, omega, coupling):
+    p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+    return p1 + 1j*omega*z - np.conj(p1)*z**2
+
+
+def determining_equations_disk_automorphism(t, state, theta, current_index, omega, coupling):
     R, Phi, Y = state
     assert R**2 - Y**2 + 1 > 0
-    p1 = coupling/2*np.sum(np.exp(1j*hattheta[current_index, :]))
+    p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
     rho1, phi1 = np.abs(p1), np.angle(p1)
     dRdt = -2*rho1*Y*np.sin(Phi - phi1)
     dPhidt = omega - 2*rho1*Y/R*np.cos(Phi - phi1)
