@@ -5,7 +5,7 @@ from plots.config_rcparams import *
 import numpy as np
 from dynamics.integrate import integrate_dopri45, integrate_dopri45_non_autonomous
 from dynamics.dynamics import kuramoto_sakaguchi
-from dynamics.symmetries import disk_automorphism, determining_equations_disk_automorphism
+from dynamics.symmetries import disk_automorphism, determining_equations_disk_automorphism, ricatti_equations
 
 
 plot_trajectories = True
@@ -15,13 +15,14 @@ N = 4
 W = np.ones((N, N))
 
 """ Dynamical parameters """
-t0, t1, dt = 0, 18, 0.01
+t0, t1, dt = 0, 18, 0.001
 timelist = np.linspace(t0, t1, int(t1 / dt))
 alpha = 0
-omega = 0
+omega = 0.9
 coupling = 0.5/N
 print(f"omega = {omega} ,", f"coupling = {coupling}")
 # np.random.seed(2333)
+# np.array([4.31159804, 3.52251869, 0.584871, 2.27442686])  #
 theta0 = 2*np.pi*np.random.random(N)   # np.array([0, 2, 4, 6])  #
 print("theta0 = ", theta0)
 
@@ -30,26 +31,18 @@ args_dynamics = (W, coupling, omega, alpha)
 theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args_dynamics))
 
 """ Integrate determining equations """
-R0 = 0.5
-Phi0 = 0.1
-Y0 = 0.2
+R0 = 0.9
+Phi0 = 0.6*np.pi
+Y0 = 0.6
 print("R0, Phi0, Y0 = ", R0, Phi0, Y0)
 assert R0**2 - Y0**2 + 1 >= 0
 X0 = np.sqrt(R0**2 - Y0**2 + 1)
 U0 = X0 + 1j*Y0
 V0 = R0*np.exp(1j*Phi0)
-hatz0 = disk_automorphism(U0, V0, np.exp(1j*theta0))
-hattheta0 = np.angle(hatz0)
-hattheta_expected = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, hattheta0, *args_dynamics))
 
-# args_determining = (W, omega, coupling)
-# state0 = np.concatenate([hattheta0, np.array([R0, Phi0, Y0])])
-# print(state0)
-# solution = np.array(integrate_dopri45(t0, t1, dt, determining_equations_disk_automorphism, state0, *args_determining))
-#
-args_determining = (omega, coupling) 
+args_determining = (omega, coupling)
 solution = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, determining_equations_disk_automorphism,
-                                                     np.array([R0, Phi0, Y0]), hattheta_expected, *args_determining))
+                                                     np.array([R0, Phi0, Y0]), theta, *args_determining))
 
 R, Phi, Y = solution[:, 0], solution[:, 1], solution[:, 2]
 X = np.sqrt(R**2 - Y**2 + 1)
@@ -58,6 +51,19 @@ V = R*np.exp(1j*Phi)
 
 phi1 = 2*np.arcsin(Y/np.sqrt(1 + R**2))  # np.angle(-U/np.abs(U))
 Z1 = R/np.sqrt(1 + R**2)*np.exp(1j*(Phi + phi1/2))  # V/U
+
+
+""" Integrate expected transformed trajectory"""
+args_ricatti = (omega, coupling)
+hatz0 = disk_automorphism(U0, V0, np.exp(1j*theta0))
+solution = np.array(integrate_dopri45_non_autonomous(t0, t1, dt, ricatti_equations,
+                                                     hatz0, theta, *args_determining))
+hattheta_expected = np.angle(solution)
+
+
+""" Integrate """
+args_dynamics = (W, coupling, omega, alpha)
+hattheta_kur = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, np.angle(hatz0), *args_dynamics))
 
 
 """ Integrate bounded determining equations """
@@ -132,8 +138,8 @@ hattheta = np.array(hattheta)
 # for i in range(len(timelist)):
 #     hattheta_b.append(np.angle(disk_automorphism_bounded(Z[i], phi[i], np.exp(1j*theta[i, :]))))
 # hattheta_b = np.array(hattheta_b)
-# 
-# 
+#
+#
 # hattheta_r = []
 # for i in range(len(timelist)):
 #     hattheta_r.append(disk_automorphism_real(X[i], Y[i], R[i], Phi[i], theta[i, :]))
@@ -227,8 +233,6 @@ for i in range(len(theta[0, :])):
     if i == 0:
         # plt.plot(timelist, theta[:, i], color=deep[0], label="Solution $\\theta(t)$")
         # plt.plot(timelist, theta1[:, i], color=deep[3], label="Solution $\\theta(t)$ ***")
-        plt.plot(timelist, hattheta[:, i], color=deep[1],
-                 linestyle="--", label="Transformed $\\hat{\\theta}(t)$")
         # plt.plot(timelist, hattheta_b[:, i], color=deep[2],
         #          linestyle="dotted", label="Transformed $\\hat{\\theta}(t)$ (bounded)")
         # plt.plot(timelist, hattheta_r[:, i], color=deep[4],
@@ -241,6 +245,10 @@ for i in range(len(theta[0, :])):
         #          linestyle.="dashdot", label="Transformed solution $\\hat{\\theta}(t)$ **")
         plt.plot(timelist, hattheta_expected[:, i], color=total_color,
                  linestyle="-", label="Expected $\\hat{\\theta}(t)$")
+        plt.plot(timelist, hattheta[:, i], color=deep[1],
+                 linestyle="--", label="Transformed $\\hat{\\theta}(t)$")
+        plt.plot(timelist, hattheta_kur[:, i], color=deep[2],
+                 linestyle="--", label="Kuramoto for these initial conditions$")
         # plt.plot(timelist, hattheta_expected_r[:, i], color=deep[9],
         #          linestyle="dashdot", label="Expected $\\hat{\\theta}(t)$ (real)")
         # plt.plot(timelist, hattheta_expected_b[:, i], color=deep[4],
@@ -250,13 +258,14 @@ for i in range(len(theta[0, :])):
     else:
         # plt.plot(timelist, theta[:, i], color=deep[0])
         # plt.plot(timelist, theta1[:, i], color=deep[3])
-        plt.plot(timelist, hattheta[:, i], color=deep[1], linestyle="--")
         # plt.plot(timelist, hattheta_b[:, i], color=deep[2], linestyle="dotted")
         # plt.plot(timelist, hattheta_r[:, i], color=deep[4], linestyle="dashdot")
         # plt.plot(timelist, hattheta_b2[:, i], color=deep[5], linestyle="dotted")
         # plt.plot(timelist, hattheta1[:, i], color=deep[3], linestyle="dotted")
         # plt.plot(timelist_bdf, hattheta2[:, i], color=deep[4], linestyle="dashdot")
         plt.plot(timelist, hattheta_expected[:, i], color=total_color, linestyle="-")
+        plt.plot(timelist, hattheta[:, i], color=deep[1], linestyle="--")
+        plt.plot(timelist, hattheta_kur[:, i], color=deep[2])           
         # plt.plot(timelist, hattheta_expected_r[:, i], color=deep[9], linestyle="dashdot")
         # plt.plot(timelist, hattheta_expected_b[:, i], color=deep[4], linestyle="dotted")
         # plt.plot(timelist, hattheta_expected_b2[:, i], color=deep[6], linestyle="dotted")
@@ -270,7 +279,7 @@ for i in range(len(theta[0, :])):
         plt.plot(vector_field_hattheta_expected[:, i], color=dark_grey, label="Expected $F(\\hat{\\theta}(t)$)")
         # plt.plot(time_derivative_theta[:, i], color=deep[0], label="d$\\theta(t)/$d$t$")
         # plt.plot(vector_field_theta[:, i], color=deep[9], linestyle="--", label="$F(\\theta(t))$")
-        plt.plot(time_derivative_hattheta[:, i], color=deep[4], label="d$\\hat{\\theta}(t)/$d$t$")
+        # plt.plot(time_derivative_hattheta[:, i], color=deep[4], label="d$\\hat{\\theta}(t)/$d$t$")
         plt.plot(vector_field_hattheta[:, i], color=deep[6], linestyle="--", label="$F(\\hat{\\theta}(t))$")
         # plt.plot(time_derivative_hattheta1[:, i], color=deep[2], linewidth=0.8, label="Derivative $\\hat{\\theta}$ *")
         # plt.plot(vector_field_hattheta1[:, i], color=deep[1], linestyle="dotted", label="$F(\\hat{\\theta})$ *")
@@ -282,7 +291,7 @@ for i in range(len(theta[0, :])):
         plt.plot(vector_field_hattheta_expected[:, i], color=dark_grey)
         # plt.plot(time_derivative_theta[:, i], color=deep[0])
         # plt.plot(vector_field_theta[:, i], color=deep[9], linestyle="--")
-        plt.plot(time_derivative_hattheta[:, i], color=deep[4])
+        # plt.plot(time_derivative_hattheta[:, i], color=deep[4])
         plt.plot(vector_field_hattheta[:, i], color=deep[6], linestyle="--")
         # plt.plot(time_derivative_hattheta1[:, i], linewidth=0.5, color=deep[2])
         # plt.plot(vector_field_hattheta1[:, i], color=deep[1], linestyle="dotted")
@@ -293,8 +302,8 @@ plt.xlabel("Timepoints")
 plt.legend(loc=1, frameon=True, fontsize=7)
 
 plt.subplot(234)
-plt.plot(np.real(U), np.imag(U), label="$U$")
-plt.plot(np.real(V), np.imag(V), label="$V$")
+# plt.plot(np.real(U), np.imag(U), label="$U$")
+# plt.plot(np.real(V), np.imag(V), label="$V$")
 plt.plot(np.real(Z1), np.imag(Z1), label="$Z$ from $U,V$", color=deep[0])
 # plt.plot(np.real(Z), np.imag(Z), label="$Z$", color=deep[1], linestyle="--")
 # plt.plot(np.real(Z2), np.imag(Z2), label="$Z$ *", color=deep[2], linestyle="dotted")
