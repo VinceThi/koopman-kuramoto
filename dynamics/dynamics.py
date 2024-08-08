@@ -8,6 +8,11 @@ def kuramoto_sakaguchi(t, theta, W, coupling, omega, alpha):
     return omega + coupling*(np.cos(theta+alpha)*(W@np.sin(theta)) - np.sin(theta+alpha)*(W@np.cos(theta)))
 
 
+def ricatti(t, z, theta, current_index, omega, coupling):
+    p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+    return p1 + 1j*omega*z - np.conj(p1)*z**2
+
+
 def complex_kuramoto_sakaguchi(t, z, W, coupling, D, alpha):
     return 1j*D@z + coupling/2*(W@z*np.exp(-1j*alpha) - (z**2)*(W@np.conj(z))*np.exp(1j*alpha))
 
