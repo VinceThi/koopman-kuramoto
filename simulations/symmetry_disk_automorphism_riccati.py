@@ -11,7 +11,7 @@ from dynamics.symmetries import disk_automorphism, determining_equations_disk_au
 plot_trajectories = True
 
 """ Graph parameters """
-N = 8
+N = 4
 W = np.ones((N, N))
 
 """ Dynamical parameters """
@@ -71,10 +71,10 @@ hattheta = np.array(hattheta)
 
 """ Transform initial condition with determining equations """
 # This gives the nonlinear action of the group through time on a given initial phase
-# dettheta = []
-# for i in range(len(timelist)):
-#     dettheta.append(np.angle(disk_automorphism(U[i], V[i], np.exp(1j*theta0))))
-# dettheta = np.array(dettheta)
+dettheta = []
+for i in range(len(timelist)):
+    dettheta.append(np.angle(disk_automorphism(U[i], V[i], np.exp(1j*theta0))))
+dettheta = np.array(dettheta)
 
 
 """ Integrate expected transformed trajectory of the --> Ricatti <-- equations """
@@ -97,20 +97,20 @@ plt.figure(figsize=(6, 6))
 plt.subplot(211)
 theta = theta % (2*np.pi)
 theta_ricatti = theta_ricatti % (2*np.pi)
-# dettheta = dettheta % (2*np.pi)
+dettheta = dettheta % (2*np.pi)
 for i in range(len(theta[0, :])):
     if i == 0:
         plt.plot(timelist, theta[:, i], color=reduced_grey, linewidth=2,
                  label="Kuramoto solution $\\theta_{\\mathrm{Kur}}(t)$")
         plt.plot(timelist, theta_ricatti[:, i], color=complete_grey, linestyle="--",
                  label="Equivalent Ricatti solution $\\theta_{\\mathrm{Ric}}(t)$")
-        # plt.plot(timelist, dettheta[:, i], color=deep[4], linestyle="--",
-        #          label="Determining solution $\\theta_{\\mathrm{Det}}(t)$")
+        plt.plot(timelist, dettheta[:, i], color=deep[4], linestyle="--",
+                 label="Determining solution $\\theta_{\\mathrm{Det}}(t)$")
 
     else:
         plt.plot(timelist, theta[:, i], linewidth=2, color=reduced_grey)
         plt.plot(timelist, theta_ricatti[:, i], color=complete_grey, linestyle="--")
-        # plt.plot(timelist, dettheta[:, i], color=deep[4], linestyle="--")
+        plt.plot(timelist, dettheta[:, i], color=deep[4], linestyle="--")
 plt.ylabel("Phase trajectory")
 plt.xlabel("Time $t$")
 plt.ylim([-0.2, 2*np.pi+0.2])
