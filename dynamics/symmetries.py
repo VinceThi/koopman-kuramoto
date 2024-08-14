@@ -64,6 +64,20 @@ def determining_equations_disk_automorphism(t, state, theta, current_index, omeg
     return np.array([dRdt, dPhidt, dYdt])
 
 
+# def determining_equations_disk_automorphism_2(t, state, theta, current_index, omega, coupling):
+#     R, Phi, Y = state
+#     assert R**2 - Y**2 + 1 > 0
+#     p0 = len(theta[0, :])*coupling/2
+#     p1 = coupling/2*np.sum(np.exp(1j*theta[current_index, :]))
+#     p2 = coupling/2*np.sum(np.exp(2*1j*theta[current_index, :]))
+#
+#     rho1, phi1 = np.abs(p1), np.angle(p1)
+#     dRdt = -2*rho1*Y*np.sin(Phi - phi1)
+#     dPhidt = omega - 2*rho1*Y/R*np.cos(Phi - phi1)
+#     dYdt = -2*rho1*R*np.sin(Phi - phi1)
+#     return np.array([dRdt, dPhidt, dYdt])
+
+
 # def determining_equations_disk_automorphism_na(t, state, W, omega, coupling):
 #     N = len(W[0])
 #     theta = state[:N]
