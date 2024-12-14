@@ -9,13 +9,13 @@ TotalDegree = 1;
 NbNodes = 3;
 AMat = Array[B, {NbNodes, NbNodes}];
 pBounds = {0, 1};
-determiningresult = GetDeterminingEquations[AMat, TotalDegree, NbNodes, pBounds];
+determiningresult = getDeterminingEquations[AMat, TotalDegree, NbNodes, pBounds];
 DetEqS = determiningresult[[1]];
 DetEqR = determiningresult[[2]];
 pSub = determiningresult[[3]];
 nbNodes = determiningresult[[4]];
 
-matrixresult = GetDeterminingMatrices[DetEqS, DetEqR, pSub, nbNodes];
+matrixresult = getDeterminingMatrices[DetEqS, DetEqR, pSub, nbNodes];
 DetMatrix = matrixresult[[3]];
 
 L0eigenvector = Transpose[{{0, 0, 1, 0, 1, 0, 1, 0, 0}}];
