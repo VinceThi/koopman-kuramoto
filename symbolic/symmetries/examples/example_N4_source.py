@@ -2,7 +2,7 @@ import numpy as np
 import json
 from plots.config_rcparams import *
 
-""" Import determining matrix """
+""" Import determining matrix generated with Mathematica """
 path = "C:/Users/thivi/Documents/GitHub/koopman-kuramoto/symbolic/symmetries/determining_matrices/"
 with open(path+"ReImDetMatrix_N4_d1_pm1_2.json", "r") as file:
     json_data = json.load(file)

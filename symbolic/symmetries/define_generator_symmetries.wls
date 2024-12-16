@@ -38,10 +38,15 @@ nbNodes = 4;
 totalDegree = 1;
 boundaries = {-1, 2};
 (*Amat = Array[A, {nbNodes, nbNodes}];*)
-A4 ={{I/2,0, 0, 0},
+(*A4 ={{I/2,0, 0, 0},
         {1,I/2,0, 0},
         {1,0, I/2,0},
-        {1,0,0,I/2}};
+        {1,0,0,I/2}};*)
+A4={{I/4,0, 0, 0},
+       {0.3Exp[0.1I],I/2,0, 0},
+       {0.1Exp[0.2I],0, I,0},
+       {0.5Exp[0.3I],0,0,2I}};        
+       
 pSub = generateLexicoTuples[totalDegree, nbNodes, boundaries];
 ordCoeffs = generateCoefficients[nbNodes, pSub];
 l0Array = generatorArray[boundaries, ordCoeffs, l0Coefficients, nbNodes]
