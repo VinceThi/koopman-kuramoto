@@ -4,14 +4,14 @@
 (* Import the function from the external file *)
 Get["C:\\Users\\thivi\\Documents\\GitHub\\koopman-kuramoto\\symbolic\\symmetries\\get_determining_equations.wls"];
 
-(* One must firt compile get_determining_equations.wls to have the functions in the global context *)
+(* One must first compile get_determining_equations.wls to have the functions in the global context *)
 
 totalDegree=1;
 nbNodes=4;
-AMat={{I/2,0, 0, 0},
-        {1, I/2,0, 0},
-        {1,0, I/2,0},
-        {1,0,0,I/2}};
+AMat={{I/2, 0, 0, 0},
+       {1, I/2, 0, 0},
+       {1, 0, I/2, 0},
+       {1, 0, 0, I/2}};
 pBounds={-1, 2};
 determiningResult=getDeterminingEquations[AMat,totalDegree,nbNodes,pBounds];
 detEqS=determiningResult[[1]];
