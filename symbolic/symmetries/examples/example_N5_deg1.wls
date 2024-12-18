@@ -13,11 +13,12 @@ nbNodes=5;
       {0.1Exp[0.2I], 0, I, 0, 0},
       {0.5Exp[0.3I], 0, 0, 2I, 1},
       {0, 0, 0, 1, 3I}};*)
-  AMat={{I, 1, 1, 0, 0},
-        {0, 2I, 0, 1, 0},
-        {0, 0, 3I, 0, 1},
-        {0, 0, 0, 4I, 0},
-        {0, 0, 0, 0, 5I}};   
+  AMat={{I, 0, 0, 0, 0},
+        {0, I/2, 0, Exp[I], 2.0 Exp[2I]},
+        {Exp[I/2]/2, 0, I/4, 0, 0},
+        {2.0 Exp[I], 0, 0, I, 0},
+        {0, 0, 0, 0, I}};
+          
       
 pBounds={-1, 2};
 determiningResult=getDeterminingEquations[AMat,totalDegree,nbNodes,pBounds];
@@ -46,11 +47,12 @@ singVals := SingularValueList[N[detMatrix]];  (* DetMatrix for symbolic and N[De
 Print[singVals]
 Print["There are ", Length[nonZeroCoeffs] - Length[singVals], " zero singular value(s)."]
 
-(* Singular vectors for AMat={{I/4,0, 0, 0},{0.3Exp[0.1I],I/2,0, 0},{0.1Exp[0.2I],0, I,0},{0.5Exp[0.3I],0,0,2I}}*)
-
-
-
-
+(*Singular vectors for   AMat={{I, 0, 0, 0, 0}, 
+                               {0, I/2, 0, Exp[I], 2.0 Exp[2I]},
+                               {Exp[I/2]/2, 0, I/4, 0, 0},
+                               {2.0 Exp[I], 0, 0, I, 0},
+                               {0, 0, 0, 0, I}};    *)
+                         
 
 
 
