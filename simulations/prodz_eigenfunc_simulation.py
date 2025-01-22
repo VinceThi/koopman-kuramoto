@@ -8,17 +8,23 @@ from dynamics.integrate import integrate_dopri45
 
 
 # set dynamical parameters
-N = 3
+N = 5
 ones_vec = np.ones((N, 1))
-w_coeffs = np.array([[1., 1., 1.]])
-w_matrix = ones_vec @ w_coeffs
-np.fill_diagonal(w_matrix, 0)
-print(w_matrix)
-omega = np.array([1] * N)
+w_coeffs = np.array([[1., 1., 1., 1., 1.]])
+# w_matrix = ones_vec @ w_coeffs
+# np.fill_diagonal(w_matrix, 0)
+# print(w_matrix)
+w_matrix = np.array([[0, 1, 1, 1, 1],
+                     [1, 0, 1, 1, 1],
+                     [1, 1, 0, 1, 1],
+                     [1, 1, 1, 0, 1],
+                     [1, 1, 1, 1, 0]])
+omega = np.array([1, 2, 1, 4, 1])
 coupling = 0.5
 alpha = 0
 
 # integrate the dynamics
+np.random.seed(0)
 x0 = 2*np.pi*np.random.random(N)
 print(x0)
 t0, t1, dt = 0, 15, 0.001
@@ -30,7 +36,7 @@ solution = solve_ivp(kuramoto_sakaguchi, (t0, t1), x0, method='DOP853', args=arg
 print('success', solution.success)
 theta = solution.y.T
 
-k1 = 1/(np.sum(w_coeffs))
+k1 = 1#/np.sum(w_coeffs)
 # k2 = 2
 mu1 = k1 * w_coeffs
 # mu2 = k2 * w_coeffs
@@ -39,10 +45,11 @@ eigenfunc1 = mu1 @ theta.T
 
 plt.figure()
 for j in range(0, N):
-    plt.plot(time, (theta[:, j]) % (2*np.pi), linewidth=0.5)
-plt.plot(time, eigenfunc1[0] % (2*np.pi), linewidth=1, label='eigenfunc1')
-plt.plot(time, (eigenfunc1[0] + 2*np.pi/3) % (2*np.pi), linewidth=1, label='eigenfunc2')
-plt.plot(time, (eigenfunc1[0] + 2*np.pi*2/3) % (2*np.pi), linewidth=1, label='eigenfunc3')
+    plt.plot(time, (theta[:, j]) % (2*np.pi), linewidth=0.5, label=f"osc {j}")
+# plt.plot(time, eigenfunc1[0] % (2*np.pi), linewidth=1, label='eigenfunc1')
+# plt.plot(time, (eigenfunc1[0][0] + np.dot(omega, k1*w_coeffs[0]) * time) % (2*np.pi), linewidth=1, label='e^lambda t')
+# plt.plot(time, (eigenfunc1[0] + 2*np.pi/3) % (2*np.pi), linewidth=1, label='eigenfunc2')
+# plt.plot(time, (eigenfunc1[0] + 2*np.pi*2/3) % (2*np.pi), linewidth=1, label='eigenfunc3')
 # plt.plot(time, (2*eigenfunc2[0]/(k2*np.sum(w_coeffs))) % (2*np.pi), linewidth=1, label='eigenfunc')
 ylab = plt.ylabel('$\\theta_j$', labelpad=20)
 ylab.set_rotation(0)
