@@ -3,9 +3,10 @@
 
 (* ::Input:: *)
 (*(*ClearAll["Global`*"];*)*)
-(*Get["C:\\Users\\thivi\\Documents\\GitHub\\koopman-kuramoto\\symbolic\\symmetries\\define_generator_symmetries.wls"];*)
+(*Get["C:\\Users\\thivi\\Documents\\GitHub\\koopman-kuramoto\\symbolic\\symmetries\\get_symmetry_generator.wls"];*)
 (**)
-(*(*Expose generateLexicoTuples to the Global context*)Global`generateLexicoTuples=generateLexicoTuples;*)
+(*(*Expose generateLexicoTuples to the Global context*)*)
+(*Global`generateLexicoTuples=generateLexicoTuples;*)
 (**)
 (*(* Note: c is a global variable *)*)
 (**)
