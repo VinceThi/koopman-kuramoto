@@ -40,6 +40,8 @@ def integrate_dopri45(t0, t1, dt, dynamics, init_cond, *args):
 
 
 def integrate_rk4_non_autonomous(t0, t1, dt, dynamics, init_cond, non_autonomous_term, *args):
+    """ For nonautonomous dynamics where the explicit time-dependence is unknown, but the associated
+            time series (non_autonomous_term) is known. """
     f = dynamics
     tvec = np.arange(t0, t1, dt)
     sol = [init_cond]
@@ -53,6 +55,8 @@ def integrate_rk4_non_autonomous(t0, t1, dt, dynamics, init_cond, non_autonomous
 
 
 def integrate_dopri45_non_autonomous(t0, t1, dt, dynamics, init_cond, non_autonomous_term, *args):
+    """ For nonautonomous dynamics where the explicit time-dependence is unknown, but the associated
+        time series (non_autonomous_term) is known. """
     f = dynamics
     tvec = np.arange(t0, t1, dt)
     sol = [init_cond]
