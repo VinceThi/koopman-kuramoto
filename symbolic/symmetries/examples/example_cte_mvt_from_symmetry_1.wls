@@ -1,6 +1,8 @@
 #!/usr/bin/env wolframscript
 (* ::Package:: *)
 
+(* Example of the directed star *)
+
 f1[z1_] = I w1 z1; (* w1 neq w + 2 y *)
 f2[z1_, z2_] = I w z2 + (x + I y) z1 - (x - I y) z2^2/z1;
 f3[z1_, z3_] = I w z3 + (x + I y) z1 - (x - I y) z3^2/z1;
