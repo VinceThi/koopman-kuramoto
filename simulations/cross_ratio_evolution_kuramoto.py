@@ -19,19 +19,24 @@ timelist = np.linspace(t0, t1, int(t1 / dt))
 """ Graph parameters """
 graph_str = "motif"
 
-# Directed star (core to periphery
+# Directed star (periphery to core)
 # W = np.array([[0, 1, 1, 1, 1],
 #               [0, 0, 0, 0, 0],
 #               [0, 0, 0, 0, 0],
 #               [0, 0, 0, 0, 0],
 #               [0, 0, 0, 0, 0]])
 
-# Directed star (periphery to core)
+# Directed star (core to periphery)
 # W = np.array([[0, 0, 0, 0, 0],
 #               [1, 0, 0, 0, 0],
 #               [1, 0, 0, 0, 0],
 #               [1, 0, 0, 0, 0],
 #               [1, 0, 0, 0, 0]])
+w = 1
+W = np.array([[0, 0, 0, 0],
+              [w, 0, 0, 0],
+              [w, 0, 0, 0],
+              [w, 0, 0, 0]])
 
 # Undirected star
 # W = np.array([[0, 1, 1, 1, 1],
@@ -44,11 +49,11 @@ graph_str = "motif"
 # W = np.ones((5, 5))
 
 # Other motif
-W = np.array([[0, 1, 1, 1, 1],
-              [1, 0, 1, 0, 1],
-              [1, 0, 1, 0, 1],
-              [1, 0, 1, 0, 1],
-              [1, 0, 1, 0, 1]])
+# W = np.array([[0, 1, 1, 1, 1],
+#               [1, 0, 1, 0, 1],
+#               [1, 0, 1, 0, 1],
+#               [1, 0, 1, 0, 1],
+#               [1, 0, 1, 0, 1]])
 
 # Directed star in network (periphery to core)
 # W = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -85,13 +90,13 @@ N = len(W[0])
 
 """ Dynamical parameters """
 dynamics_str = "kuramoto_sakaguchi"
-omega = np.array([0.5, 1, 1, 1, 1])
 coupling = 0.5/5
-alpha = 0
+alpha = np.pi/3
+As = (coupling/2)*w*np.exp(-1j*alpha)
+omega = np.array([1 + 2*np.imag(As), 1, 1, 1])
 
 """ Integration """
 theta0 = 2*np.pi*np.random.random(N)
-
 args_dynamics = (W, coupling, omega, alpha)
 x = np.array(integrate_dopri45(t0, t1, dt, kuramoto_sakaguchi, theta0, *args_dynamics))
 
@@ -101,9 +106,10 @@ plt.subplot(111)
 for j in range(0, N):
     plt.plot(timelist, x[:, j] % (2*np.pi), color=first_community_color,
              linewidth=0.3)
-plt.plot(timelist, log_cross_ratio_theta(theta0[1], theta0[2], theta0[3], theta0[4])*np.ones(len(timelist)),
-         label="Log cross-ratio $log(c_{2345})$")
-plt.plot(timelist, log_cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))
+# plt.plot(timelist, log_cross_ratio_theta(theta0[1], theta0[2], theta0[3], theta0[4])*np.ones(len(timelist)),
+#          label="Log cross-ratio $log(c_{2345})$")
+# plt.plot(timelist, log_cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))
+plt.plot(timelist, log_cross_ratio_theta(x[:, 0], x[:, 1], x[:, 2], x[:, 3]))
 # plt.plot(timelist, cross_ratio_theta(theta0[1], theta0[2], theta0[3], theta0[4])*np.ones(len(timelist)))
 # plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))  # label="Cross-ratio $c_{2345}$")
 #          label="Cross-ratio $log(c_{2345})$")
