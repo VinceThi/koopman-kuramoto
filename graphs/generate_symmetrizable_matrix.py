@@ -2,6 +2,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+""" This script was used to generate one motifs supporting a monomial eigenfunction for Fig.2 of 
+Kuramoto meets Koopman """
 
 adjacency_matrix = np.array([
     [0, 2, 0.5, 0, 0, 0, 0, 0, 0, 0],
