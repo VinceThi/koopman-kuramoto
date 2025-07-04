@@ -4,6 +4,14 @@
 import numpy as np
 
 
+def kuramoto(t, theta, W, coupling, omega, alpha):
+    """ This is the general Kuramoto dynamics defined in Thibeault et al., Kuramoto meets Koopman:..., 2025. """
+    C = coupling*W*np.cos(alpha)
+    S = coupling*W*np.sin(alpha)
+    return omega + np.cos(theta)*(C@np.sin(theta)) - np.sin(theta)*(C@np.cos(theta)) \
+        - np.sin(theta)*(S@np.sin(theta)) - np.cos(theta)*(S@np.cos(theta))
+
+
 def kuramoto_sakaguchi(t, theta, W, coupling, omega, alpha):
     return omega + coupling*(np.cos(theta+alpha)*(W@np.sin(theta)) - np.sin(theta+alpha)*(W@np.cos(theta)))
 

@@ -1,0 +1,1 @@
+The scripts in this folder are exploratory and are meant to look for polynomial eigenfunctions in the Kuramoto model.

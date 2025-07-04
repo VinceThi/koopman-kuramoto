@@ -1,6 +1,12 @@
 import numpy as np
 
 
+""" 
+This script contains useful functions to use Matone's formula and to define the determining equations 
+along with the symmetry transformations.
+"""
+
+
 def nu_function(X):
     if X > 1 or X < -1:
         Gamma = np.sqrt(X**2 - 1)

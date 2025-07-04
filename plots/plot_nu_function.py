@@ -6,9 +6,9 @@ X = np.linspace(-2, 2, 1000)
 nu_list = []
 nup_list = []
 for i in X:
-    nu_list.append(nu_function(i))
+    nu_list.append(nu_function(1/i))
     nup_list.append(nu_derivative(i))
-print(nup_list)
+print(nu_list)
 nu_list[499] = np.nan
 
 plt.figure(figsize=(6, 3))
