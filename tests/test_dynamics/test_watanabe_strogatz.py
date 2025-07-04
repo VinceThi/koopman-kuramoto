@@ -2,7 +2,6 @@ import numpy as np
 from dynamics.integrate import integrate_dopri45
 from dynamics.dynamics import kuramoto_sakaguchi
 from dynamics.watanabe_strogatz import ws_equations_kuramoto, ws_transformation
-from dynamics.symmetries import symmetry_generator_coefficients
 from dynamics.ws_initial_conditions import get_watanabe_strogatz_initial_conditions
 from plots.config_rcparams import *
 import pytest

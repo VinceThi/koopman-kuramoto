@@ -167,16 +167,20 @@ def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable
     return alpha
 
 
-# def random_gaussian_frequencies_pintegrable(m, sizes, calA):
-#     q = len(sizes)  # Number of parts m + c + 1
-#     N = np.sum(sizes)
-#     row_blocks = []
-#     for nu in range(q):
-#         if nu < m or nu > q - m - 2 # TODO TODOOOOOO à recalculer:
-#             row_blocks.append(np.random.normal((1, sizes[nu])))
-#         else:
-#             # TODO else condition 2.3 du théorème 2
-#     return 1  # TODO
+def random_gaussian_frequencies_pintegrable(m, sizes, calA, mean, std):
+    q = len(sizes)  # Number of parts m + c + 1
+    N = np.sum(sizes)
+    reference_frequencies = np.random.normal(mean, std, (1, q - m - 1))
+    row_blocks = []
+    for nu in range(q):
+        if nu < m or nu > q - 2:
+            row_blocks.append(np.random.normal(mean, std, (1, sizes[nu])))
+        else:
+            omega_list = []
+            for j in sizes[nu]:
+                omega_list.append(reference_frequencies[nu - m] + 2 * np.imag(calA[nu, j] - calA[nu, 0 TODO])) # TODO
+            row_blocks.append(omega_list)  # TODO
+    return np.concatenate(row_blocks, axis=1)
 
 
 if __name__ == "__main__":
