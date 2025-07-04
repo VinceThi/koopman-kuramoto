@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 # from plots.config_rcparams import *
 
 
+""" See Table 1 in the paper: Partially integrable random graph of Kuramoto oscillators """
+
+# --------------------------------- Monomial part ----------------------------------------------------------------------
 def monomial_exponent_matrix(sizes_monomial, random_exponents):
     """
 
@@ -24,9 +27,9 @@ def monomial_exponent_matrix(sizes_monomial, random_exponents):
 
 def diagonal_exponent_matrix(sizes_monomial, random_exponents):
     """
-    :param U = (mu_1  ... mu_m) is a Nxm array where mu_tau is a Nx1 array of the tau-th monomial exponent with
-           non-zero real elements. It must be a block diagonal matrix with blocks of sizes d_tau times 1 where
-           d_tau is the number of vertices involved in the tau-th monomial
+    :param sizes_monomial: a list with the size d_tau of each part of vertices admitting monomial eigenfunctions
+    :param random_exponents: -->positive<-- matrix of size N x m
+                             with the desired exponents (i.e., it must not contain zeros)
     :return: D: the diagonal matrix diag(mu_{1,1}, ..., mu_{1,d_1}, mu_{2,d_1+1}, ..., mu_{2,d_1+d_2}, ..., mu_md_m)
     """
     U = monomial_exponent_matrix(sizes_monomial, random_exponents)
@@ -40,7 +43,7 @@ def symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_list, 
     :param probabilities_list: list of size len(sizes_monomials) with the connection probabilities between the vertices
            within each monomial part.
     :param weight_matrix: weight matrix of size sum_tau d_tau x sum_tau d_tau of a connected graph (in order to have
-           one monomial for each parts)
+           one monomial for each part)
     :return: sum_tau d_tau x N random block symmetric matrix concatenated with a zero block for the connections within
              the monomial parts
     """
@@ -69,6 +72,8 @@ def skew_symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_l
     return np.concatenate([skewsym_beta, np.zeros((np.sum(sizes_monomial), N - np.sum(sizes_monomial)))], axis=1)
 
 
+
+# --------------------------------- Cross-ratio part -------------------------------------------------------------------
 def membership_crossratio_matrix(sizes_crossratio):
     """ The size of the motifs admitting conserved cross-ratios must be greater than or equal to 4. """
     if not np.all(np.array(sizes_crossratio) >= 4*np.ones(len(sizes_crossratio))):
@@ -108,9 +113,9 @@ def crossratio_phaselag_matrix(probabilities_matrix, sizes, weight_matrix):
     :param probabilities_matrix: size c x (m + c + 1), it contains the probabilities of having phase lags between the
            oscillator's motifs admitting conserved cross-ratios and the monomial, themselves and the non-integrable part
     :param sizes = [d1, ... , dm, n1, ... , nc, p], the size of each part of the partition, n_gamma >= 4 for all gamma
-                     monomials,   cross-ratios, non integrable
+                      monomials,  cross-ratios, non integrable
     :param weight_matrix: phase lag matrix of size c times N with weights within ]-pi/2, pi/2[
-    :return: c x N matrix equal to C^T in the paper
+    :return: c x N matrix equal to chi^T in the paper
     """
     if np.any(np.abs(weight_matrix) >= np.pi / 2):
         raise ValueError("The phase-lags between the oscillators must be within ]-pi/2, pi/2[")
@@ -129,6 +134,18 @@ def crossratio_phaselag_matrix(probabilities_matrix, sizes, weight_matrix):
     return block_matrix*weight_matrix
 
 
+def calA(sigma, weight_matrix, phaselag_matrix):
+    """
+    :param sigma: global coupling strength
+    :param weight_matrix: Nxc weight matrix (result from crossratio_weight_matrix)
+    :param phaselag_matrix: Nxc phase lag matrix (result from crossratio_phaselag_matrix)
+
+    :return calA from the paper, cxN complex matrix appearing in the partial integration of the cross-ratio parts
+    """
+    return sigma/2*weight_matrix*np.exp(1j*phaselag_matrix)
+
+
+# --------------------------------- Non-integrable part ----------------------------------------------------------------
 def nonintegrable_weight_matrix(probabilities_list, sizes, weight_matrix):
     p = sizes[-1]  # Number of vertices in the nonintegrable part
     q = len(sizes)  # Number of parts m + c + 1
@@ -138,6 +155,8 @@ def nonintegrable_weight_matrix(probabilities_list, sizes, weight_matrix):
     return np.block(row_blocks)*weight_matrix
 
 
+
+# --------------------------------- Gathering parts --------------------------------------------------------------------
 def random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
                          probabilities_monomial, probabilities_crossratio, probabilities_nonintegrable,
                          weights_monomial, weights_crossratio, weights_nonintegrable):
@@ -170,17 +189,22 @@ def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable
 def random_gaussian_frequencies_pintegrable(m, sizes, calA, mean, std):
     q = len(sizes)  # Number of parts m + c + 1
     N = np.sum(sizes)
+    nm = np.sum(sizes[:m])  # Number of nodes in monomial parts
     reference_frequencies = np.random.normal(mean, std, (1, q - m - 1))
     row_blocks = []
+    increment = 0
     for nu in range(q):
         if nu < m or nu > q - 2:
             row_blocks.append(np.random.normal(mean, std, (1, sizes[nu])))
         else:
             omega_list = []
-            for j in sizes[nu]:
-                omega_list.append(reference_frequencies[nu - m] + 2 * np.imag(calA[nu, j] - calA[nu, 0 TODO])) # TODO
-            row_blocks.append(omega_list)  # TODO
-    return np.concatenate(row_blocks, axis=1)
+            ell_nu = nm + increment  # Reference oscillator label with the cross-ratio part
+            for i in range(sizes[nu]):
+                j = ell_nu + i
+                omega_list.append(reference_frequencies[nu - m] + 2*np.imag(calA[nu, j] - calA[nu, ell_nu]))
+            row_blocks.append(omega_list)
+            increment += sizes[nu]
+    return np.concatenate(row_blocks, axis=1)  # TODO TO TEST !!!
 
 
 if __name__ == "__main__":
