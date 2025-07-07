@@ -49,6 +49,7 @@ def symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_list, 
     """
     blocks = [(np.random.rand(d_tau, d_tau) < p_tau).astype(int)
               for d_tau, p_tau in zip(sizes_monomial, probabilities_list)]
+    print(np.shape(block_diag(*blocks)), np.shape(weight_matrix))
     B = block_diag(*blocks)*weight_matrix
     symB = B + B.T
     return np.concatenate([symB, np.zeros((np.sum(sizes_monomial), N - np.sum(sizes_monomial)))], axis=1)
@@ -186,11 +187,11 @@ def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable
     return alpha
 
 
-def random_gaussian_frequencies_pintegrable(m, sizes, calA, mean, std):
+def random_gaussian_frequencies_pintegrable(c, sizes, calA, mean, std):
     q = len(sizes)  # Number of parts m + c + 1
-    N = np.sum(sizes)
+    m = q - c - 1   # Number of monomial parts
     nm = np.sum(sizes[:m])  # Number of nodes in monomial parts
-    reference_frequencies = np.random.normal(mean, std, (1, q - m - 1))
+    reference_frequencies = np.random.normal(mean, std, (1, q - m - 1))[0]
     row_blocks = []
     increment = 0
     for nu in range(q):
@@ -198,13 +199,15 @@ def random_gaussian_frequencies_pintegrable(m, sizes, calA, mean, std):
             row_blocks.append(np.random.normal(mean, std, (1, sizes[nu])))
         else:
             omega_list = []
-            ell_nu = nm + increment  # Reference oscillator label with the cross-ratio part
+            gamma = nu - m
+            ell_gamma = nm + increment  # Reference oscillator label with the cross-ratio part
             for i in range(sizes[nu]):
-                j = ell_nu + i
-                omega_list.append(reference_frequencies[nu - m] + 2*np.imag(calA[nu, j] - calA[nu, ell_nu]))
-            row_blocks.append(omega_list)
+                j = ell_gamma + i
+                # print(gamma, len(reference_frequencies[gamma]))
+                omega_list.append(reference_frequencies[gamma] + 2*np.imag(calA[gamma, j] - calA[gamma, ell_gamma]))
+            row_blocks.append(np.array([omega_list]))
             increment += sizes[nu]
-    return np.concatenate(row_blocks, axis=1)  # TODO TO TEST !!!
+    return np.concatenate(row_blocks, axis=1)[0]  # TODO TO TEST !!!
 
 
 if __name__ == "__main__":
@@ -215,6 +218,9 @@ if __name__ == "__main__":
     q = len(sizes)  # Number of parts
     N = sum(sizes)
     random_exponents = np.random.normal(1, 0.5, (sum(sizes_monomial), len(sizes_monomial))) + 1
+
+    m = len(sizes_monomial)
+    c = len(sizes_crossratio)
 
     probabilities_monomial = [1, 1, 0.9]
     probabilities_crossratio = [[1, 0.5, 0.2, 0.7, 0.2, 0.5],
@@ -238,8 +244,11 @@ if __name__ == "__main__":
     alpha = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
                                     probabilities_monomial2, probabilities_crossratio2, probabilities_nonintegrable2,
                                     phaselags_monomial, phaselags_crossratio, phaselags_nonintegrable)
+    cal_A = calA(1, weights_crossratio, phaselags_crossratio)
 
-    plot_eigenvalues = True
+    print(random_gaussian_frequencies_pintegrable(c, sizes, cal_A, 1, 1))
+
+    plot_eigenvalues = False
 
     plt.figure(figsize=(9, 4))
     ax1 = plt.subplot(121)
