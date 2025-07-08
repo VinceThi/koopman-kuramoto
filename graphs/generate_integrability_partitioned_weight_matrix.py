@@ -13,16 +13,19 @@ import matplotlib.pyplot as plt
 def monomial_exponent_matrix(sizes_monomial, random_exponents):
     """
 
-    :param sizes_monomials: a list with the size d_tau of each part of vertices admitting monomial eigenfunctions
+    :param sizes_monomial: a list with the size d_tau of each part of vertices admitting monomial eigenfunctions
     :param random_exponents: -->positive<-- matrix of size N x m
                              with the desired exponents (i.e., it must not contain zeros)
     :return: U := (mu_1  ... mu_m) is a sum_tau d_tau x m array where mu_tau is a sum_tau d_tau x 1 array of
              the tau-th monomial exponent with non-zero real elements. It is a block diagonal matrix with blocks
               of sizes d_tau times 1. Note that it differs from the paper where U is of size N x m
+              It also must be of rank m
     """
     blocks = [np.ones((d_tau, 1)) for d_tau in sizes_monomial]
     U_binary = block_diag(*blocks)
-    return U_binary*random_exponents
+    U = U_binary*random_exponents
+    assert (np.linalg.matrix_rank(U) - len(sizes_monomial)) < 1e-10
+    return U
 
 
 def diagonal_exponent_matrix(sizes_monomial, random_exponents):
@@ -49,10 +52,10 @@ def symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_list, 
     """
     blocks = [(np.random.rand(d_tau, d_tau) < p_tau).astype(int)
               for d_tau, p_tau in zip(sizes_monomial, probabilities_list)]
-    print(np.shape(block_diag(*blocks)), np.shape(weight_matrix))
     B = block_diag(*blocks)*weight_matrix
     symB = B + B.T
-    return np.concatenate([symB, np.zeros((np.sum(sizes_monomial), N - np.sum(sizes_monomial)))], axis=1)
+    Nm = np.sum(sizes_monomial, dtype=int)  # Number of vertices in monomial parts
+    return np.concatenate([symB, np.zeros((Nm, N - Nm))], axis=1)
 
 
 def skew_symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_list, weight_matrix):
@@ -68,17 +71,20 @@ def skew_symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_l
         raise ValueError("The phase-lags between the oscillators must be within ]-pi/2, pi/2[")
     blocks = [(np.random.rand(d_tau, d_tau) < p_tau).astype(int)
               for d_tau, p_tau in zip(sizes_monomial, probabilities_list)]
-    beta = block_diag(*blocks)
-    skewsym_beta = (beta - beta.T)*weight_matrix
+    beta = block_diag(*blocks)*weight_matrix
+    skewsym_beta = beta - beta.T
     return np.concatenate([skewsym_beta, np.zeros((np.sum(sizes_monomial), N - np.sum(sizes_monomial)))], axis=1)
 
 
 
 # --------------------------------- Cross-ratio part -------------------------------------------------------------------
 def membership_crossratio_matrix(sizes_crossratio):
-    """ The size of the motifs admitting conserved cross-ratios must be greater than or equal to 4. """
+    """ sizes_crossratio: Sizes of the motifs admitting conserved cross-ratios,
+                        each element must be greater than or equal to 4
+    """
     if not np.all(np.array(sizes_crossratio) >= 4*np.ones(len(sizes_crossratio))):
-        raise ValueError("The size of the motifs admitting conserved cross-ratios must be greater than or equal to 4.")
+        raise ValueError("The size of the motifs admitting conserved cross-ratios"
+                         " must be greater than or equal to 4.")
     blocks = [np.ones((n_gamma, 1)) for n_gamma in sizes_crossratio]
     return block_diag(*blocks)
 
@@ -158,31 +164,61 @@ def nonintegrable_weight_matrix(probabilities_list, sizes, weight_matrix):
 
 
 # --------------------------------- Gathering parts --------------------------------------------------------------------
-def random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
-                         probabilities_monomial, probabilities_crossratio, probabilities_nonintegrable,
-                         weights_monomial, weights_crossratio, weights_nonintegrable):
+def random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents=None,
+                         probabilities=None, weights=None):
+    """
+    random_exponents: array of shape (sum(sizes_monomial), len(sizes_monomial)) to use in the function
+                      diagonal_exponent_matrix
+    probabilities: dictionary such that {"monomial":list of len(sizes_monomial) probabilities,
+                   "crossratio":list of probabilities of size len(sizes_crossratio) x total number of parts
+                   (equal to len(sizes_monomial) + len(sizes_crossratio) + len(sizes_nonintegrable)),
+                   "nonintegrable":list of probabilities of size total number of parts}
+    weights: dictionary such that {"monomial":real array with shape (sum(sizes_monomial), sum(sizes_monomial)),
+             "crossratio": real array with shape (len(sizes_crossratio), N),
+             "nonintegrable": real array with shape (size_nonintegrable[0], N)}
+    The values of the dictionaries must satisfy specific constraints based on the previously defined functions.
+
+    See the example at the end of this script to better understand how to use the function.
+    """
+    probabilities = probabilities or {}  # if probabilities is None, return {}
+    weights = weights or {}  # if weights is None, return {}
     sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable])
-    N = sum(sizes)
-    D = diagonal_exponent_matrix(sizes_monomial, random_exponents)
-    S = symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_monomial, weights_monomial)
-    M = membership_crossratio_matrix(sizes_crossratio)
-    C = crossratio_weight_matrix(probabilities_crossratio, sizes, weights_crossratio)
-    G = nonintegrable_weight_matrix(probabilities_nonintegrable, sizes, weights_nonintegrable)
-    W = np.concatenate([np.linalg.inv(D)@S, M@C, G])
+    N = np.sum(sizes, dtype=int)
+    blocks = []
+    if len(sizes_monomial) > 0:
+        D = diagonal_exponent_matrix(sizes_monomial, random_exponents)
+        S = symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities.get("monomial"),
+                                                 weights.get("monomial"))
+        blocks.append(np.linalg.inv(D)@S)
+    if len(sizes_crossratio) > 0:
+        M = membership_crossratio_matrix(sizes_crossratio)
+        C = crossratio_weight_matrix(probabilities.get("crossratio"), sizes, weights.get("crossratio"))
+        blocks.append(M@C)
+    if len(size_nonintegrable) > 0:
+        G = nonintegrable_weight_matrix(probabilities.get("nonintegrable"), sizes, weights.get("nonintegrable"))
+        blocks.append(G)
+    W = np.concatenate(blocks)
     np.fill_diagonal(W, 0)
     return W
 
 
-def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
-                            probabilities_monomial, probabilities_crossratio, probabilities_nonintegrable,
-                            phaselags_monomial, phaselags_crossratio, phaselags_nonintegrable):
+def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, probabilities=None, phaselags=None):
+    """ See documentation of random_weight_matrix and the example at the end of this script. """
     sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable])
     N = sum(sizes)
-    kappa = skew_symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities_monomial, phaselags_monomial)
-    M = membership_crossratio_matrix(sizes_crossratio)
-    chi = crossratio_weight_matrix(probabilities_crossratio, sizes, phaselags_crossratio)
-    g = nonintegrable_weight_matrix(probabilities_nonintegrable, sizes, phaselags_nonintegrable)
-    alpha = np.concatenate([kappa, M@chi, g])
+    block = []
+    if len(sizes_monomial) > 0:
+        kappa = skew_symmetric_concatenated_random_matrix(N, sizes_monomial, probabilities.get("monomial"),
+                                                          phaselags.get("monomial"))
+        block.append(kappa)
+    if len(sizes_crossratio) > 0:
+        M = membership_crossratio_matrix(sizes_crossratio)
+        chi = crossratio_weight_matrix(probabilities.get("crossratio"), sizes, phaselags.get("crossratio"))
+        block.append(M@chi)
+    if len(size_nonintegrable) > 0:
+        g = nonintegrable_weight_matrix(probabilities.get("nonintegrable"), sizes, phaselags.get("nonintegrable"))
+        block.append(g)
+    alpha = np.concatenate(block)
     np.fill_diagonal(alpha, 0)
     return alpha
 
@@ -203,7 +239,6 @@ def random_gaussian_frequencies_pintegrable(c, sizes, calA, mean, std):
             ell_gamma = nm + increment  # Reference oscillator label with the cross-ratio part
             for i in range(sizes[nu]):
                 j = ell_gamma + i
-                # print(gamma, len(reference_frequencies[gamma]))
                 omega_list.append(reference_frequencies[gamma] + 2*np.imag(calA[gamma, j] - calA[gamma, ell_gamma]))
             row_blocks.append(np.array([omega_list]))
             increment += sizes[nu]
@@ -226,24 +261,30 @@ if __name__ == "__main__":
     probabilities_crossratio = [[1, 0.5, 0.2, 0.7, 0.2, 0.5],
                                 [0.1, 0, 0.2, 0.1, 0.8, 0.1]]
     probabilities_nonintegrable = [0.5, 0.5, 0.5, 0.1, 0.1, 0.7]
+    probabilities_dict = {"monomial": probabilities_monomial, "crossratio": probabilities_crossratio,
+                          "nonintegrable": probabilities_nonintegrable}
     weights_monomial = np.random.normal(1, 1, (sum(sizes_monomial), sum(sizes_monomial)))
     weights_crossratio = np.random.normal(1, 1, (len(sizes_crossratio), N))
     weights_nonintegrable = np.random.normal(1, 1, (size_nonintegrable[0], N))
+    weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio,
+                    "nonintegrable": weights_nonintegrable}
 
     W = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
-                             probabilities_monomial, probabilities_crossratio, probabilities_nonintegrable,
-                             weights_monomial, weights_crossratio, weights_nonintegrable)
+                             probabilities=probabilities_dict, weights=weights_dict)
 
     probabilities_monomial2 = [0.5, 0.5, 0.5]
     probabilities_crossratio2 = [[0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
                                  [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]]
     probabilities_nonintegrable2 = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+    probabilities_dict2 = {"monomial": probabilities_monomial2, "crossratio": probabilities_crossratio2,
+                           "nonintegrable": probabilities_nonintegrable2}
     phaselags_monomial = np.random.normal(0, 0.1, (sum(sizes_monomial), sum(sizes_monomial)))
     phaselags_crossratio = np.random.normal(0, 0.1, (len(sizes_crossratio), N))
     phaselags_nonintegrable = np.random.normal(0, 0.1, (size_nonintegrable[0], N))
+    phaselags_dict = {"monomial": phaselags_monomial, "crossratio": phaselags_crossratio,
+                      "nonintegrable": phaselags_nonintegrable}
     alpha = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
-                                    probabilities_monomial2, probabilities_crossratio2, probabilities_nonintegrable2,
-                                    phaselags_monomial, phaselags_crossratio, phaselags_nonintegrable)
+                                    probabilities=probabilities_dict2, phaselags=phaselags_dict)
     cal_A = calA(1, weights_crossratio, phaselags_crossratio)
 
     print(random_gaussian_frequencies_pintegrable(c, sizes, cal_A, 1, 1))

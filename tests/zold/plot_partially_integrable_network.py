@@ -4,12 +4,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import graph_tool.all as gt
-from graphs.generate_integrability_partitioned_weight_matrix import integrability_partitioned_block_weight_matrix
+from tests.zold.generate_integrability_partitioned_weight_matrix_netsciQC import integrability_partitioned_block_weight_matrix
 import matplotlib.colors as mcolors
 import time
 import os
 
-save_weight_matrix = True
+save_weight_matrix = False
 plot_weight_matrix = False
 plot_weight_distribution = False
 plot_out_degree_distribution = False
