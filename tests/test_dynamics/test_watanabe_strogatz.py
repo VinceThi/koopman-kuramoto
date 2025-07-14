@@ -48,5 +48,6 @@ def test_ws_equations_kuramoto():
     assert np.all(np.abs(theta - theta_ws) < 1e-6)
 
 
+# test_ws_equations_kuramoto()
 if __name__ == "__main__":
     pytest.main()
