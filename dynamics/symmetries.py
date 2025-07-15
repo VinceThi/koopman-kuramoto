@@ -1,12 +1,38 @@
 import numpy as np
 
 
-""" 
-This script contains useful functions to use Matone's formula and to define the determining equations 
-along with the symmetry transformations.
-"""
+""" Disk automorphisms in three different forms """
+def disk_automorphism(U, V, z):
+    # return (np.conjugate(U)*z - V) / (-np.conjugate(V)*z + U)
+    return (U*z + V)/(np.conjugate(V)*z + np.conjugate(U))
 
 
+def disk_automorphism_bounded(Z, phi, z): return (np.exp(1j*phi)*z + Z)/(np.exp(1j*phi)*np.conjugate(Z)*z + 1)
+
+
+def disk_automorphism_real(X, Y, R, Phi, theta):
+    # denom = 2*R**2 + 1 + 2*X*R*np.cos(theta - Phi) - 2*Y*R*np.sin(theta - Phi)
+    real_num = (X**2 - Y**2)*np.cos(theta) \
+        - 2*X*Y*np.sin(theta) + 2*X*R*np.cos(Phi) - 2*Y*R*np.sin(Phi) + R**2*np.cos(theta - 2*Phi)
+    imag_num = (X**2 - Y**2)*np.sin(theta) \
+        + 2*X*Y*np.cos(theta) + 2*X*R*np.sin(Phi) + 2*Y*R*np.cos(Phi) - R**2*np.sin(theta - 2*Phi)
+    return np.arctan2(imag_num, real_num)
+
+def inverse_disk_automorphism(Z, phi, z):
+    return np.exp(-1j*phi)*(z - Z)/(1 - np.conjugate(Z)*z)
+
+
+""" Symmetry action for calS_eta in Thibeault et al. 2025 """
+def ode_symmetry_action_calS(t, state, w, calA, Omega, xis):
+    """ This is only when there is one symmetry, calA is a vector """
+    Z, phi = state
+    F = calA[1:].T@disk_automorphism_bounded(Z, phi, w) + calA[0]*xis
+    G = Omega
+    F_bar = np.conjugate(F)
+    return np.array([F + 1j*G*Z - F_bar*Z**2, G + F*np.conjugate(Z) - F_bar*Z])
+
+
+""" Functions to use Matone's formula """
 def nu_function(X):
     if X > 1 or X < -1:
         Gamma = np.sqrt(X**2 - 1)
@@ -40,22 +66,6 @@ def nu_derivative(X):
     else:
         raise ValueError(f"in function nu_derivative, X must be a real number. In this case, X = {X}")
 
-
-def disk_automorphism(U, V, z):
-    # return (np.conjugate(U)*z - V) / (-np.conjugate(V)*z + U)
-    return (U*z + V)/(np.conjugate(V)*z + np.conjugate(U))
-
-
-def disk_automorphism_bounded(Z, phi, z): return (np.exp(1j*phi)*z + Z)/(np.exp(1j*phi)*np.conjugate(Z)*z + 1)
-
-
-def disk_automorphism_real(X, Y, R, Phi, theta):
-    # denom = 2*R**2 + 1 + 2*X*R*np.cos(theta - Phi) - 2*Y*R*np.sin(theta - Phi)
-    real_num = (X**2 - Y**2)*np.cos(theta) \
-        - 2*X*Y*np.sin(theta) + 2*X*R*np.cos(Phi) - 2*Y*R*np.sin(Phi) + R**2*np.cos(theta - 2*Phi)
-    imag_num = (X**2 - Y**2)*np.sin(theta) \
-        + 2*X*Y*np.cos(theta) + 2*X*R*np.sin(Phi) + 2*Y*R*np.cos(Phi) - R**2*np.sin(theta - 2*Phi)
-    return np.arctan2(imag_num, real_num)
 
 
 # For the non-autonomous model

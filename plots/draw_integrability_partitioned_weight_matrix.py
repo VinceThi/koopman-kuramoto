@@ -38,7 +38,7 @@ probabilities_dict = {"monomial": probabilities_monomial, "crossratio": probabil
                       "nonintegrable": probabilities_nonintegrable}
 weights_monomial = np.random.normal(0.1, 2, (sum(sizes_monomial), sum(sizes_monomial)))
 weights_crossratio = np.random.normal(0.1, 1, (len(sizes_crossratio), N))
-weights_nonintegrable = np.random.normal(0.1, 1, (size_nonintegrable[0], N))
+weights_nonintegrable = np.random.normal(0.1, 0.5, (size_nonintegrable[0], N))
 weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio,
                 "nonintegrable": weights_nonintegrable}
 

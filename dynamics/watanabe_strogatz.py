@@ -26,5 +26,5 @@ def ws_equations_kuramoto(t, state, w, coupling, omega):
 
 
 def ws_equations_kuramoto_generalized():
-    # TODO
+    # TODO, fait par Benjamin
     return

@@ -28,9 +28,6 @@ def animate_kuramoto_on_circle(theta, sizes, interval=100, save_path=None, ax=No
     cmap = plt.get_cmap('tab10' if len(sizes) <= 10 else 'hsv')
     colors = cmap(group_labels)
 
-    x_circle = np.cos(np.linspace(0, 2*np.pi, 500))
-    y_circle = np.sin(np.linspace(0, 2*np.pi, 500))
-
     # Create fig/ax only if needed
     if ax is None:
         fig, ax = plt.subplots(figsize=(6, 6))
@@ -39,6 +36,8 @@ def animate_kuramoto_on_circle(theta, sizes, interval=100, save_path=None, ax=No
         fig = ax.figure
         show_fig = False
 
+    x_circle = np.cos(np.linspace(0, 2*np.pi, 500))
+    y_circle = np.sin(np.linspace(0, 2*np.pi, 500))
     ax.plot(x_circle, y_circle, color='lightgray', zorder=0)
     scatter = ax.scatter(np.zeros(N), np.zeros(N), c=colors, s=60, zorder=1)
 
@@ -46,20 +45,22 @@ def animate_kuramoto_on_circle(theta, sizes, interval=100, save_path=None, ax=No
     ax.set_xlim(-1.2, 1.2)
     ax.set_ylim(-1.2, 1.2)
     ax.axis('off')
+    ax.set_autoscale_on(False)
 
     def init():
         scatter.set_offsets(np.zeros((N, 2)))
         return scatter,
 
     def update(frame):
-        x = np.cos(theta[frame])
-        y = np.sin(theta[frame])
+        phase = theta[frame] % (2 * np.pi)
+        x = np.cos(phase)
+        y = np.sin(phase)
         scatter.set_offsets(np.c_[x, y])
         return scatter,
 
     ani = animation.FuncAnimation(
         fig, update, frames=T,
-        init_func=init, blit=True, interval=interval
+        init_func=init, blit=False, interval=interval
     )
 
     if save_path:
