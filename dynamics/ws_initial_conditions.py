@@ -54,7 +54,7 @@ def get_watanabe_strogatz_initial_conditions(theta0, dispersed_guess=False, nb_g
         dispersed_guess (bool): If True, initial guesses for R are restrained to 0 < R < 0.2
                                 instead of 0 < R < 1. Defaults to False.
         nb_guess (int): Maximum number of sets of initial guesses for the
-                        optimization process. Defaults to 1.
+                        optimization process. Defaults to 10.
         tol (float): parameter 'xtol' for 'hybr' method of scipy.optimize.root.
                      Defaults to 1e-10.
 
@@ -66,7 +66,7 @@ def get_watanabe_strogatz_initial_conditions(theta0, dispersed_guess=False, nb_g
 
     """
     # WARNING: Since the objective function is squared, the tolerance specified here is smaller than the actual error.
-    #          Note that theta0 must not be a state of majority cluster (see Watanabe-Strogatz, Sec. 4.2.3., 1994).
+    #          Note that theta0 must not be a state of majority cluster (Watanabe-Strogatz, Sec. 4.2.3, Phys. D, 1994).
 
     R_upper = 0.2 if dispersed_guess else 1
 

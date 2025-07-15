@@ -45,7 +45,7 @@ cal_A = calA(coupling, weights_crossratio, phaselags_crossratio)
 
 
 """ Get natural frequencies """
-omega =  np.concatenate([np.array([5*np.random.rand()]),
+omega = np.concatenate([np.array([5*np.random.rand()]),
                          2*np.random.rand()*np.ones((sizes_crossratio[0],))])  # np.array([2, 1, 1, 1, 1])  #
 # random_gaussian_frequencies_pintegrable(c, sizes, cal_A, 1, 1)      #
 

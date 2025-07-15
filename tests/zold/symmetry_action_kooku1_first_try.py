@@ -10,11 +10,11 @@ from plots.config_rcparams import *
 # Weight matrix and coupling
 coupling = 1
 w1, w2, w3, w4, w5 = 1., 0., 1., 0., 1.   #  1., 0., -0.598, 0., 1.512
-W =  np.array([[0., 0., 0., 0., 0.],
-               [w1, 0., w3, w4, w5],
-               [w1, w2, 0., w4, w5],
-               [w1, w2, w3, 0., w5],
-               [w1, w2, w3, w4, 0.]])
+W = np.array([[0., 0., 0., 0., 0.],
+              [w1, 0., w3, w4, w5],
+              [w1, w2, 0., w4, w5],
+              [w1, w2, w3, 0., w5],
+              [w1, w2, w3, w4, 0.]])
 print("W = \n", W)
 
 # Phase lags
