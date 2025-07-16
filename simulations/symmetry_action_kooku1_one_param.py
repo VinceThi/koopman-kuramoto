@@ -62,14 +62,13 @@ theta = np.where(theta < 0, 2*np.pi + theta, theta)
 
 """ Integrate symmetry """
 epsilon0 = 0
-epsilon = 1  # Index
-# depsilon = 0.01
+epsilon = 1
 theta_transformed = []
 for t in tqdm(range(len(timelist))):
     zs_t = np.exp(1j*theta[t, 0])
     z_t = np.exp(1j*theta[t, 1:])
     Z0, phi0 = 0, 0
-    args_ws = (z_t, calA, Omega - omega1, zs_t)
+    args_ws = (z_t, calA[0], calA[1:], Omega - omega1, zs_t)
     solution = solve_ivp(ode_symmetry_action_calS, [epsilon0, epsilon],
                          np.array([Z0, phi0], dtype=complex), vectorized=True,
                          args=args_ws, rtol=1e-08, atol=1e-10)
@@ -89,7 +88,7 @@ ax1.plot(timelist, theta[:, 0] % (2*np.pi), color=deep[2], label="Source")
 ax1.plot(timelist, theta[:, 1:] % (2*np.pi), color=deep[0], label="Periphery")
 ax1.set_ylabel("Solutions")   # $\\theta_1(t), ..., \\theta_N(t)$")
 ax1.set_ylim([-0.05, 2*np.pi + 0.05])
-plt.legend()
+ax1.legend()
 
 theta_verif = np.array(integrate_dopri45(t0, t1, dt, kuramoto,
                                          np.concatenate([np.array([theta0[0]]), theta_ws[0, :]]), *args_dynamics))
@@ -102,8 +101,8 @@ ax2.plot(timelist, theta_ws[:, 1:] % (2*np.pi), color=deep[1], linestyle="--")
 ax2.set_ylim([-0.05, 2*np.pi + 0.05])
 ax2.set_title(f"$\\epsilon =$ {epsilon}")
 ax2.set_ylabel("Transformed solutions")   # $\\theta_1(t), ..., \\theta_N(t)$")
-plt.xlabel("Time $t$")
-plt.legend()
+ax2.set_xlabel("Time $t$")
+ax2.legend(loc=1)
 plt.show()
 
 
