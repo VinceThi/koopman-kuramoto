@@ -1,70 +1,67 @@
-# -*- coding: utf-8 -*-
-# @author: Vincent Thibeault
-
+import numpy as np
+from dynamics.integrate import integrate_dopri45
+from dynamics.dynamics import kuramoto
 from dynamics.symmetries import ode_symmetry_action_calS, disk_automorphism_bounded, inverse_disk_automorphism
+from dynamics.ws_initial_conditions import get_watanabe_strogatz_initial_conditions
+from plots.config_rcparams import *
 from tqdm import tqdm
 from scipy.integrate import solve_ivp
-from plots.config_rcparams import *
-from graphs.generate_integrability_partitioned_weight_matrix import *
-from dynamics.dynamics import kuramoto
-from dynamics.integrate import integrate_dopri45
+
 
 plot_Zphi = False
 
-""" Partition parameters"""
+
 sizes_monomial = np.array([1], dtype=int)
-sizes_crossratio = np.array([4, 5], dtype=int)
+sizes_crossratio = np.array([4, 4], dtype=int)
 size_nonintegrable = np.array([], dtype=int)
 sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable])
-q = len(sizes)  # Number of parts
-N = np.sum(sizes, dtype=int)
-m = len(sizes_monomial)
-c = len(sizes_crossratio)
 
-""" Get weight matrix """
-random_exponents = np.array([1])  # np.random.normal(1, 0.5, (sum(sizes_monomial), len(sizes_monomial))) + 1
-probabilities_monomial = np.array([0])
-probabilities_crossratio = np.array([[1, 0.8, 0],
-                                     [1, 0., 0.8]])
-# np.random.rand(c, N)
-probabilities_dict = {"monomial": probabilities_monomial, "crossratio": probabilities_crossratio}
-weights_monomial = np.array([1])  # np.random.normal(1, 1, (sum(sizes_monomial), sum(sizes_monomial)))
-weights_crossratio = np.random.normal(1, 1, (len(sizes_crossratio), N))
-weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio}
-
-W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
-                            probabilities=probabilities_dict, weights=weights_dict)
+""" Dynamical parameters """
+# Weight matrix and coupling
 coupling = 1
+binary_vector = (np.random.rand(5, ) < np.array([1, 0.4, 0.5, 0.3, 0.9])).astype(int)
+weight_vector = np.random.normal(1, 1, (5, ))
+w = binary_vector*weight_vector
+w1, w2, w3, w4, w5 = w[0], w[1], w[2], w[3], w[4]  # 1, 1., -0.598, 0.1, 1.512      # 1., 0., 1., 0., 1.
+W = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+              [w1, 0., w3, w4, w5, 0., 0., 0., 0.],
+              [w1, w2, 0., w4, w5, 0., 0., 0., 0.],
+              [w1, w2, w3, 0., w5, 0., 0., 0., 0.],
+              [w1, w2, w3, w4, 0., 0., 0., 0., 0.],
+              [w1, 0., 0., 0., 0., 0., w3, w4, w5],
+              [w1, 0., 0., 0., 0., w2, 0., w4, w5],
+              [w1, 0., 0., 0., 0., w2, w3, 0., w5],
+              [w1, 0., 0., 0., 0., w2, w3, w4, 0.]])
 print("W = \n", np.round(W, 3))
 
-""" Get phase-lag matrix """
-probabilities_monomial2 = np.array([0])
-probabilities_crossratio2 = np.array([[1, 0.9, 0],
-                                      [1, 0., 0.7]])
-# np.ones((c, N)))
-probabilities_nonintegrable2 = []
-probabilities_dict2 = {"monomial": probabilities_monomial2, "crossratio": probabilities_crossratio2}
-phaselags_monomial = np.random.normal(0, 0.1, (sum(sizes_monomial), sum(sizes_monomial)))  # np.zeros((sum(sizes_monomial), sum(sizes_monomial)))
-phaselags_crossratio = np.random.normal(0, 0.1, (len(sizes_crossratio), N))  # np.zeros((len(sizes_crossratio), N))
-phaselags_dict = {"monomial": phaselags_monomial, "crossratio": phaselags_crossratio}
-alpha, chi = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
-                                     probabilities=probabilities_dict2, phaselags=phaselags_dict)
+# Phase lags
+binary2_vector = (np.random.rand(5, ) < np.array([0.8, 0.5, 0.7, 0.6, 0.8])).astype(int)
+phaselag_vector = np.random.normal(1, 1, (5, ))
+a = binary2_vector*phaselag_vector
+a1, a2, a3, a4, a5 = a[0], a[1], a[2], a[3], a[4]    # 0.1, -0.7, np.pi/2-0.1, 0.9, 1.     # 0., 0., 0., 0., 0. #
+alpha = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                  [a1, 0., a3, a4, a5, 0., 0., 0., 0.],
+                  [a1, a2, 0., a4, a5, 0., 0., 0., 0.],
+                  [a1, a2, a3, 0., a5, 0., 0., 0., 0.],
+                  [a1, a2, a3, a4, 0., 0., 0., 0., 0.],
+                  [a1, 0., 0., 0., 0., 0., a3, a4, a5],
+                  [a1, 0., 0., 0., 0., a2, 0., a4, a5],
+                  [a1, 0., 0., 0., 0., a2, a3, 0., a5],
+                  [a1, 0., 0., 0., 0., a2, a3, a4, 0.]])
 print("alpha = \n", np.round(alpha, 3))
 
-""" calA """
-cal_A = calA(coupling, C, chi)
-print("calA = \n", np.round(cal_A, 3))
-
-""" Natural frequencies"""
-print(2*np.imag(cal_A[0, 2] - cal_A[0, 1]), 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), 2*np.imag(cal_A[0, 4] - cal_A[0, 1]))
-print(2*np.imag(cal_A[1, 6] - cal_A[1, 5]), 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), 2*np.imag(cal_A[1, 8] - cal_A[1, 5]),
-      2*np.imag(cal_A[1, 9] - cal_A[1, 5]))
-# omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, 1, 1)
-omega = np.array([1, 2, 2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), 2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), 2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
-                  3, 3 + 2*np.imag(cal_A[1, 6] - cal_A[1, 5]), 3 + 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), 3 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5]), 3 + 2*np.imag(cal_A[1, 9] - cal_A[1, 5])])
-Omega1 = omega[1] - 2*np.imag(cal_A[0, 1])
-Omega2 = omega[5] - 2*np.imag(cal_A[1, 5])
-print("omega = ", omega)
+# Natural frequencies
+cal_A = coupling/2*np.array([[w1*np.exp(-1j*a1), w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
+                            w4*np.exp(-1j*a4), w5*np.exp(-1j*a5), 0., 0., 0., 0.],
+                            [w1*np.exp(-1j*a1),  0., 0., 0., 0., w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
+                            w4*np.exp(-1j*a4), w5*np.exp(-1j*a5)]])
+omega1, omega2 = np.random.uniform(-1, 5), np.random.uniform(-1, 5)
+omega = [omega1,
+         omega2, omega2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
+         omega2, omega2 + 2*np.imag(cal_A[1, 6] - cal_A[0, 5]), omega2 + 2*np.imag(cal_A[1, 7] - cal_A[0, 5]), omega2 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5])]
+Omega1 = omega2 - 2*np.imag(cal_A[0, 1])
+Omega2 = omega2 - 2*np.imag(cal_A[1, 5])
+print("omega = ", f"{omega1, omega2}")
 
 """ Integration parameters """
 t0, t1, dt = 0, 10, 0.01
@@ -154,21 +151,3 @@ ax3.set_ylabel("Phase")
 ax3.set_xlabel("Time $t$")
 ax3.legend(loc=1)
 plt.show()
-
-
-""" Old code """
-# zs_t = np.exp(1j*theta[t, 0])
-# print("\n", "theta(t) = ", theta[t, 1:])
-# Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta[t, 1:], dispersed_guess=False, nb_guess=5000)
-# args_ws = (w, calA[0], Omega, zs_t)
-# solution = np.array(integrate_dopri45(epsilon0, epsilon, depsilon, ode_symmetry_action_calS,
-#                                       np.array([Z0, phi0]), *args_ws))
-# Z, phi = solution[:, 0], solution[:, 1]
-# print("w(t) = ",  np.round(w, 3))
-# theta_transformed.append(np.angle(disk_automorphism_bounded(Z[-1], phi[-1], w)))
-# print(disk_automorphism_bounded(Z[-1], phi[-1], w))
-
-# solution = np.array(integrate_dopri45(epsilon0, epsilon, depsilon, ode_symmetry_action_calS,
-#                                       np.array([Z0, phi0]), *args_ws))
-# Z, phi = solution[:, 0], solution[:, 1]
-#

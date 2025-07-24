@@ -199,7 +199,7 @@ def random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, r
         blocks.append(G)
     W = np.concatenate(blocks)
     np.fill_diagonal(W, 0)
-    return W
+    return W, C
 
 
 def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, probabilities=None, phaselags=None):
@@ -220,18 +220,17 @@ def random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable
         block.append(g)
     alpha = np.concatenate(block)
     np.fill_diagonal(alpha, 0)
-    return alpha
+    return alpha, chi
 
 
-def random_gaussian_frequencies_pintegrable(c, sizes, calA, mean, std):
-    q = len(sizes)  # Number of parts m + c + 1
-    m = q - c - 1   # Number of monomial parts
+def random_gaussian_frequencies_pintegrable(m, c, sizes, calA, mean, std):
+    q = len(sizes)  # Number of parts m + c + (1 or 0, if there is non integrable part or not)
     nm = np.sum(sizes[:m])  # Number of nodes in monomial parts
-    reference_frequencies = np.random.normal(mean, std, (1, q - m - 1))[0]
+    reference_frequencies = np.random.normal(mean, std, (c, ))
     row_blocks = []
     increment = 0
     for nu in range(q):
-        if nu < m or nu > q - 2:
+        if nu < m or nu > m + c - 1:
             row_blocks.append(np.random.normal(mean, std, (1, sizes[nu])))
         else:
             omega_list = []
@@ -269,8 +268,8 @@ if __name__ == "__main__":
     weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio,
                     "nonintegrable": weights_nonintegrable}
 
-    W = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
-                             probabilities=probabilities_dict, weights=weights_dict)
+    W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
+                                probabilities=probabilities_dict, weights=weights_dict)
 
     probabilities_monomial2 = [0.5, 0.5, 0.5]
     probabilities_crossratio2 = [[0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
@@ -283,11 +282,11 @@ if __name__ == "__main__":
     phaselags_nonintegrable = np.random.normal(0, 0.1, (size_nonintegrable[0], N))
     phaselags_dict = {"monomial": phaselags_monomial, "crossratio": phaselags_crossratio,
                       "nonintegrable": phaselags_nonintegrable}
-    alpha = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
-                                    probabilities=probabilities_dict2, phaselags=phaselags_dict)
-    cal_A = calA(1, weights_crossratio, phaselags_crossratio)
+    alpha, chi = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
+                                         probabilities=probabilities_dict2, phaselags=phaselags_dict)
+    cal_A = calA(1, C, chi)
 
-    print(random_gaussian_frequencies_pintegrable(c, sizes, cal_A, 1, 1))
+    # print(random_gaussian_frequencies_pintegrable(c, sizes, cal_A, 1, 1))
 
     plot_eigenvalues = False
 

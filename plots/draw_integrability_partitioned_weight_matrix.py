@@ -42,8 +42,8 @@ weights_nonintegrable = np.random.normal(0.1, 0.5, (size_nonintegrable[0], N))
 weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio,
                 "nonintegrable": weights_nonintegrable}
 
-W = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
-                         probabilities=probabilities_dict, weights=weights_dict)
+W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
+                            probabilities=probabilities_dict, weights=weights_dict)
 
 if save_weight_matrix:
     timestr = time.strftime("%Y_%m_%d_%Hh%Mmin%Ssec")

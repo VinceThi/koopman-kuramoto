@@ -17,7 +17,7 @@ coupling = 1
 binary_vector = (np.random.rand(5, ) < np.array([1, 0.4, 0.5, 0.3, 0.9])).astype(int)
 weight_vector = np.random.normal(1, 1, (5, ))
 w = binary_vector*weight_vector
-w1, w2, w3, w4, w5 = 1., 0., 1., 0., 1.     # w[0], w[1], w[2], w[3], w[4]  # 1, 1., -0.598, 0.1, 1.512      #
+w1, w2, w3, w4, w5 = 2.104, -0.597, 0.764, -0.499, -0.   # 1., 0., 1., 0., 1.     # w[0], w[1], w[2], w[3], w[4]  # 1, 1., -0.598, 0.1, 1.512      #
 W = np.array([[0., 0., 0., 0., 0.],
               [w1, 0., w3, w4, w5],
               [w1, w2, 0., w4, w5],
@@ -29,7 +29,7 @@ print("W = \n", W)
 binary2_vector = (np.random.rand(5, ) < np.array([0.8, 0.5, 0.7, 0.6, 0.8])).astype(int)
 phaselag_vector = np.random.normal(1, 1, (5, ))
 a = binary2_vector*phaselag_vector
-a1, a2, a3, a4, a5 = a[0], a[1], a[2], a[3], a[4]    # 0.1, -0.7, np.pi/2-0.1, 0.9, 1.     # 0., 0., 0., 0., 0. #
+a1, a2, a3, a4, a5 = 1.342, 1.252,  0.139,  1.723,  0.307  # a[0], a[1], a[2], a[3], a[4]    # 0.1, -0.7, np.pi/2-0.1, 0.9, 1.     # 0., 0., 0., 0., 0. #
 alpha = np.array([[0., 0., 0., 0., 0.],
                   [a1, 0., a3, a4, a5],
                   [a1, a2, 0., a4, a5],
@@ -40,17 +40,17 @@ print("alpha = \n", alpha)
 # Natural frequencies
 calA = coupling/2*np.array([w1*np.exp(-1j*a1), w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
                             w4*np.exp(-1j*a4), w5*np.exp(-1j*a5)])
-omega1, omega2 = np.random.uniform(-1, 5), np.random.uniform(-1, 5)
+omega1, omega2 = 2.404424932904708,  4.91286062432374  # (0.2584719283950414, 2.688683380831751)   # np.random.uniform(-1, 5), np.random.uniform(-1, 5)
 omega = [omega1, omega2, omega2 + 2*np.imag(calA[2] - calA[1]),
          omega2 + 2*np.imag(calA[3] - calA[1]), omega2 + 2*np.imag(calA[4] - calA[1])]
 Omega = omega2 - 2*np.imag(calA[1])
 print("omega = ", f"{omega1, omega2}")
 
 """ Integration parameters """
-t0, t1, dt = 0, 20, 0.01
+t0, t1, dt = 0, 10, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
 N = len(alpha[0])
-# np.random.seed(12)
+np.random.seed(12)
 theta0 = np.random.uniform(0, 2*np.pi, N)
 theta0_source = theta0[0]
 
@@ -61,13 +61,13 @@ theta = np.where(theta < 0, 2*np.pi + theta, theta)
 
 
 """ Integrate symmetry """
+Z0, phi0 = 0, 0
 epsilon0 = 0
-epsilon = 1
+epsilon = 0.4
 theta_transformed = []
 for t in tqdm(range(len(timelist))):
     zs_t = np.exp(1j*theta[t, 0])
     z_t = np.exp(1j*theta[t, 1:])
-    Z0, phi0 = 0, 0
     args_ws = (z_t, calA[0], calA[1:], Omega - omega1, zs_t)
     solution = solve_ivp(ode_symmetry_action_calS, [epsilon0, epsilon],
                          np.array([Z0, phi0], dtype=complex), vectorized=True,
@@ -85,7 +85,8 @@ theta_ws = np.where(theta_transformed < 0, 2*np.pi + theta_transformed, theta_tr
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(11, 5))
 ax1.plot(timelist, theta[:, 0] % (2*np.pi), color=deep[2], label="Source")
-ax1.plot(timelist, theta[:, 1:] % (2*np.pi), color=deep[0], label="Periphery")
+ax1.plot(timelist, theta[:, 1] % (2*np.pi), color=deep[0], label="Periphery")
+ax1.plot(timelist, theta[:, 2:] % (2*np.pi), color=deep[0])
 ax1.set_ylabel("Solutions")   # $\\theta_1(t), ..., \\theta_N(t)$")
 ax1.set_ylim([-0.05, 2*np.pi + 0.05])
 ax1.legend()
