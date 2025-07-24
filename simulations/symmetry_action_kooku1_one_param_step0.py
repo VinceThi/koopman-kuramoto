@@ -13,7 +13,7 @@ plot_Zphi = False
 
 """ Dynamical parameters """
 # Weight matrix and coupling
-coupling = 2
+coupling = 1
 binary_vector = (np.random.rand(5, ) < np.array([1, 0.4, 0.5, 0.3, 0.9])).astype(int)
 weight_vector = np.random.normal(1, 1, (5, ))
 w = binary_vector*weight_vector
