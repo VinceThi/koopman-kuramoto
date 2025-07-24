@@ -24,7 +24,7 @@ def inverse_disk_automorphism(Z, phi, z):
 
 
 """ Symmetry action for calS_eta in Thibeault et al. 2025 """
-def ode_symmetry_action_calS(t, state, w, calA_source, calA_row_periphery,  omega, xis):
+def ode_symmetry_action_calS(t, state, w, calA_source, calA_row_periphery, omega, xis):
     """ calA_row is a part of a row of calA of the size of w (nonzero elements related to the cross-ratio part) """
     Z, phi = state
     F = np.sum(calA_row_periphery*disk_automorphism_bounded(Z, phi, w)) + calA_source*xis

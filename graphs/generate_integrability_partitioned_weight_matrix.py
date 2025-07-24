@@ -149,7 +149,7 @@ def calA(sigma, weight_matrix, phaselag_matrix):
 
     :return calA from the paper, cxN complex matrix appearing in the partial integration of the cross-ratio parts
     """
-    return sigma/2*weight_matrix*np.exp(1j*phaselag_matrix)
+    return sigma/2*weight_matrix*np.exp(-1j*phaselag_matrix)
 
 
 # --------------------------------- Non-integrable part ----------------------------------------------------------------

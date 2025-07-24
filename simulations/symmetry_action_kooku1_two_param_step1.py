@@ -58,7 +58,7 @@ cal_A = coupling/2*np.array([[w1*np.exp(-1j*a1), w2*np.exp(-1j*a2), w3*np.exp(-1
 omega1, omega2 = np.random.uniform(-1, 5), np.random.uniform(-1, 5)
 omega = [omega1,
          omega2, omega2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
-         omega2, omega2 + 2*np.imag(cal_A[1, 6] - cal_A[0, 5]), omega2 + 2*np.imag(cal_A[1, 7] - cal_A[0, 5]), omega2 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5])]
+         omega2, omega2 + 2*np.imag(cal_A[1, 6] - cal_A[1, 5]), omega2 + 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), omega2 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5])]
 Omega1 = omega2 - 2*np.imag(cal_A[0, 1])
 Omega2 = omega2 - 2*np.imag(cal_A[1, 5])
 print("omega = ", f"{omega1, omega2}")

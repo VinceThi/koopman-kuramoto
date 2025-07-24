@@ -26,7 +26,6 @@ random_exponents = np.array([1])  # np.random.normal(1, 0.5, (sum(sizes_monomial
 probabilities_monomial = np.array([0])
 probabilities_crossratio = np.array([[1, 0.8, 0],
                                      [1, 0., 0.8]])
-# np.random.rand(c, N)
 probabilities_dict = {"monomial": probabilities_monomial, "crossratio": probabilities_crossratio}
 weights_monomial = np.array([1])  # np.random.normal(1, 1, (sum(sizes_monomial), sum(sizes_monomial)))
 weights_crossratio = np.random.normal(1, 1, (len(sizes_crossratio), N))
@@ -55,13 +54,13 @@ print("alpha = \n", np.round(alpha, 3))
 cal_A = calA(coupling, C, chi)
 print("calA = \n", np.round(cal_A, 3))
 
+
 """ Natural frequencies"""
-print(2*np.imag(cal_A[0, 2] - cal_A[0, 1]), 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), 2*np.imag(cal_A[0, 4] - cal_A[0, 1]))
-print(2*np.imag(cal_A[1, 6] - cal_A[1, 5]), 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), 2*np.imag(cal_A[1, 8] - cal_A[1, 5]),
-      2*np.imag(cal_A[1, 9] - cal_A[1, 5]))
-# omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, 1, 1)
-omega = np.array([1, 2, 2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), 2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), 2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
-                  3, 3 + 2*np.imag(cal_A[1, 6] - cal_A[1, 5]), 3 + 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), 3 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5]), 3 + 2*np.imag(cal_A[1, 9] - cal_A[1, 5])])
+omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, 1, 1)
+# omega1, omega2, omega3 = np.random.uniform(-1, 5, size=3)
+# omega = [omega1,
+#          omega2, omega2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
+#          omega3, omega3 + 2*np.imag(cal_A[1, 6] - cal_A[1, 5]), omega3 + 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), omega3 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5]), omega3 + 2*np.imag(cal_A[1, 9] - cal_A[1, 5])]
 Omega1 = omega[1] - 2*np.imag(cal_A[0, 1])
 Omega2 = omega[5] - 2*np.imag(cal_A[1, 5])
 print("omega = ", omega)
@@ -83,8 +82,8 @@ theta = np.where(theta < 0, 2*np.pi + theta, theta)
 """ Integrate symmetry """
 Z0, phi0 = 0, 0
 epsilon0 = 0
-epsilon1 = 0.2
-epsilon2 = 0.4
+epsilon1 = 0.4
+epsilon2 = 0.2
 theta_transformed_1 = []
 theta_transformed_2 = []
 for t in tqdm(range(len(timelist))):
@@ -154,21 +153,3 @@ ax3.set_ylabel("Phase")
 ax3.set_xlabel("Time $t$")
 ax3.legend(loc=1)
 plt.show()
-
-
-""" Old code """
-# zs_t = np.exp(1j*theta[t, 0])
-# print("\n", "theta(t) = ", theta[t, 1:])
-# Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta[t, 1:], dispersed_guess=False, nb_guess=5000)
-# args_ws = (w, calA[0], Omega, zs_t)
-# solution = np.array(integrate_dopri45(epsilon0, epsilon, depsilon, ode_symmetry_action_calS,
-#                                       np.array([Z0, phi0]), *args_ws))
-# Z, phi = solution[:, 0], solution[:, 1]
-# print("w(t) = ",  np.round(w, 3))
-# theta_transformed.append(np.angle(disk_automorphism_bounded(Z[-1], phi[-1], w)))
-# print(disk_automorphism_bounded(Z[-1], phi[-1], w))
-
-# solution = np.array(integrate_dopri45(epsilon0, epsilon, depsilon, ode_symmetry_action_calS,
-#                                       np.array([Z0, phi0]), *args_ws))
-# Z, phi = solution[:, 0], solution[:, 1]
-#

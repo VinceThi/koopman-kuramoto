@@ -14,36 +14,48 @@ plot_Zphi = False
 """ Dynamical parameters """
 # Weight matrix and coupling
 coupling = 1
-binary_vector = (np.random.rand(5, ) < np.array([1, 0.4, 0.5, 0.3, 0.9])).astype(int)
-weight_vector = np.random.normal(1, 1, (5, ))
-w = binary_vector*weight_vector
-w1, w2, w3, w4, w5 = w[0], w[1], w[2], w[3], w[4]
-W = np.array([[0., 0., 0., 0., 0.],
-              [w1, 0., w3, w4, w5],
-              [w1, w2, 0., w4, w5],
-              [w1, w2, w3, 0., w5],
-              [w1, w2, w3, w4, 0.]])
+# binary_vector = (np.random.rand(5, ) < np.array([1, 0.4, 0.5, 0.3, 0.9])).astype(int)
+# weight_vector = np.random.normal(1, 1, (5, ))
+# w = binary_vector*weight_vector
+w1, w2, w3, w4, w5 = 2.104, -0.597, 0.764, -0.499, -0.   # 1., 0., 1., 0., 1.     # w[0], w[1], w[2], w[3], w[4]  # 1, 1., -0.598, 0.1, 1.512      #
+W = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+              [w1, 0., w3, w4, w5, 0., 0., 0., 0.],
+              [w1, w2, 0., w4, w5, 0., 0., 0., 0.],
+              [w1, w2, w3, 0., w5, 0., 0., 0., 0.],
+              [w1, w2, w3, w4, 0., 0., 0., 0., 0.],
+              [w1, 0., 0., 0., 0., 0., w3, w4, w5],
+              [w1, 0., 0., 0., 0., w2, 0., w4, w5],
+              [w1, 0., 0., 0., 0., w2, w3, 0., w5],
+              [w1, 0., 0., 0., 0., w2, w3, w4, 0.]])
 print("W = \n", W)
 
 # Phase lags
-binary2_vector = (np.random.rand(5, ) < np.array([0.8, 0.5, 0.7, 0.6, 0.8])).astype(int)
-phaselag_vector = np.random.normal(1, 1, (5, ))
-a = binary2_vector*phaselag_vector
-a1, a2, a3, a4, a5 = a[0], a[1], a[2], a[3], a[4]
-alpha = np.array([[0., 0., 0., 0., 0.],
-                  [a1, 0., a3, a4, a5],
-                  [a1, a2, 0., a4, a5],
-                  [a1, a2, a3, 0., a5],
-                  [a1, a2, a3, a4, 0.]])
+# binary2_vector = (np.random.rand(5, ) < np.array([0.8, 0.5, 0.7, 0.6, 0.8])).astype(int)
+# phaselag_vector = np.random.normal(1, 1, (5, ))
+# a = binary2_vector*phaselag_vector
+a1, a2, a3, a4, a5 = 1.342, 1.252,  0.139,  1.723,  0.307  # a[0], a[1], a[2], a[3], a[4]    # 0.1, -0.7, np.pi/2-0.1, 0.9, 1.     # 0., 0., 0., 0., 0. #
+alpha = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                  [a1, 0., a3, a4, a5, 0., 0., 0., 0.],
+                  [a1, a2, 0., a4, a5, 0., 0., 0., 0.],
+                  [a1, a2, a3, 0., a5, 0., 0., 0., 0.],
+                  [a1, a2, a3, a4, 0., 0., 0., 0., 0.],
+                  [a1, 0., 0., 0., 0., 0., a3, a4, a5],
+                  [a1, 0., 0., 0., 0., a2, 0., a4, a5],
+                  [a1, 0., 0., 0., 0., a2, a3, 0., a5],
+                  [a1, 0., 0., 0., 0., a2, a3, a4, 0.]])
 print("alpha = \n", alpha)
 
 # Natural frequencies
-calA = coupling/2*np.array([w1*np.exp(-1j*a1), w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
-                            w4*np.exp(-1j*a4), w5*np.exp(-1j*a5)])
-omega1, omega2 = np.random.uniform(-1, 5), np.random.uniform(-1, 5)
-omega = [omega1, omega2, omega2 + 2*np.imag(calA[2] - calA[1]),
-         omega2 + 2*np.imag(calA[3] - calA[1]), omega2 + 2*np.imag(calA[4] - calA[1])]
-Omega = omega2 - 2*np.imag(calA[1])
+calA = coupling/2*np.array([[w1*np.exp(-1j*a1), w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
+                            w4*np.exp(-1j*a4), w5*np.exp(-1j*a5), 0., 0., 0., 0.],
+                            [w1*np.exp(-1j*a1), 0., 0., 0., 0., w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
+                            w4*np.exp(-1j*a4), w5*np.exp(-1j*a5)]])
+omega1, omega2 = 2.404424932904708,  4.91286062432374  # (0.2584719283950414, 2.688683380831751)   # np.random.uniform(-1, 5), np.random.uniform(-1, 5)
+omega = [omega1,
+         omega2, omega2 + 2*np.imag(calA[0, 2] - calA[0, 1]), omega2 + 2*np.imag(calA[0, 3] - calA[0, 1]), omega2 + 2*np.imag(calA[0, 4] - calA[0, 1]),
+         omega3, omega3 + 2*np.imag(calA[1, 6] - calA[1, 5]), omega3 + 2*np.imag(calA[1, 7] - calA[1, 5]), omega3 + 2*np.imag(calA[1, 8] - calA[1, 5])]
+Omega1 = omega2 - 2*np.imag(calA[0, 1])
+Omega1 = omega2 - 2*np.imag(calA[0, 1])
 print("omega = ", f"{omega1, omega2}")
 
 """ Integration parameters """
@@ -51,7 +63,8 @@ t0, t1, dt = 0, 10, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
 N = len(alpha[0])
 # np.random.seed(507)
-theta0 = np.random.uniform(0, 2*np.pi, N)
+# theta0 = np.random.uniform(0, 2*np.pi, N)
+theta0 = [0.09550468, 1.69888603, 0.92979301, 3.47728797, 1.47864402, 1.69888603, 0.92979301, 3.47728797, 1.47864402]
 theta0_source = theta0[0]
 
 """ Integrate complete dynamics """

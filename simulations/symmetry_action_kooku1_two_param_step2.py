@@ -18,10 +18,11 @@ sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable])
 """ Dynamical parameters """
 # Weight matrix and coupling
 coupling = 1
-binary_vector = (np.random.rand(10, ) < np.array([1, 1, 0.4, 0.5, 0.3, 0.9, 0.5, 0.9, 0.8, 0.4])).astype(int)
-weight_vector = np.random.normal(1, 1, (10, ))
-w = binary_vector*weight_vector
-w0, w1, w2, w3, w4, w5, w6, w7, w8, w9 = 0.34, 2.104, 0., 0., -0.044, -1.29, -0.597, 0.764, -0.499, -0.  # w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9]
+# binary_vector = (np.random.rand(10, ) < np.array([1, 1, 0.4, 0.5, 0.3, 0.9, 0.5, 0.9, 0.8, 0.4])).astype(int)
+# weight_vector = np.random.normal(1, 1, (10, ))
+# w = binary_vector*weight_vector
+w0, w1, w2, w3, w4, w5, w6, w7, w8, w9 = 2.104, 2.104, 0., 0., -0.044, -1.29, -0.597, 0.764, -0.499, -0.  # w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9]
+# 0.34, 2.104, 0., 0., -0.044, -1.29, -0.597, 0.764, -0.499, -0.
 W = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
               [w0, 0., w3, w4, w5, 0., 0., 0., 0.],
               [w0, w2, 0., w4, w5, 0., 0., 0., 0.],
@@ -31,12 +32,12 @@ W = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
               [w1, 0., 0., 0., 0., w6, 0., w8, w9],
               [w1, 0., 0., 0., 0., w6, w7, 0., w9],
               [w1, 0., 0., 0., 0., w6, w7, w8, 0.]])
-print("W = \n", np.round(W, 3))
+print("W = \n", W)
 
 # Phase lags
-binary2_vector = (np.random.rand(10, ) < np.array([0.8, 0.5, 0.7, 0.6, 0.8, 0.9, 0.2, 0.5, 0.6, 0.7])).astype(int)
-phaselag_vector = np.random.normal(1, 1, (10, ))
-a = binary2_vector*phaselag_vector
+# binary2_vector = (np.random.rand(10, ) < np.array([0.8, 0.5, 0.7, 0.6, 0.8, 0.9, 0.2, 0.5, 0.6, 0.7])).astype(int)
+# phaselag_vector = np.random.normal(1, 1, (10, ))
+# a = binary2_vector*phaselag_vector
 a0, a1, a2, a3, a4, a5, a6, a7, a8, a9 = 0.015, 1.342, 0.626, 0.43, 0.363,  0., 1.252,  0.139,  1.723,  0.307 # a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]
 alpha = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
                   [a0, 0., a3, a4, a5, 0., 0., 0., 0.],
@@ -47,7 +48,7 @@ alpha = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0.],
                   [a1, 0., 0., 0., 0., a6, 0., a8, a9],
                   [a1, 0., 0., 0., 0., a6, a7, 0., a9],
                   [a1, 0., 0., 0., 0., a6, a7, a8, 0.]])
-print("alpha = \n", np.round(alpha, 3))
+print("alpha = \n", alpha)
 
 # Natural frequencies
 cal_A = coupling/2*np.array([[w0*np.exp(-1j*a0), w2*np.exp(-1j*a2), w3*np.exp(-1j*a3),
@@ -57,7 +58,7 @@ cal_A = coupling/2*np.array([[w0*np.exp(-1j*a0), w2*np.exp(-1j*a2), w3*np.exp(-1
 omega1, omega2, omega3 = 2.404424932904708, 3.6313250324434705, 4.91286062432374 # np.random.uniform(-1, 5, size=3)
 omega = [omega1,
          omega2, omega2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
-         omega3, omega3 + 2*np.imag(cal_A[1, 6] - cal_A[0, 5]), omega3 + 2*np.imag(cal_A[1, 7] - cal_A[0, 5]), omega3 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5])]
+         omega3, omega3 + 2*np.imag(cal_A[1, 6] - cal_A[1, 5]), omega3 + 2*np.imag(cal_A[1, 7] - cal_A[1, 5]), omega3 + 2*np.imag(cal_A[1, 8] - cal_A[1, 5])]
 Omega1 = omega2 - 2*np.imag(cal_A[0, 1])
 Omega2 = omega3 - 2*np.imag(cal_A[1, 5])
 print("omega = ", f"{omega1, omega2, omega3}")
@@ -66,9 +67,10 @@ print("omega = ", f"{omega1, omega2, omega3}")
 t0, t1, dt = 0, 10, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
 N = len(alpha[0])
-np.random.seed(12)
+np.random.seed(507)
 theta0 = np.random.uniform(0, 2*np.pi, N)
 theta0_source = theta0[0]
+
 
 """ Integrate complete dynamics """
 args_dynamics = (W, coupling, omega, alpha)
@@ -126,8 +128,8 @@ theta0_transformed = np.concatenate([np.array([theta0[0]]), theta_ws1[0, :], the
 theta_verif = np.array(integrate_dopri45(t0, t1, dt, kuramoto, theta0_transformed, *args_dynamics))
 theta_verif = np.where(theta_verif < 0, 2*np.pi + theta_verif, theta_verif)
 
-ax2.plot(timelist, theta[:, 1] % (2*np.pi), color=deep[0], label="Periphery 1")
-ax2.plot(timelist, theta[:, 2:1+sizes_crossratio[0]] % (2*np.pi), color=deep[0])
+# ax2.plot(timelist, theta[:, 1] % (2*np.pi), color=deep[0], label="Periphery 1")
+# ax2.plot(timelist, theta[:, 2:1+sizes_crossratio[0]] % (2*np.pi), color=deep[0])
 ax2.plot(timelist, theta_verif[:, 1] % (2*np.pi), color=deep[7], label="True")
 ax2.plot(timelist, theta_verif[:, 2:1+sizes_crossratio[0]] % (2*np.pi), color=deep[7])
 ax2.plot(timelist, theta_ws1[:, 0] % (2*np.pi), color=deep[1], linestyle="--", label="Theory (transf. periphery 1)")
@@ -137,8 +139,8 @@ ax2.set_title(f"$\\epsilon_1 =$ {epsilon1}")
 ax2.set_ylabel("Phase")
 ax2.legend(loc=1)
 
-ax3.plot(timelist, theta[:, 1+sizes_crossratio[0]] % (2*np.pi), color=deep[0], label="Periphery 2")
-ax3.plot(timelist, theta[:, 2+sizes_crossratio[0]:] % (2*np.pi), color=deep[0])
+# ax3.plot(timelist, theta[:, 1+sizes_crossratio[0]] % (2*np.pi), color=deep[0], label="Periphery 2")
+# ax3.plot(timelist, theta[:, 2+sizes_crossratio[0]:] % (2*np.pi), color=deep[0])
 ax3.plot(timelist, theta_verif[:, 1+sizes_crossratio[0]] % (2*np.pi), color=deep[7], label="True")
 ax3.plot(timelist, theta_verif[:, 2+sizes_crossratio[0]:] % (2*np.pi), color=deep[7])
 ax3.plot(timelist, theta_ws2[:, 0] % (2*np.pi), color=deep[3], linestyle="--", label="Theory (transf. periphery 2)")
