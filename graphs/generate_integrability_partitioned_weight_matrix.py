@@ -14,7 +14,7 @@ def monomial_exponent_matrix(sizes_monomial, random_exponents):
     """
 
     :param sizes_monomial: a list with the size d_tau of each part of vertices admitting monomial eigenfunctions
-    :param random_exponents: -->positive<-- matrix of size N x m
+    :param random_exponents: -->positive<-- matrix of size sum_tau d_tau x m
                              with the desired exponents (i.e., it must not contain zeros)
     :return: U := (mu_1  ... mu_m) is a sum_tau d_tau x m array where mu_tau is a sum_tau d_tau x 1 array of
              the tau-th monomial exponent with non-zero real elements. It is a block diagonal matrix with blocks
@@ -245,8 +245,8 @@ def random_gaussian_frequencies_pintegrable(m, c, sizes, calA, mean, std):
 
 
 if __name__ == "__main__":
-    sizes_monomial = [1, 5, 10]
-    sizes_crossratio = [4, 10]
+    sizes_monomial = [1, 3, 100]
+    sizes_crossratio = [4, 4]
     size_nonintegrable = [5]
     sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable])
     q = len(sizes)  # Number of parts
@@ -270,6 +270,9 @@ if __name__ == "__main__":
 
     W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
                                 probabilities=probabilities_dict, weights=weights_dict)
+    import scipy
+    plt.scatter(np.arange(0, len(W[0, :]), 1), scipy.linalg.svdvals(W))
+    plt.show()
 
     probabilities_monomial2 = [0.5, 0.5, 0.5]
     probabilities_crossratio2 = [[0.5, 0.5, 0.5, 0.5, 0.5, 0.5],

@@ -56,7 +56,7 @@ print("calA = \n", np.round(cal_A, 3))
 
 
 """ Natural frequencies"""
-omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, 1, 1)
+omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, 0.5, 1)
 # omega1, omega2, omega3 = np.random.uniform(-1, 5, size=3)
 # omega = [omega1,
 #          omega2, omega2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1]),
@@ -66,7 +66,7 @@ Omega2 = omega[5] - 2*np.imag(cal_A[1, 5])
 print("omega = ", omega)
 
 """ Integration parameters """
-t0, t1, dt = 0, 10, 0.01
+t0, t1, dt = 0, 30, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
 N = len(alpha[0])
 # np.random.seed(12)
@@ -144,8 +144,8 @@ ax3.plot(timelist, theta[:, 1+sizes_crossratio[0]] % (2*np.pi), color=deep[0], l
 ax3.plot(timelist, theta[:, 2+sizes_crossratio[0]:] % (2*np.pi), color=deep[0])
 ax3.plot(timelist, theta_verif[:, 1+sizes_crossratio[0]] % (2*np.pi), color=deep[7], label="True")
 ax3.plot(timelist, theta_verif[:, 2+sizes_crossratio[0]:] % (2*np.pi), color=deep[7])
-ax3.plot(timelist, theta_ws2[:, 0] % (2*np.pi), color=deep[3], linestyle="--", label="Theory (transf. periphery 2)")
-ax3.plot(timelist, theta_ws2[:, 1:] % (2*np.pi), color=deep[3], linestyle="--")
+ax3.plot(timelist, theta_ws2[:, 0] % (2*np.pi), color=deep[1], linestyle="--", label="Theory (transf. periphery 2)")
+ax3.plot(timelist, theta_ws2[:, 1:] % (2*np.pi), color=deep[1], linestyle="--")
 ax3.set_ylim([-0.05, 2*np.pi + 0.05])
 ax3.set_title(f"$\\epsilon_2 =$ {epsilon2}")
 ax3.set_ylabel("Phase")
