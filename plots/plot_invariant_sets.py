@@ -140,9 +140,9 @@ def add_3d_arrowhead(ax, tip, direction, width=0.2, height=0.4, color='k'):
 def plot_invariant_set_cross_ratio_c1234(ax, c, n, epsilon, cut_value=0.05, color='blue', lw=0.5, alpha=0.9, XgeqY=True):
 
     # Domain [0, 2π]
-    x = np.linspace(0 + cut_value, 2 * np.pi - cut_value, n)
-    y = np.linspace(0 + cut_value, 2 * np.pi - cut_value, n)
-    z = np.linspace(0 + cut_value, 2 * np.pi - cut_value, n)
+    x = np.linspace(0 + cut_value, 2*np.pi - cut_value, n)
+    y = np.linspace(0 + cut_value, 2*np.pi - cut_value, n)
+    z = np.linspace(0 + cut_value, 2*np.pi - cut_value, n)
     X, Y, Z = np.meshgrid(x, y, z, indexing='ij')  # Shape: (n, n, n)
 
     # Compute function F, theta1 = 0
@@ -215,6 +215,29 @@ def plot_invariant_set_sym_gen(ax, omega, omega1, s, phaselag, c, n, epsilon, cu
                            color=color, lw=lw, alpha=alpha, shade=False)
 
 
+def plot_invariant_set_monomial(ax, nu1, nu2, nu3, value, n,  cut_value=0, color='orange', lw=0.5, alpha=0.9):
+
+    # Domain [0, 2π]
+    x = np.linspace(0 + cut_value, 2*np.pi - cut_value, n)
+    y = np.linspace(0 + cut_value, 2*np.pi - cut_value, n)
+    z = np.linspace(0 + cut_value, 2*np.pi - cut_value, n)
+    X, Y, Z = np.meshgrid(x, y, z, indexing='ij')  # Shape: (n, n, n)
+
+    # Compute and mask F
+    F = nu1*X + nu2*Y + nu3*Z
+
+    # Define level set
+    F_level = F - value
+
+    verts, faces, normals, values = measure.marching_cubes(F_level, level=0.0)
+
+    # Rescale verts to physical coordinates [0, 2π]
+    scale = (2 * np.pi) / (n - 1)
+    verts_scaled = verts * scale
+
+    mesh = ax.plot_trisurf(verts_scaled[:, 0], verts_scaled[:, 1], faces, verts_scaled[:, 2],
+                           color=color, lw=lw, alpha=alpha, shade=False)  # cmap='viridis',
+
 
 """ Get trajectories """
 theta2 = theta[:, 1]
@@ -233,7 +256,7 @@ theta52 = np.array(theta345_transformed)[epsilon_index2, :, 2]
 
 """ Plot invariant sets and trajectories """
 
-n = 100
+n = 20
 alphaplot = 0.75
 linewidth = 1.8
 offset1 = 0.3
@@ -247,12 +270,12 @@ plt.rcParams.update({
 
 
 
-fig = plt.figure(figsize=(4, 5))
+fig = plt.figure(figsize=(8, 4))
 
 cut_value = 0.15
 mid = len(theta2) // 6
 
-ax = fig.add_subplot(211, projection='3d')
+ax = fig.add_subplot(131, projection='3d')
 # ax.scatter(theta2[0], theta31[0], theta41[0], color="k", s=10)
 # ax.scatter(theta2[0], theta32[0], theta42[0], color='#2f6eff', s=10)
 ax.plot(theta2, theta31, theta41, color="k", linewidth=linewidth)
@@ -286,7 +309,7 @@ draw_axes_at_origin_with_pi_ticks(ax, ax_labels, axis_length=2*np.pi, tick_spaci
 
 cut_value = 0
 
-ax2 = fig.add_subplot(212, projection='3d')
+ax2 = fig.add_subplot(132, projection='3d')
 # ax2.scatter(theta2[0], theta41[0], theta51[0], color="k", s=10)
 # ax2.scatter(theta2[0], theta42[0], theta52[0], color='#6cca31', s=10)
 ax2.plot(theta2, theta41, theta51, linewidth=linewidth, color="k")
@@ -313,7 +336,24 @@ ax2.view_init(elev=45, azim=40)   # 31, 43
 ax2_labels = [r'$\theta_2$', r'$\theta_4$', r'$\theta_5$']
 draw_axes_at_origin_with_pi_ticks(ax2, ax2_labels, axis_length=2*np.pi, tick_spacing=np.pi, offset=offset2, fontsize=10)
 
+# This is only for the illustration, not a monomial in the data generated
+ax3 = fig.add_subplot(133, projection='3d')
+# ax3.plot(theta2, theta42, theta52, linewidth=linewidth, color='#6cca31')
+# p_tip = [theta2[mid], theta42[mid], theta52[mid]]
+# vec = np.array([theta2[mid] - theta2[mid - 1],
+#                 theta42[mid] - theta42[mid - 1],
+#                 theta52[mid] - theta52[mid - 1]])
+#add_3d_arrowhead(ax3, tip=p_tip, direction=vec, width=0.5, height=0.6, color="#6cca31")
+plot_invariant_set_monomial(ax3, 0.6, 0.5, 0.8, 2.5, n,  cut_value=0, color='#fdac82', lw=0.5, alpha=alphaplot)  #74a655
+# ax2.set_title(r'Invariant sets of $S_2[c_{2345}]$')
+ax3.grid(False)
+ax3.view_init(elev=16, azim=-14, roll=0)   # 31, 43
+ax3_labels = [r'$\theta_1$', r'$\theta_6$', r'$\theta_7$']
+draw_axes_at_origin_with_pi_ticks(ax3, ax3_labels, axis_length=2*np.pi, tick_spacing=np.pi, offset=offset2, fontsize=10)
+
 plt.tight_layout()
-save_path = path / (file_name.removesuffix("parameters_dictionary.json") + "surfaces" + ".pdf")
+# save_path = path / (file_name.removesuffix("parameters_dictionary.json") + "surfaces" + ".pdf")
+# plt.savefig(save_path, bbox_inches='tight')
+save_path = path / (file_name.removesuffix("parameters_dictionary.json") + "surfaces_with_monomial" + ".pdf")
 plt.savefig(save_path, bbox_inches='tight')
 plt.show()
