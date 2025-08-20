@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # @author: Vincent Thibeault
 
+# TODO the integration is fucked up both for complete and reduced dynamics, what's happening o_0
+# TODO Option: Juste intégrer les équations réelles, avec jacobien et version zeta ?
+
 from dynamics.watanabe_strogatz import ws_transformation
 from dynamics.ws_initial_conditions import get_watanabe_strogatz_initial_conditions
 from dynamics.integrate import integrate_dopri45  #, integrate_dopri45_non_autonomous
 from plots.config_rcparams import *
 from graphs.generate_integrability_partitioned_weight_matrix import *
 from dynamics.dynamics import kuramoto
+from scipy.integrate import solve_ivp
 from scipy.stats import binned_statistic
 from numba import njit
 import time
@@ -20,29 +24,32 @@ plot_trajectories = True
 import_setup = False
 
 @njit(fastmath=True)
-def ws_transformation(Z, phi, w):
-    eiphi = np.exp(1j*phi)
-    num = eiphi*w + Z
-    den = 1.0 + eiphi*np.conjugate(Z)*w
+def ws_transformation(Z, phi, w):                               # For solve ivp potentially
+    eiphi = np.exp(1j*phi)                                      # eiphi = np.exp(1j*phi)
+    num = eiphi*w + Z                                # num = eiphi[..., None]*w + Z[..., None]
+    den = 1.0 + eiphi*np.conjugate(Z)*w              # den = 1.0 + eiphi[..., None]*np.conjugate(Z)[..., None]*w
     return num / den
 
 @njit(fastmath=True)
 def ws_equations_kooku1_fig3(t, state, w, calA_source, calA_row_periphery, Omega):
     Z = state[0]
     phi = state[1]
-
     F = np.sum(calA_row_periphery*ws_transformation(Z, phi, w)) + calA_source
     G = Omega
     F_bar = np.conjugate(F)
 
     dotZ   = F + 1j*G*Z - F_bar*Z*Z
-    dotphi = G - 1j*F*np.conjugate(Z) + 1j * F_bar * Z
+    dotphi = G - 1j*F*np.conjugate(Z) + 1j*F_bar*Z
     return dotZ, dotphi
+
+# def real_zeta_dynamics(t, state, w, calA_source, calA_row_periphery, Omega):
+
+
 
 @njit(fastmath=True)
 def integrate_dopri45_jit(t0, t1, dt, dynamics, y0, w, calA_source, calA_row_periphery, omega):
     n_steps = int((t1 - t0) / dt)
-    Y = np.empty((n_steps + 1, 2), dtype=np.complex128)
+    Y = np.empty((n_steps, 2), dtype=np.complex128)
     Y[0, 0] = y0[0]
     Y[0, 1] = y0[1]
 
@@ -137,18 +144,22 @@ if import_setup:
         "theta0", "random_exponents",
         "probabilities_monomial", "probabilities_crossratio",
         "probabilities_nonintegrable2", "probabilities_monomial2", "probabilities_crossratio2", "timelist",
-        "order_param2_array", "mean_module_zeta_array"])
+        "order_param_array", "mean_module_zeta_array"])
 
 else:
     """ Integration parameters """
-    t0, t1, dt = 0, 200, 0.005
+    # t0, t1, dt = 0, 20, 0.001
+    # timelist = np.linspace(t0, t1, int(t1 / dt))
+    t0, t1 = 0, 100
+    dt = 0.005
     timelist = np.linspace(t0, t1, int(t1 / dt))
-
 
     """ Coupling """
     coupling = 1
 
     """ Parameters """
+    size_crossratio = 4
+
     w2, w3, w4, w5 = -0.3, -0.598, 0.5, -1.512
 
     a1, a2, a3, a4, a5 = 0.1, -0.7, np.pi / 2 - 0.1, 0.9, 1
@@ -165,12 +176,11 @@ else:
 
     """ Simulation """
     percentage_averaged_end_time_series = 0.5
-    start_idx = int(percentage_averaged_end_time_series*len(timelist))
     nb_w1 = 10
     min_w1 = 0
-    max_w1 = 2
+    max_w1 = 5
     w1_crossratio = np.linspace(min_w1, max_w1, nb_w1)
-    order_param2_array = np.zeros(len(w1_crossratio))
+    order_param_array = np.zeros(len(w1_crossratio))
     mean_module_zeta_array = np.zeros(len(w1_crossratio))
     for i, w1 in enumerate(w1_crossratio):
         W = np.array([[0., 0., 0., 0., 0.],
@@ -184,13 +194,13 @@ else:
         cal_A = calA(coupling, C, chi)
 
         """ Natural frequencies """
-        omega = np.array([omega1, omega2, omega2 + 2 * np.imag(calA[0, 2] - calA[0, 1]),
-                          omega2 + 2 * np.imag(calA[0, 3] - calA[0, 1]), omega2 + 2*np.imag(calA[0, 4] - calA[0, 1])])
+        omega = np.array([omega1, omega2, omega2 + 2*np.imag(cal_A[0, 2] - cal_A[0, 1]),
+                          omega2 + 2*np.imag(cal_A[0, 3] - cal_A[0, 1]), omega2 + 2*np.imag(cal_A[0, 4] - cal_A[0, 1])])
         Omega = omega[1] - 2*np.imag(cal_A[0, 1])
 
         """ Order parameter from Lohe 2017 """
-        order_param = coupling*np.sum(C*np.cos(chi), axis=1)/sizes_crossratio
-        order_param2_array[i] = order_param
+        order_param = coupling*np.sum(C*np.cos(chi), axis=1)[0]/size_crossratio
+        order_param_array[i] = order_param
 
         print(i, order_param)
 
@@ -204,24 +214,36 @@ else:
         # # print("theta0 = ", theta0)
 
         args_dynamics = (W, coupling, omega, alpha)
+        # sol = solve_ivp(kuramoto, [t0, t1], theta0, vectorized=True, args=args_dynamics, method="BDF",
+        #                 rtol=1e-06, atol=1e-8)
+        # print("Integration complete dynamics done")
         theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto, theta0, *args_dynamics))
+        # theta = sol.y
+        # timelist_theta = sol.t
+        # print(np.shape(theta))
         theta = np.where(theta < 0, 2*np.pi + theta, theta)
 
-        """ Integrate the (large-size) cross-ratio part """
-        Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0[1:], 4, nb_guess=5000)
+        """ Integrate the cross-ratio part """
+        Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0[1:], size_crossratio, nb_guess=5000)
         # print("Initial conditions WS obtained")
         args_ws = (w, cal_A[0, 0], cal_A[0, 1:], Omega)
         solution = np.array([integrate_dopri45_jit(t0, t1, dt, ws_equations_kooku1_fig3,
-                            np.array([Z0, phi0], dtype=complex), theta, *args_ws)])[0]
-        # print("Integration of WS equations complete")
+                            np.array([Z0, phi0], dtype=complex), *args_ws)])[0]
+        # # print("Integration of WS equations complete")
         Z = solution[:, 0]
-        phi = np.real(solution[:, 1])      # np.real for JSON serialization
-        # ReZ, ImZ = np.real(Z), np.imag(Z)  # for JSON serialization
-        # Rew, Imw = np.real(w), np.imag(w)  # for JSON serialization
-
+        phi = np.real(solution[:, 1])
+        # print("Starting integration reduced dynamics ")
+        # solution = solve_ivp(ws_equations_kooku1_fig3, [t0, t1], np.array([Z0, phi0], dtype=complex),
+        #                      method="BDF", vectorized=True, args=args_ws, rtol=1e-08, atol=1e-10)
+        # print("Integration reduced dynamics done")
+        # Z, phi = solution.y[0, :], solution.y[1, :]
+        # timelist = solution.t
+        start_idx = int(percentage_averaged_end_time_series*len(timelist))
+        
+        
         zeta = Z*np.exp(-1j*phi)
         mean_module_zeta_array[i] = np.mean(np.abs(zeta[start_idx:]))
-
+        
         if np.mean(np.abs(zeta[start_idx:])) > 1.05:
             raise ValueError('Something went wrong in the integration (e.g., too large integration step) and '
                              'np.mean(np.abs(zeta[start_idx:])) > 1.05')
@@ -233,15 +255,16 @@ else:
             theta_ws = np.array(theta_ws)
             theta_ws = np.where(theta_ws < 0, 2 * np.pi + theta_ws, theta_ws)
             fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-            ax2.plot(timelist, theta[:, 1:] % (2 * np.pi), color=deep[0])
-            ax2.plot(timelist, theta_ws % (2 * np.pi), color=deep[1], linestyle="dashed")
-            ax2.set_ylim([-0.05, 2 * np.pi + 0.05])
-            ax2.set_ylabel("Phase")
-            ax2.legend(loc=1)
+            # ax.plot(timelist_theta, theta[1:, :].T % (2 * np.pi), color=deep[0])
+            ax.plot(timelist, theta[:, 1:] % (2 * np.pi), color=deep[0])
+            ax.plot(timelist, theta_ws % (2 * np.pi), color=deep[1], linestyle="dashed")
+            ax.set_ylim([-0.05, 2*np.pi + 0.05])
+            ax.set_ylabel("Phase")
+            ax.legend(loc=1)
             plt.show()
 
             fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 3))
-
+            
             ax1.set_aspect('equal')
             angle = np.linspace(0, 2*np.pi, 300)
             ax1.plot(np.cos(angle), np.sin(angle), color=reduced_grey, alpha=0.8)
@@ -249,12 +272,18 @@ else:
             ax1.scatter(np.real(zeta[0]), np.imag(zeta[0]), color="#aac4ff")
             ax1.axis('off')
             ax1.legend(loc=1)
-
+            
             ax2.plot(timelist, np.abs(zeta))
             ax2.set_xlabel("Time $t$")
             ax2.set_ylabel("$|Z(t) e^{-i\phi(t)}|$")
-
+            
             plt.show()
+
+# fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+# 
+# ax.scatter(order_param_array, mean_module_zeta_array, s=5, alpha=0.6)
+# 
+# plt.show()
 
 # plt.rcParams.update({
 #     "text.usetex": True,               # Use LaTeX for all text
@@ -267,9 +296,9 @@ else:
 # fig, ax = plt.subplots(1, 1, figsize=(4, 4))
 #
 # for i in range(nb_init_conditions):
-#     ax.scatter(order_param2_array[:, i], mean_module_zeta_array[:, i], s=5, alpha=0.6)
+#     ax.scatter(order_param_array[:, i], mean_module_zeta_array[:, i], s=5, alpha=0.6)
 #
-# x, y = order_param2_array.ravel(), mean_module_zeta_array.ravel()
+# x, y = order_param_array.ravel(), mean_module_zeta_array.ravel()
 #
 # nb_bins = 40  # edges = np.histogram_bin_edges(x, bins="fd") # Freedman–Diaconis binning did not work well
 #
@@ -325,7 +354,7 @@ else:
 #                                  "probabilities_monomial2": probabilities_monomial2.tolist(),
 #                                  "probabilities_crossratio2": probabilities_crossratio2.tolist(),
 #                                  "t0": t0, "t1": t1, "dt": dt, "nb_init_conditions": nb_init_conditions,
-#                                  "timelist": timelist.tolist(), "order_param2_array": order_param2_array.tolist(),
+#                                  "timelist": timelist.tolist(), "order_param_array": order_param_array.tolist(),
 #                                  "mean_module_zeta_array": mean_module_zeta_array.tolist(),
 #                                  "percentage_averaged_end_time_series": percentage_averaged_end_time_series,
 #                                  "start_idx": int(start_idx),

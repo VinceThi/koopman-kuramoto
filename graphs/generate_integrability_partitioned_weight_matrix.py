@@ -178,6 +178,8 @@ def random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, r
              "nonintegrable": real array with shape (size_nonintegrable[0], N)}
     The values of the dictionaries must satisfy specific constraints based on the previously defined functions.
 
+    Warning: C corresponds to C^T in the paper
+
     See the example at the end of this script to better understand how to use the function.
     """
     probabilities = probabilities or {}  # if probabilities is None, return {}

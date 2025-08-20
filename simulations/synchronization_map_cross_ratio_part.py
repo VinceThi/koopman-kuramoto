@@ -151,7 +151,7 @@ if import_setup:
         "sizes_monomial", "sizes_crossratio", "size_nonintegrable",
         "random_exponents", "probabilities_monomial", "probabilities_crossratio",
         "probabilities_nonintegrable2", "probabilities_monomial2", "probabilities_crossratio2", "timelist",
-        "order_param_array", "mean_module_zeta_array"])
+        "order_param2_array", "mean_module_zeta_array"])
 
 else:
     """ Integration parameters """
@@ -182,8 +182,6 @@ else:
     stdW_monomial = 0.1
     weights_monomial = np.random.normal(meanW_monomial, stdW_monomial, (sum(sizes_monomial), sum(sizes_monomial)))
 
-    weights_crossratio10 = 0      # TODO Important parameters
-
     # Phase-lags
     probabilities_monomial2 = np.array([0])
     probabilities_crossratio2 = np.array([[1, 0.5]])
@@ -202,127 +200,130 @@ else:
     percentage_averaged_end_time_series = 0.5
     start_idx = int(percentage_averaged_end_time_series*len(timelist))
     stdW_crossratio = 1
-    nb_init_conditions = 1000
-    nb_meanW = 100
+    nb_init_conditions = 20
+    nb_meanW = 20
     min_meanW = -0.5
     max_meanW = 0.5
     meanW_crossratio = np.linspace(min_meanW, max_meanW, nb_meanW)
-    order_param_array = np.zeros((len(meanW_crossratio), nb_init_conditions))
-    mean_module_zeta_array = np.zeros((len(meanW_crossratio), nb_init_conditions))
-    for j, _ in tqdm(enumerate(range(nb_init_conditions))):
-        """ Initial conditions """
-        theta0 = np.random.uniform(0, 2*np.pi, N)
-        theta0[0] = 0  # This simplifies things slightly and this is without loss of generality
-        for i, meanW_cr in enumerate(meanW_crossratio):
+    nb_source_weight = 20
+    min_source_weight = -10
+    max_source_weight = 10
+    source_weight = np.linspace(min_source_weight, max_source_weight, nb_source_weight)
+    order_param_array = np.zeros((len(meanW_crossratio), nb_init_conditions, nb_source_weight))
+    mean_module_zeta_array = np.zeros((len(meanW_crossratio), nb_init_conditions, nb_source_weight))
+    for k, source_weight in tqdm(range()):
+        for j, _ in enumerate(range(nb_init_conditions)):
+            """ Initial conditions """
+            theta0 = np.random.uniform(0, 2*np.pi, N)
+            theta0[0] = 0  # This simplifies things slightly and this is without loss of generality
+            for i, meanW_cr in enumerate(meanW_crossratio):
 
-            """ Get weight matrix """
-            weights_crossratio = np.random.normal(meanW_cr, stdW_crossratio, (len(sizes_crossratio), N))
-            weights_crossratio[0, 0] = weights_crossratio10
-            weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio}
+                """ Get weight matrix """
+                weights_crossratio = np.random.normal(meanW_cr, stdW_crossratio, (len(sizes_crossratio), N))
+                weights_crossratio[0, 0] = source_weight
+                weights_dict = {"monomial": weights_monomial, "crossratio": weights_crossratio}
 
-            W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
-                                        probabilities=probabilities_dict, weights=weights_dict)
+                W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
+                                            probabilities=probabilities_dict, weights=weights_dict)
 
-            """ Get phase-lag matrix """
-            phaselags_monomial = np.random.normal(meanalpha_monomial, stdalpha_monomial,
-                                                  (sum(sizes_monomial), sum(sizes_monomial))) % (np.pi / 2)
-            phaselags_crossratio = np.random.normal(meanalpha_crossratio, stdalpha_crossratio, (len(sizes_crossratio), N))
-            phaselags_dict = {"monomial": phaselags_monomial, "crossratio": phaselags_crossratio}
-            alpha, chi = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
-                                                 probabilities=probabilities_dict2, phaselags=phaselags_dict)
+                """ Get phase-lag matrix """
+                phaselags_monomial = np.random.normal(meanalpha_monomial, stdalpha_monomial,
+                                                      (sum(sizes_monomial), sum(sizes_monomial))) % (np.pi / 2)
+                phaselags_crossratio = np.random.normal(meanalpha_crossratio, stdalpha_crossratio, (len(sizes_crossratio), N))
+                phaselags_dict = {"monomial": phaselags_monomial, "crossratio": phaselags_crossratio}
+                alpha, chi = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
+                                                     probabilities=probabilities_dict2, phaselags=phaselags_dict)
 
-            """ calA """
-            cal_A = calA(coupling, C, chi)
+                """ calA """
+                cal_A = calA(coupling, C, chi)
 
-            """ Order parameter from Lohe 2017 """
-            order_param = coupling*np.sum(C[0, 1:]*np.cos(chi[0, 1:]), axis=1)/sizes_crossratio
-            order_param_array[i, j] = order_param[0]
+                """ Order parameter from Lohe 2017 """
+                order_param = coupling*np.sum(C[1, :]*np.cos(chi[1, :]), axis=1)/sizes_crossratio
+                order_param_array[i, j] = order_param[0]
 
-            # print(i, order_param)
+                # print(i, order_param)
 
-            """ Natural frequencies """
-            omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, mean_omega, std_omega)
-            # We put ourselves in the reference frame of the source
-            omega[0] = 0
-            Omega = omega[1] - 2*np.imag(cal_A[0, 1])
+                """ Natural frequencies """
+                omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, mean_omega, std_omega)
+                # We put ourselves in the reference frame of the source
+                omega[0] = 0
+                Omega = omega[1] - 2*np.imag(cal_A[0, 1])
 
-            # print("W = \n", np.round(W, 3))
-            # # plt.matshow(W, aspect="auto")
-            # # plt.show()
-            # print("alpha = \n", np.round(alpha, 3))
-            # print("calA = \n", np.round(cal_A, 3))
-            # print("order_param = \n", order_param)
-            # # print("omega = ", omega)
-            # print("Omega1 = ", Omega)
-            # # print("theta0 = ", theta0)
+                # print("W = \n", np.round(W, 3))
+                # # plt.matshow(W, aspect="auto")
+                # # plt.show()
+                # print("alpha = \n", np.round(alpha, 3))
+                # print("calA = \n", np.round(cal_A, 3))
+                # print("order_param = \n", order_param)
+                # # print("omega = ", omega)
+                # print("Omega1 = ", Omega)
+                # # print("theta0 = ", theta0)
 
-            """ Integrate the (large-size) cross-ratio part """
-            Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0[1:], sizes_crossratio[0], nb_guess=5000)
-            # print("Initial conditions WS obtained")
-            args_ws = (w, cal_A[0, 0], cal_A[0, 1:], Omega)
-            solution = np.array([integrate_dopri45_non_autonomous(t0, t1, dt, ws_equations_kooku1_fig3,
-                                np.array([Z0, phi0], dtype=complex), None, *args_ws)])[0]
-            # print("Integration of WS equations complete")
-            Z = solution[:, 0]
-            phi = np.real(solution[:, 1])      # np.real for JSON serialization
-            # ReZ, ImZ = np.real(Z), np.imag(Z)  # for JSON serialization
-            # Rew, Imw = np.real(w), np.imag(w)  # for JSON serialization
+                """ Integrate the (large-size) cross-ratio part """
+                Z0, phi0, w = get_watanabe_strogatz_initial_conditions(theta0[1:], sizes_crossratio[0], nb_guess=5000)
+                # print("Initial conditions WS obtained")
+                args_ws = (w, cal_A[0, 0], cal_A[0, 1:], Omega)
+                solution = np.array([integrate_dopri45_non_autonomous(t0, t1, dt, ws_equations_kooku1_fig3,
+                                    np.array([Z0, phi0], dtype=complex), None, *args_ws)])[0]
+                # print("Integration of WS equations complete")
+                Z = solution[:, 0]
+                phi = np.real(solution[:, 1])      # np.real for JSON serialization
+                # ReZ, ImZ = np.real(Z), np.imag(Z)  # for JSON serialization
+                # Rew, Imw = np.real(w), np.imag(w)  # for JSON serialization
 
-            zeta = Z*np.exp(-1j*phi)
+                zeta = Z*np.exp(-1j*phi)
 
-            if np.any(np.abs(zeta) > 1.002):
-                print('np.any(np.abs(zeta) > 1.002) is true, meaning that the integration step was probably too '
-                      'large for these parameters and the integrated trajectory is incorrect.'
-                      ' A Nan was added to mean_module_zeta_array')
-                mean_module_zeta_array[i, j] = np.nan
-            else:
-                mean_module_zeta_array[i, j] = np.mean(np.abs(zeta[start_idx:]))
+                if np.any(np.abs(zeta) > 1.002):
+                    print('np.any(np.abs(zeta) > 1.002) is true, meaning that the integration step was probably too '
+                          'large for these parameters and the integrated trajectory is incorrect.'
+                          ' A Nan was added to mean_module_zeta_array')
+                    mean_module_zeta_array[i, j, k] = np.nan
+                else:
+                    mean_module_zeta_array[i, j, k] = np.mean(np.abs(zeta[start_idx:]))
 
 
+                if verif_validity_ws_equations:
+                    args_dynamics = (W, coupling, omega, alpha)
+                    theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto, theta0, *args_dynamics))
+                    theta = np.where(theta < 0, 2*np.pi + theta, theta)
 
-            if verif_validity_ws_equations:
-                args_dynamics = (W, coupling, omega, alpha)
-                theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto, theta0, *args_dynamics))
-                theta = np.where(theta < 0, 2*np.pi + theta, theta)
+                    theta_ws = []
+                    for i in range(len(timelist)):
+                        theta_ws.append(np.angle(ws_transformation(Z[i], phi[i], w)))
+                    theta_ws = np.array(theta_ws)
+                    theta_ws = np.where(theta_ws < 0, 2 * np.pi + theta_ws, theta_ws)
+                    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
+                    ax1.plot(timelist, theta[:, 0] % (2 * np.pi), color=deep[2], label="Sources")
+                    ax1.set_ylabel("Phase")  # $\\theta_1(t), ..., \\theta_N(t)$")
+                    ax1.set_ylim([-0.05, 2 * np.pi + 0.05])
+                    ax1.legend()
 
-                theta_ws = []
-                for i in range(len(timelist)):
-                    theta_ws.append(np.angle(ws_transformation(Z[i], phi[i], w)))
-                theta_ws = np.array(theta_ws)
-                theta_ws = np.where(theta_ws < 0, 2 * np.pi + theta_ws, theta_ws)
-                fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-                ax1.plot(timelist, theta[:, 0] % (2 * np.pi), color=deep[2], label="Sources")
-                ax1.set_ylabel(
-                    "Phase")  # $\\theta_1(t), ..., \\theta_N(t)$")
-                ax1.set_ylim([-0.05, 2 * np.pi + 0.05])
-                ax1.legend()
+                    ax2.plot(timelist, theta[:, 1:] % (2 * np.pi),
+                             color=deep[0])  # , label="Cross-ratio part")
+                    ax2.plot(timelist, theta_ws % (2 * np.pi), color=deep[1],
+                             linestyle="dashed")  # , label="Cross-ratio part")
+                    ax2.set_ylim([-0.05, 2 * np.pi + 0.05])
+                    ax2.set_ylabel("Phase")
+                    ax2.legend(loc=1)
+                    plt.show()
 
-                ax2.plot(timelist, theta[:, 1:] % (2 * np.pi),
-                         color=deep[0])  # , label="Cross-ratio part")
-                ax2.plot(timelist, theta_ws % (2 * np.pi), color=deep[1],
-                         linestyle="dashed")  # , label="Cross-ratio part")
-                ax2.set_ylim([-0.05, 2 * np.pi + 0.05])
-                ax2.set_ylabel("Phase")
-                ax2.legend(loc=1)
-                plt.show()
+                if plot_zeta_trajectories:
 
-            if plot_zeta_trajectories:
+                    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 3))
 
-                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 3))
+                    ax1.set_aspect('equal')
+                    angle = np.linspace(0, 2*np.pi, 300)
+                    ax1.plot(np.cos(angle), np.sin(angle), color=reduced_grey, alpha=0.8)
+                    ax1.plot(np.real(zeta), np.imag(zeta), color="#aac4ff", label=r"$Z(t) e^{-i\phi(t)}$")
+                    ax1.scatter(np.real(zeta[0]), np.imag(zeta[0]), color="#aac4ff")
+                    ax1.axis('off')
+                    ax1.legend(loc=1)
 
-                ax1.set_aspect('equal')
-                angle = np.linspace(0, 2*np.pi, 300)
-                ax1.plot(np.cos(angle), np.sin(angle), color=reduced_grey, alpha=0.8)
-                ax1.plot(np.real(zeta), np.imag(zeta), color="#aac4ff", label=r"$Z(t) e^{-i\phi(t)}$")
-                ax1.scatter(np.real(zeta[0]), np.imag(zeta[0]), color="#aac4ff")
-                ax1.axis('off')
-                ax1.legend(loc=1)
+                    ax2.plot(timelist, np.abs(zeta))
+                    ax2.set_xlabel("Time $t$")
+                    ax2.set_ylabel("$|Z(t) e^{-i\phi(t)}|$")
 
-                ax2.plot(timelist, np.abs(zeta))
-                ax2.set_xlabel("Time $t$")
-                ax2.set_ylabel("$|Z(t) e^{-i\phi(t)}|$")
-
-                plt.show()
+                    plt.show()
 
 plt.rcParams.update({
     "text.usetex": True,               # Use LaTeX for all text
@@ -398,6 +399,8 @@ if not import_setup:
                                  "percentage_averaged_end_time_series": percentage_averaged_end_time_series,
                                  "start_idx": int(start_idx),
                                  "weights_crossratio10": weights_crossratio[0, 0],
+                                 "weights_crossratio11": weights_crossratio[0, 1],
+                                 "weights_crossratio12": weights_crossratio[0, 2],
                                  "mean_omega": mean_omega, "std_omega": std_omega
                                  }  # "phaselags_crossratio10": phaselags_crossratio[1, 0],
 
