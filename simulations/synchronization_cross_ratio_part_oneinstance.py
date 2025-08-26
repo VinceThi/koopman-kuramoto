@@ -6,6 +6,8 @@ from dynamics.ws_initial_conditions import get_watanabe_strogatz_initial_conditi
 from dynamics.integrate import integrate_dopri45
 from plots.config_rcparams import *
 from graphs.generate_integrability_partitioned_weight_matrix import *
+from plots.kuramoto_animation import animate_kuramoto_on_circle
+from matplotlib.animation import FuncAnimation
 from dynamics.dynamics import kuramoto
 from numba import njit
 import time
@@ -14,12 +16,11 @@ from pathlib import Path
 import sys
 from PyQt6.QtWidgets import QApplication, QMessageBox, QInputDialog
 
-""" Order param here is a bad terminology and means the conformists-contrarians coupling """
-
 verif_validity_ws_equations = False
 import_setup = True
-isolate_cross_ratio_part = import_setup*True
+isolate_cross_ratio_part = import_setup*False
 reconnect_cross_ratio_part = import_setup*False
+plot_animation = True
 
 @njit(fastmath=True)
 def ws_transformation(Z, phi, w):
@@ -152,7 +153,7 @@ if import_setup:
     REPO_ROOT = SCRIPT_DIR.parent      # Go to repo root (adjust this based on how deep your script is)
     path = REPO_ROOT / 'simulations' / 'kooku1_fig3_data'  # Path to the data file
     # Path to your JSON file
-    file_path = Path(path / "2025_08_18_11h52min33sec_phasesync_kuramoto_parameters_dictionary.json")
+    file_path = Path(path / "2025_08_21_15h03min45sec_periodic_kuramoto_parameters_dictionary.json")
     load_parameters_to_globals(file_path, keys_as_array=[
         "sizes_monomial", "sizes_crossratio", "size_nonintegrable",
         "theta0", "random_exponents", "W", "alpha", "C", "chi", "omega", "Rew", "Imw", "ReZ0", "ImZ0",
@@ -160,14 +161,15 @@ if import_setup:
         "probabilities_nonintegrable2", "probabilities_monomial2", "probabilities_crossratio2", "timelist"])
     w = np.array(Rew) + 1j*np.array(Imw)
     Z0 = np.array(ReZ0) + 1j*np.array(ImZ0)
+    sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable]).astype(int)
 
 else:  # Generate parameters
     """ Integration parameters """
-    t0, t1, dt = 0, 200, 0.005
+    t0, t1, dt = 0, 300, 0.01
     timelist = np.linspace(t0, t1, int(t1 / dt))
 
     """ Partition parameters"""
-    # Note: This does not exactlyyield the graph from fig. 3, but it does yields the cross-ratio part of 93 vertices
+    # Note: This does not yield the graph from fig. 3, but it does yields the cross-ratio part of 93 vertices
     # that receive the input from the source 1
     sizes_monomial = np.array([1, 2], dtype=int)
     sizes_crossratio = np.array([4, 93], dtype=int)
@@ -179,7 +181,7 @@ else:  # Generate parameters
     c = len(sizes_crossratio)
 
     """ Coupling """
-    coupling = 0.1
+    coupling = 1
 
     """ Distribution parameters """
 
@@ -193,7 +195,7 @@ else:  # Generate parameters
     stdW_monomial = 0.1
     weights_monomial = np.random.normal(meanW_monomial, stdW_monomial, (sum(sizes_monomial), sum(sizes_monomial)))
 
-    weights_crossratio10 = 0      # TODO Important parameters
+    weights_crossratio10 = 20     # TODO Important parameters
     weights_crossratio11 = 0      # TODO Important parameters
     weights_crossratio12 = 0      # TODO Important parameters
 
@@ -237,10 +239,10 @@ else:  # Generate parameters
     omega[0] = 0
     # We have that omega[1 to 4] = omega[0] - 2*np.imag(cal_A[0, 0]) to ensure c1234 is conserved, so we set :
     # Not important for this script however, since we focus on the other cross-ratio part
-    omega[3] = omega[0] - 2 * np.imag(cal_A[0, 0])
-    omega[4] = omega[0] - 2 * np.imag(cal_A[0, 0])
-    omega[5] = omega[0] - 2 * np.imag(cal_A[0, 0])
-    omega[6] = omega[0] - 2 * np.imag(cal_A[0, 0])
+    omega[3] = omega[0] - 2*np.imag(cal_A[0, 0])
+    omega[4] = omega[0] - 2*np.imag(cal_A[0, 0])
+    omega[5] = omega[0] - 2*np.imag(cal_A[0, 0])
+    omega[6] = omega[0] - 2*np.imag(cal_A[0, 0])
     Omega1 = omega[3] - 2*np.imag(cal_A[0, 3])
     Omega2 = omega[7] - 2*np.imag(cal_A[1, 7])
 
@@ -249,7 +251,7 @@ else:  # Generate parameters
     # # plt.show()
     # print("alpha = \n", np.round(alpha, 3))
     # print("calA = \n", np.round(cal_A, 3))
-    # print("order_param = \n", order_param)
+    # print("conformist_contrarian_coupling = \n", conformist_contrarian_coupling)
     # # print("omega = ", omega)
     # print("Omega1 = ", Omega1)
     # print("Omega2 = ", Omega2)
@@ -275,13 +277,18 @@ if reconnect_cross_ratio_part:
 
 cal_A = calA(coupling, C, chi)
 
-order_param = coupling * np.sum(C[1, 7:]*np.cos(chi[1, 7:]), axis=1) / sizes_crossratio  # Order parameter from Lohe 2017
+conformist_contrarian_coupling = coupling * np.sum(C[1, 7:]*np.cos(chi[1, 7:])) / sizes_crossratio[1]  # from Lohe 2017
 
-print(order_param)
+print(conformist_contrarian_coupling)
 
 args_dynamics = (W, coupling, omega, alpha)
 theta = np.array(integrate_dopri45(t0, t1, dt, kuramoto, theta0, *args_dynamics))
 theta = np.where(theta < 0, 2*np.pi + theta, theta)
+
+if plot_animation:
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+    ani_ax = animate_kuramoto_on_circle(theta, sizes, interval=10, ax=ax)
+    plt.show()
 
 """ Integrate the (large-size) cross-ratio part """
 # print("Initial conditions WS obtained")
@@ -364,7 +371,7 @@ if reply == QMessageBox.StandardButton.Yes:
                              "probabilities_monomial2": probabilities_monomial2.tolist(),
                              "probabilities_crossratio2": probabilities_crossratio2.tolist(),
                              "t0": t0, "t1": t1, "dt": dt, "theta": theta.tolist(),
-                             "timelist": timelist.tolist(), "order_param": order_param,
+                             "timelist": timelist.tolist(), "conformist_contrarian_coupling": conformist_contrarian_coupling,
                              "mean_module_zeta": mean_module_zeta,
                              "ReZ0": np.real(Z0).tolist(), "ImZ0": np.imag(Z0).tolist(), "phi0": np.real(phi0),
                              "Rew": np.real(w).tolist(), "Imw": np.imag(w).tolist(),

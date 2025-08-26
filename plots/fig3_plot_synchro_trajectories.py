@@ -17,12 +17,10 @@ def get_param_dictionary(filepath):
     with filepath.open("r") as f:
         params = json.load(f)
     return params
-SCRIPT_DIR = Path(__file__).resolve().parent   # Get current script location
-REPO_ROOT = SCRIPT_DIR.parent      # Go to repo root (adjust this based on how deep your script is)
-path = REPO_ROOT / 'simulations' / 'kooku1_fig3_data'  # Path to the data file
-# Path to your JSON file
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+path = REPO_ROOT / 'simulations' / 'kooku1_fig3_data'
 
-""" Order param here is a bad terminology and means the conformists-contrarians coupling """
 
 t0, t1, dt = 0, 300, 0.01
 timelist = np.linspace(t0, t1, int(t1 / dt))
@@ -30,44 +28,52 @@ percentage_averaged_end_time_series = 0.5
 start_idx = int(percentage_averaged_end_time_series*len(timelist))
 
 """ Freq sync to periodic state """
-file_path_freqsync1 = Path(path / "2025_08_18_16h08min22sec_isolated_2025_08_18_16h06min51sec_kuramoto_parameters_dictionary.json")
+file_path_freqsync1 = Path(path / "2025_08_21_15h06min08sec_freqsync_15h03_kuramoto_parameters_dictionary.json")
 dict_freqsync1 = get_param_dictionary(file_path_freqsync1)
-order_param_freqsync1 = dict_freqsync1['order_param2']
-print("(isolated) order_param_freqsync1 = ", order_param_freqsync1)
+conformist_contrarian_coupling_freqsync1 = dict_freqsync1['conformist_contrarian_coupling']
+print("(isolated) conformist_contrarian_couplingm_freqsync1 = ", conformist_contrarian_coupling_freqsync1)
+alpha = np.array(dict_freqsync1['alpha'])
+print("alpha_s_freqsync1 = ", alpha[7, 0])
 Rezeta_freqsync1 = np.array(dict_freqsync1["Rezeta"])
 Imzeta_freqsync1 = np.array(dict_freqsync1["Imzeta"])
 zeta_freqsync1 = Rezeta_freqsync1 + 1j*Imzeta_freqsync1
 print(np.mean(np.abs(zeta_freqsync1[start_idx:])))
 
-file_path_periodic = Path(path / "2025_08_18_16h06min51sec_nice_periodic_kuramoto_parameters_dictionary.json")
+file_path_periodic = Path(path / "2025_08_21_15h03min45sec_periodic_kuramoto_parameters_dictionary.json")
 dict_periodic = get_param_dictionary(file_path_periodic)
-order_param_periodic = dict_periodic['order_param2']
-print("order_param_periodic = ", order_param_periodic)
+conformist_contrarian_coupling_periodic = dict_periodic['conformist_contrarian_coupling']
+print("conformist_contrarian_coupling_periodic = ", conformist_contrarian_coupling_periodic)
 Rezeta_periodic = np.array(dict_periodic["Rezeta"])
 Imzeta_periodic = np.array(dict_periodic["Imzeta"])
 zeta_periodic = Rezeta_periodic + 1j*Imzeta_periodic
 print(np.mean(np.abs(zeta_periodic[start_idx:])))
+alpha = np.array(dict_periodic['alpha'])
+print("alpha_s_periodic = ", alpha[7, 0])
 
 
 """ Freq sync to phase sync """
-file_path_freqsync2 = Path(path / "2025_08_18_16h13min41sec_isolated_2025_08_18_16h11min43sec_kuramoto_parameters_dictionary.json")
+file_path_freqsync2 = Path(path / "2025_08_21_15h32min23sec_freq_sync_15h29_kuramoto_parameters_dictionary.json")
 dict_freqsync2 = get_param_dictionary(file_path_freqsync2)
-order_param_freqsync2 = dict_freqsync2['order_param2']
-print("(isolated) order_param_freqsync2 = ", order_param_freqsync2)
+conformist_contrarian_coupling_freqsync2 = dict_freqsync2['conformist_contrarian_coupling']
+print("(isolated) conformist_contrarian_coupling_freqsync2 = ", conformist_contrarian_coupling_freqsync2)
 Rezeta_freqsync2 = np.array(dict_freqsync2["Rezeta"])
 Imzeta_freqsync2 = np.array(dict_freqsync2["Imzeta"])
 zeta_freqsync2 = Rezeta_freqsync2 + 1j*Imzeta_freqsync2
 print(np.mean(np.abs(zeta_freqsync2[start_idx:])))
+alpha = np.array(dict_freqsync2['alpha'])
+print("alpha_s_freqsync2 = ", alpha[7, 0])
 
 
-file_path_phasesync = Path(path / "2025_08_18_16h11min43sec_phasesync_kuramoto_parameters_dictionary.json")
+file_path_phasesync = Path(path / "2025_08_21_15h29min15sec_phasesync_kuramoto_parameters_dictionary.json")
 dict_phasesync = get_param_dictionary(file_path_phasesync)
-order_param_phasesync = dict_phasesync['order_param2']
-print("order_param_phasesync = ", order_param_phasesync)
+conformist_contrarian_coupling_phasesync = dict_phasesync['conformist_contrarian_coupling']
+print("conformist_contrarian_coupling_phasesync = ", conformist_contrarian_coupling_phasesync)
 Rezeta_phasesync = np.array(dict_phasesync["Rezeta"])
 Imzeta_phasesync = np.array(dict_phasesync["Imzeta"])
 zeta_phasesync = Rezeta_phasesync + 1j*Imzeta_phasesync
 print(np.mean(np.abs(zeta_phasesync[start_idx:])))
+alpha = np.array(dict_phasesync['alpha'])
+print("alpha_s_phasesync = ", alpha[7, 0])
 
 
 
@@ -117,7 +123,7 @@ plt.rcParams.update({
     "font.serif": ["Computer Modern"], # Same as LaTeX default
     "axes.unicode_minus": False        # Allow proper minus signs
 })
-s = 10
+s = 15
 width, height = 0.1, 0.1
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(5, 2))
 ax1.set_aspect('equal')
@@ -125,29 +131,29 @@ angle = np.linspace(0, 2*np.pi, 300)
 
 ax1.plot(np.cos(angle), np.sin(angle), color=reduced_grey, alpha=0.8, zorder=-10)
 ax1.plot(Rezeta_freqsync1, Imzeta_freqsync1, color="#aac4ff", label=r"Isolated")
-mid = 40  # int(len(Rezeta_freqsync1) // 5)
+mid = 5  # int(len(Rezeta_freqsync1) // 5)
 p_tip = [Rezeta_freqsync1[mid], Imzeta_freqsync1[mid]]
 vec   = [Rezeta_freqsync1[mid] - Rezeta_freqsync1[mid-1],
          Imzeta_freqsync1[mid] - Imzeta_freqsync1[mid-1]]
 add_2d_arrowhead(ax1, tip=p_tip, direction=vec, width=width, height=height, color="#aac4ff", zorder=15)
 
 ax1.plot(Rezeta_periodic, Imzeta_periodic, color="#fde0d0", label=r"Pertubed")
-mid = int(len(Rezeta_periodic) // 1.057)
+mid = 10
 p_tip = [Rezeta_periodic[mid], Imzeta_periodic[mid]]
 vec   = [Rezeta_periodic[mid] - Rezeta_periodic[mid-1],
          Imzeta_periodic[mid] - Imzeta_periodic[mid-1]]
 add_2d_arrowhead(ax1, tip=p_tip, direction=vec, width=width, height=height, color="#fde0d0", zorder=15)
 
 ax1.scatter(Rezeta_periodic[0], Imzeta_periodic[0], color=dark_grey, s=s)
-ax1.scatter(Rezeta_freqsync1[-1], Imzeta_freqsync1[-1], color="#aac4ff", s=s)
+ax1.scatter(Rezeta_freqsync1[-1], Imzeta_freqsync1[-1], color="#aac4ff", s=s, marker="s")
 ax1.axis('off')
-ax1.legend(loc=1)
+# ax1.legend(loc=1)
 
 ax2.set_aspect('equal')
 ax2.plot(np.cos(angle), np.sin(angle), color=reduced_grey, alpha=0.8, zorder=-10)
 
 ax2.plot(Rezeta_freqsync2, Imzeta_freqsync2, color="#aac4ff", label=r"Isolated")
-mid = 40  # int(len(Rezeta_freqsync1) // 5)
+mid = 20  # int(len(Rezeta_freqsync1) // 5)
 p_tip = [Rezeta_freqsync2[mid], Imzeta_freqsync2[mid]]
 vec   = [Rezeta_freqsync2[mid] - Rezeta_freqsync2[mid-1],
          Imzeta_freqsync2[mid] - Imzeta_freqsync2[mid-1]]
@@ -155,7 +161,7 @@ add_2d_arrowhead(ax2, tip=p_tip, direction=vec, width=width, height=height, colo
 
 
 ax2.plot(Rezeta_phasesync, Imzeta_phasesync, color="#fde0d0", label=r"Pertubed")
-mid = 60
+mid = 10
 p_tip = [Rezeta_phasesync[mid], Imzeta_phasesync[mid]]
 vec   = [Rezeta_phasesync[mid] - Rezeta_phasesync[mid-1],
          Imzeta_phasesync[mid] - Imzeta_phasesync[mid-1]]
@@ -163,10 +169,10 @@ add_2d_arrowhead(ax2, tip=p_tip, direction=vec, width=width, height=height, colo
 
 
 ax2.scatter(Rezeta_phasesync[0], Imzeta_phasesync[0], color=dark_grey, s=s)
-ax2.scatter(Rezeta_phasesync[-1], Imzeta_phasesync[-1], color="#fde0d0", s=s)
-ax2.scatter(Rezeta_freqsync2[-1], Imzeta_freqsync2[-1], color="#aac4ff", s=s)
+ax2.scatter(Rezeta_phasesync[-1], Imzeta_phasesync[-1], color="#fde0d0", s=40, marker="*")
+ax2.scatter(Rezeta_freqsync2[-1], Imzeta_freqsync2[-1], color="#aac4ff", s=40, marker="*")
 ax2.axis('off')
-ax2.legend(loc=1)
+# ax2.legend(loc=1)
 
 plt.show()
 app = QApplication(sys.argv)

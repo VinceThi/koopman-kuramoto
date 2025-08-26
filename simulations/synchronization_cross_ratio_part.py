@@ -16,7 +16,7 @@ from pathlib import Path
 import sys
 from PyQt6.QtWidgets import QApplication, QMessageBox, QInputDialog
 
-plot_zeta_trajectories = False
+plot_zeta_trajectories = True
 verif_validity_ws_equations = False
 import_setup = False
 
@@ -151,7 +151,7 @@ if import_setup:
         "sizes_monomial", "sizes_crossratio", "size_nonintegrable",
         "random_exponents", "probabilities_monomial", "probabilities_crossratio",
         "probabilities_nonintegrable2", "probabilities_monomial2", "probabilities_crossratio2", "timelist",
-        "order_param_array", "mean_module_zeta_array"])
+        "conformist_contrarian_coupling_array", "mean_module_zeta_array"])
 
 else:
     """ Integration parameters """
@@ -182,7 +182,7 @@ else:
     stdW_monomial = 0.1
     weights_monomial = np.random.normal(meanW_monomial, stdW_monomial, (sum(sizes_monomial), sum(sizes_monomial)))
 
-    weights_crossratio10 = 0      # TODO Important parameters
+    weights_crossratio10 = 20      # TODO Important parameters
 
     # Phase-lags
     probabilities_monomial2 = np.array([0])
@@ -202,12 +202,12 @@ else:
     percentage_averaged_end_time_series = 0.5
     start_idx = int(percentage_averaged_end_time_series*len(timelist))
     stdW_crossratio = 1
-    nb_init_conditions = 1000
+    nb_init_conditions = 50
     nb_meanW = 100
     min_meanW = -0.5
     max_meanW = 0.5
     meanW_crossratio = np.linspace(min_meanW, max_meanW, nb_meanW)
-    order_param_array = np.zeros((len(meanW_crossratio), nb_init_conditions))
+    conformist_contrarian_coupling_array = np.zeros((len(meanW_crossratio), nb_init_conditions))
     mean_module_zeta_array = np.zeros((len(meanW_crossratio), nb_init_conditions))
     for j, _ in tqdm(enumerate(range(nb_init_conditions))):
         """ Initial conditions """
@@ -223,6 +223,7 @@ else:
             W, C = random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, random_exponents,
                                         probabilities=probabilities_dict, weights=weights_dict)
 
+
             """ Get phase-lag matrix """
             phaselags_monomial = np.random.normal(meanalpha_monomial, stdalpha_monomial,
                                                   (sum(sizes_monomial), sum(sizes_monomial))) % (np.pi / 2)
@@ -235,10 +236,10 @@ else:
             cal_A = calA(coupling, C, chi)
 
             """ Order parameter from Lohe 2017 """
-            order_param = coupling*np.sum(C[0, 1:]*np.cos(chi[0, 1:]), axis=1)/sizes_crossratio
-            order_param_array[i, j] = order_param[0]
+            conformist_contrarian_coupling = coupling*np.sum(C[0, 1:]*np.cos(chi[0, 1:]))/sizes_crossratio
+            conformist_contrarian_coupling_array[i, j] = conformist_contrarian_coupling[0]
 
-            # print(i, order_param)
+            # print(i, conformist_contrarian_coupling)
 
             """ Natural frequencies """
             omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, mean_omega, std_omega)
@@ -251,7 +252,7 @@ else:
             # # plt.show()
             # print("alpha = \n", np.round(alpha, 3))
             # print("calA = \n", np.round(cal_A, 3))
-            # print("order_param = \n", order_param)
+            # print("conformist_contrarian_coupling = \n", conformist_contrarian_coupling)
             # # print("omega = ", omega)
             # print("Omega1 = ", Omega)
             # # print("theta0 = ", theta0)
@@ -335,9 +336,9 @@ plt.rcParams.update({
 fig, ax = plt.subplots(1, 1, figsize=(4, 4))
 
 for i in range(nb_init_conditions):
-    ax.scatter(order_param_array[:, i], mean_module_zeta_array[:, i], s=5, alpha=0.6)
+    ax.scatter(conformist_contrarian_coupling_array[:, i], mean_module_zeta_array[:, i], s=5, alpha=0.6)
 
-x, y = order_param_array.ravel(), mean_module_zeta_array.ravel()
+x, y = conformist_contrarian_coupling_array.ravel(), mean_module_zeta_array.ravel()
 
 nb_bins = 40  # edges = np.histogram_bin_edges(x, bins="fd") # Freedman–Diaconis binning did not work well
 
@@ -361,7 +362,7 @@ y_std_plot = y_std[mask]
 ax.plot(x_plot, y_mean_plot, lw=2)
 ax.fill_between(x_plot, y_mean_plot - y_std_plot, y_mean_plot + y_std_plot, alpha=0.3)
 
-ax.set_xlabel("Lohe order parameter")
+ax.set_xlabel("Conformists-contrarians coupling")
 ax.set_ylabel("$\\langle |Z e^{-i\phi}| \\rangle_t$")
 
 plt.show()
@@ -393,7 +394,8 @@ if not import_setup:
                                  "probabilities_monomial2": probabilities_monomial2.tolist(),
                                  "probabilities_crossratio2": probabilities_crossratio2.tolist(),
                                  "t0": t0, "t1": t1, "dt": dt, "nb_init_conditions": nb_init_conditions,
-                                 "timelist": timelist.tolist(), "order_param_array": order_param_array.tolist(),
+                                 "timelist": timelist.tolist(),
+                                 "conformist_contrarian_coupling_array": conformist_contrarian_coupling_array.tolist(),
                                  "mean_module_zeta_array": mean_module_zeta_array.tolist(),
                                  "percentage_averaged_end_time_series": percentage_averaged_end_time_series,
                                  "start_idx": int(start_idx),

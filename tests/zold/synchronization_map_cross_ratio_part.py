@@ -151,7 +151,7 @@ if import_setup:
         "sizes_monomial", "sizes_crossratio", "size_nonintegrable",
         "random_exponents", "probabilities_monomial", "probabilities_crossratio",
         "probabilities_nonintegrable2", "probabilities_monomial2", "probabilities_crossratio2", "timelist",
-        "order_param2_array", "mean_module_zeta_array"])
+        "conformist_contrarian_coupling_array", "mean_module_zeta_array"])
 
 else:
     """ Integration parameters """
@@ -200,18 +200,18 @@ else:
     percentage_averaged_end_time_series = 0.5
     start_idx = int(percentage_averaged_end_time_series*len(timelist))
     stdW_crossratio = 1
-    nb_init_conditions = 20
-    nb_meanW = 20
+    nb_init_conditions = 10   #####
+    nb_meanW = 10   #####
     min_meanW = -0.5
     max_meanW = 0.5
     meanW_crossratio = np.linspace(min_meanW, max_meanW, nb_meanW)
-    nb_source_weight = 20
-    min_source_weight = -10
-    max_source_weight = 10
-    source_weight = np.linspace(min_source_weight, max_source_weight, nb_source_weight)
-    order_param_array = np.zeros((len(meanW_crossratio), nb_init_conditions, nb_source_weight))
+    nb_source_weight = 10   #####
+    min_source_weight = 0
+    max_source_weight = 30
+    source_weight_array = np.linspace(min_source_weight, max_source_weight, nb_source_weight)
+    conformist_contrarian_coupling_array = np.zeros((len(meanW_crossratio), nb_init_conditions, nb_source_weight))
     mean_module_zeta_array = np.zeros((len(meanW_crossratio), nb_init_conditions, nb_source_weight))
-    for k, source_weight in tqdm(range()):
+    for k, source_weight in tqdm(enumerate(source_weight_array)):
         for j, _ in enumerate(range(nb_init_conditions)):
             """ Initial conditions """
             theta0 = np.random.uniform(0, 2*np.pi, N)
@@ -237,11 +237,11 @@ else:
                 """ calA """
                 cal_A = calA(coupling, C, chi)
 
-                """ Order parameter from Lohe 2017 """
-                order_param = coupling*np.sum(C[1, :]*np.cos(chi[1, :]), axis=1)/sizes_crossratio
-                order_param_array[i, j] = order_param[0]
+                """ Conformist-contrarian coupling from Lohe 2017 """
+                conformist_contrarian_coupling = coupling*np.sum(C[0, :]*np.cos(chi[0, :]))/sizes_crossratio
+                conformist_contrarian_coupling_array[i, j] = conformist_contrarian_coupling[0]
 
-                # print(i, order_param)
+                # print(i, conformist_contrarian_coupling)
 
                 """ Natural frequencies """
                 omega = random_gaussian_frequencies_pintegrable(m, c, sizes, cal_A, mean_omega, std_omega)
@@ -254,7 +254,7 @@ else:
                 # # plt.show()
                 # print("alpha = \n", np.round(alpha, 3))
                 # print("calA = \n", np.round(cal_A, 3))
-                # print("order_param = \n", order_param)
+                # print("conformist_contrarian_coupling = \n", conformist_contrarian_coupling)
                 # # print("omega = ", omega)
                 # print("Omega1 = ", Omega)
                 # # print("theta0 = ", theta0)
@@ -325,86 +325,60 @@ else:
 
                     plt.show()
 
-plt.rcParams.update({
-    "text.usetex": True,               # Use LaTeX for all text
-    "font.family": "serif",            # Use serif fonts
-    "font.serif": ["Computer Modern"], # Same as LaTeX default
-    "axes.unicode_minus": False        # Allow proper minus signs
-})
-
+# plt.rcParams.update({
+#     "text.usetex": True,               # Use LaTeX for all text
+#     "font.family": "serif",            # Use serif fonts
+#     "font.serif": ["Computer Modern"], # Same as LaTeX default
+#     "axes.unicode_minus": False        # Allow proper minus signs
+# })
+# 
 # Create plot
-fig, ax = plt.subplots(1, 1, figsize=(4, 4))
-
-for i in range(nb_init_conditions):
-    ax.scatter(order_param_array[:, i], mean_module_zeta_array[:, i], s=5, alpha=0.6)
-
-x, y = order_param_array.ravel(), mean_module_zeta_array.ravel()
-
-nb_bins = 40  # edges = np.histogram_bin_edges(x, bins="fd") # Freedman–Diaconis binning did not work well
-
-# Mean per bin
-y_mean, edges, _ = binned_statistic(x, y, statistic=lambda v: np.nanmean(v) if v.size > 0 else np.nan, bins=nb_bins)
-x_mid = 0.5 * (edges[:-1] + edges[1:])
-
-# Std per bin (population std). For sample std use lambda v: np.nanstd(v, ddof=1)
-y_std  = binned_statistic(x, y, statistic=lambda v: np.nanstd(v, ddof=0) if v.size > 0 else np.nan, bins=edges)[0]
-
-# Bin counts (to filter empties / singletons)
-counts = binned_statistic(x, y, statistic=lambda v: np.sum(~np.isnan(v)), bins=edges)[0]
-
-# Keep bins with data; set std=0 (or np.nan) where <2 points
-mask = counts >= 1
-y_std[counts < 2] = np.nan  # or np.nan if you prefer gaps
-
-x_plot = x_mid[mask]
-y_mean_plot = y_mean[mask]
-y_std_plot = y_std[mask]
-ax.plot(x_plot, y_mean_plot, lw=2)
-ax.fill_between(x_plot, y_mean_plot - y_std_plot, y_mean_plot + y_std_plot, alpha=0.3)
-
-ax.set_xlabel("Lohe order parameter")
-ax.set_ylabel("$\\langle |Z e^{-i\phi}| \\rangle_t$")
-
-plt.show()
-if not import_setup:
-    app = QApplication(sys.argv)
-    reply = QMessageBox.question(None, "Python", "Would you like to save the parameters, the data, and the plot?",
-                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-    if reply == QMessageBox.StandardButton.Yes:
-        filename, ok = QInputDialog.getText(None, "File:", "Enter your file name")
-        if ok:
-            print("File name:", filename)
-        SCRIPT_DIR = Path(__file__).resolve().parent   # Get current script location
-        REPO_ROOT = SCRIPT_DIR.parent      # Go to repo root (adjust this based on how deep your script is)
-        path = REPO_ROOT / 'simulations' / 'kooku1_fig3_data'  # Path to the data file
-        timestr = time.strftime("%Y_%m_%d_%Hh%Mmin%Ssec")
-        parameters_dictionary = {"N": N, "sizes_monomial": sizes_monomial.tolist(),
-                                 "sizes_crossratio":sizes_crossratio.tolist(),
-                                 "size_nonintegrable":size_nonintegrable.tolist(), "coupling": coupling,
-                                 "meanW_monomial": meanW_monomial, "stdW_monomial": stdW_monomial,
-                                 "meanalpha_monomial": meanalpha_monomial, "stdalpha_monomial": stdalpha_monomial,
-                                 "min_meanW": min_meanW, "max_meanW": max_meanW, "nb_meanW": nb_meanW,
-                                 "meanW_crossratio": meanW_crossratio.tolist(), "stdW_crossratio": stdW_crossratio,
-                                 "meanalpha_crossratio": meanalpha_crossratio, "stdalpha_crossratio": stdalpha_crossratio,
-                                 "theta0": "np.random.uniform(0, 2 * np.pi, N) with theta0[0] = 0",
-                                 "random_exponents": random_exponents.tolist(),
-                                 "probabilities_monomial": probabilities_monomial.tolist(),
-                                 "probabilities_crossratio": probabilities_crossratio.tolist(),
-                                 "probabilities_nonintegrable2": probabilities_nonintegrable2.tolist(),
-                                 "probabilities_monomial2": probabilities_monomial2.tolist(),
-                                 "probabilities_crossratio2": probabilities_crossratio2.tolist(),
-                                 "t0": t0, "t1": t1, "dt": dt, "nb_init_conditions": nb_init_conditions,
-                                 "timelist": timelist.tolist(), "order_param_array": order_param_array.tolist(),
-                                 "mean_module_zeta_array": mean_module_zeta_array.tolist(),
-                                 "percentage_averaged_end_time_series": percentage_averaged_end_time_series,
-                                 "start_idx": int(start_idx),
-                                 "weights_crossratio10": weights_crossratio[0, 0],
-                                 "weights_crossratio11": weights_crossratio[0, 1],
-                                 "weights_crossratio12": weights_crossratio[0, 2],
-                                 "mean_omega": mean_omega, "std_omega": std_omega
-                                 }  # "phaselags_crossratio10": phaselags_crossratio[1, 0],
-
-        fig.savefig(path / f'{timestr}_{filename}_synchro_crossratio_part_kuramoto.pdf')
-        fig.savefig(path / f'{timestr}_{filename}_synchro_crossratio_part_kuramoto.png')
-        with open(path / f'{timestr}_{filename}_kuramoto_parameters_dictionary.json', 'w') as outfile:
-            json.dump(parameters_dictionary, outfile)
+# fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+#
+# for i in range(nb_init_conditions):
+#     ax.scatter(conformist_contrarian_coupling_array[:, i], mean_module_zeta_array[:, i], s=5, alpha=0.6)
+#
+# ax.set_xlabel("Conformists-contrarians coupling")
+# ax.set_ylabel("$\\langle |Z e^{-i\phi}| \\rangle_t$")
+#
+# plt.show()
+app = QApplication(sys.argv)
+reply = QMessageBox.question(None, "Python", "Would you like to save the parameters, the data, and the plot?",
+                             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+if reply == QMessageBox.StandardButton.Yes:
+    filename, ok = QInputDialog.getText(None, "File:", "Enter your file name")
+    if ok:
+        print("File name:", filename)
+    SCRIPT_DIR = Path(__file__).resolve().parent   # Get current script location
+    REPO_ROOT = SCRIPT_DIR.parent      # Go to repo root (adjust this based on how deep your script is)
+    path = REPO_ROOT / 'simulations' / 'kooku1_fig3_data'  # Path to the data file
+    timestr = time.strftime("%Y_%m_%d_%Hh%Mmin%Ssec")
+    parameters_dictionary = {"N": N, "sizes_monomial": sizes_monomial.tolist(),
+                             "sizes_crossratio":sizes_crossratio.tolist(),
+                             "size_nonintegrable":size_nonintegrable.tolist(), "coupling": coupling,
+                             "meanW_monomial": meanW_monomial, "stdW_monomial": stdW_monomial,
+                             "meanalpha_monomial": meanalpha_monomial, "stdalpha_monomial": stdalpha_monomial,
+                             "min_meanW": min_meanW, "max_meanW": max_meanW, "nb_meanW": nb_meanW,
+                             "meanW_crossratio": meanW_crossratio.tolist(), "stdW_crossratio": stdW_crossratio,
+                             "meanalpha_crossratio": meanalpha_crossratio, "stdalpha_crossratio": stdalpha_crossratio,
+                             "theta0": "np.random.uniform(0, 2 * np.pi, N) with theta0[0] = 0",
+                             "random_exponents": random_exponents.tolist(),
+                             "probabilities_monomial": probabilities_monomial.tolist(),
+                             "probabilities_crossratio": probabilities_crossratio.tolist(),
+                             "probabilities_nonintegrable2": probabilities_nonintegrable2.tolist(),
+                             "probabilities_monomial2": probabilities_monomial2.tolist(),
+                             "probabilities_crossratio2": probabilities_crossratio2.tolist(),
+                             "t0": t0, "t1": t1, "dt": dt, "nb_init_conditions": nb_init_conditions,
+                             "timelist": timelist.tolist(),
+                             "conformist_contrarian_coupling_array": conformist_contrarian_coupling_array.tolist(),
+                             "mean_module_zeta_array": mean_module_zeta_array.tolist(),
+                             "percentage_averaged_end_time_series": percentage_averaged_end_time_series,
+                             "start_idx": int(start_idx), "source_weight_array": source_weight_array.tolist(),
+                             "min_source_weight": min_source_weight, "max_source_weight": max_source_weight,
+                             "nb_source_weight": nb_source_weight,
+                             "mean_omega": mean_omega, "std_omega": std_omega
+                             }
+    # fig.savefig(path / f'{timestr}_{filename}_synchro_crossratio_part_kuramoto.pdf')
+    # fig.savefig(path / f'{timestr}_{filename}_synchro_crossratio_part_kuramoto.png')
+    with open(path / f'{timestr}_{filename}_kuramoto_parameters_dictionary.json', 'w') as outfile:
+        json.dump(parameters_dictionary, outfile)
