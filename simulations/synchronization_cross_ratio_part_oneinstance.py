@@ -17,7 +17,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMessageBox, QInputDialog
 
 verif_validity_ws_equations = False
-import_setup = True
+import_setup = False
 isolate_cross_ratio_part = import_setup*False
 reconnect_cross_ratio_part = import_setup*False
 plot_animation = True
@@ -153,7 +153,7 @@ if import_setup:
     REPO_ROOT = SCRIPT_DIR.parent      # Go to repo root (adjust this based on how deep your script is)
     path = REPO_ROOT / 'simulations' / 'kooku1_fig3_data'  # Path to the data file
     # Path to your JSON file
-    file_path = Path(path / "2025_08_21_15h03min45sec_periodic_kuramoto_parameters_dictionary.json")
+    file_path = Path(path / "2025_08_21_15h03min45sec_periodic_kuramoto_parameters_dictionary.json")  # "2025_08_21_15h29min15sec_phasesync_kuramoto_parameters_dictionary.json")  #
     load_parameters_to_globals(file_path, keys_as_array=[
         "sizes_monomial", "sizes_crossratio", "size_nonintegrable",
         "theta0", "random_exponents", "W", "alpha", "C", "chi", "omega", "Rew", "Imw", "ReZ0", "ImZ0",
@@ -195,11 +195,11 @@ else:  # Generate parameters
     stdW_monomial = 0.1
     weights_monomial = np.random.normal(meanW_monomial, stdW_monomial, (sum(sizes_monomial), sum(sizes_monomial)))
 
-    weights_crossratio10 = 20     # TODO Important parameters
+    weights_crossratio10 = 0     # TODO Important parameters
     weights_crossratio11 = 0      # TODO Important parameters
     weights_crossratio12 = 0      # TODO Important parameters
 
-    meanW_crossratio = -0.2
+    meanW_crossratio = 0.1  # -0.2
     stdW_crossratio = 1
 
     weights_crossratio = np.random.normal(meanW_crossratio, stdW_crossratio, (len(sizes_crossratio), N))
@@ -225,6 +225,8 @@ else:  # Generate parameters
     phaselags_monomial = np.random.normal(meanalpha_monomial, stdalpha_monomial,
                                           (sum(sizes_monomial), sum(sizes_monomial))) % (np.pi / 2)
     phaselags_crossratio = np.random.normal(meanalpha_crossratio, stdalpha_crossratio, (len(sizes_crossratio), N))
+    phaselags_crossratio[1, 0] = 0   # TODO Important parameters
+    print(phaselags_crossratio[1, 0])
     phaselags_dict = {"monomial": phaselags_monomial, "crossratio": phaselags_crossratio}
     alpha, chi = random_phase_lag_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable,
                                          probabilities=probabilities_dict2, phaselags=phaselags_dict)

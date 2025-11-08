@@ -9,8 +9,8 @@ from dynamics.constants_of_motion import cross_ratio_theta,\
 from dynamics.integrate import integrate_dopri45
 import time
 import json
-import tkinter.simpledialog
-from tkinter import messagebox
+# import tkinter.simpledialog
+# from tkinter import messagebox
 
 """ Time parameters """
 t0, t1, dt = 0, 15, 0.0001
@@ -127,37 +127,38 @@ plt.tick_params(axis='both', which='major')
 plt.tight_layout()
 plt.legend(loc=1, fontsize=fontsize_legend)
 plt.show()
-if messagebox.askyesno("Python",
-                       "Would you like to save the parameters,"
-                       " the data, and the plot?"):
-    window = tkinter.Tk()
-    window.withdraw()  # hides the window
-    file = tkinter.simpledialog.askstring("File: ", "Enter your file name")
-    path = f'C:/Users/thivi/Documents/GitHub/koopman-kuramoto/' \
-           f'simulations/data/{dynamics_str}_data/'
-    timestr = time.strftime("%Y_%m_%d_%Hh%Mmin%Ssec")
-
-    parameters_dictionary = {"N": N, "graph_str": graph_str,
-                             "omega": omega.tolist(),
-                             "alpha": alpha,
-                             "coupling": coupling,
-                             "t0": t0, "t1": t1, "dt": dt}
-
-    fig.savefig(path + f'{timestr}_{file}_trajectories_and_cross_ratios'
-                f'_{dynamics_str}_{graph_str}.pdf')
-    fig.savefig(path + f'{timestr}_{file}_trajectories_and_cross_ratios'
-                       f'_{dynamics_str}_{graph_str}.png')
-    # with open(path + f'{timestr}_{file}'
-    #           f'_x_equilibrium_points_list'
-    #           f'_complete_{dynamics_str}_{graph_str}.json', 'w') \
-    #         as outfile:
-    #     json.dump(x_equilibrium_points_list, outfile)
-    # with open(path + f'{timestr}_{file}'
-    #           f'_redx_equilibrium_points_list'
-    #           f'_reduced_{dynamics_str}_{graph_str}.json',
-    #           'w') as outfile:
-    #     json.dump(redx_equilibrium_points_list, outfile)
-    with open(path + f'{timestr}_{file}'
-              f'_{dynamics_str}_{graph_str}_parameters_dictionary.json',
-              'w') as outfile:
-        json.dump(parameters_dictionary, outfile)
+# if messagebox.askyesno("Python",
+#                        "Would you like to save the parameters,"
+#                        " the data, and the plot?"):
+#     window = tkinter.Tk()
+#     window.withdraw()  # hides the window
+#     file = tkinter.simpledialog.askstring("File: ", "Enter your file name")
+#     path = f'C:/Users/thivi/Documents/GitHub/koopman-kuramoto/' \
+#            f'simulations/data/{dynamics_str}_data/'
+#     timestr = time.strftime("%Y_%m_%d_%Hh%Mmin%Ssec")
+# 
+#     parameters_dictionary = {"N": N, "graph_str": graph_str,
+#                              "omega": omega.tolist(),
+#                              "alpha": alpha,
+#                              "coupling": coupling,
+#                              "t0": t0, "t1": t1, "dt": dt}
+# 
+#     fig.savefig(path + f'{timestr}_{file}_trajectories_and_cross_ratios'
+#                 f'_{dynamics_str}_{graph_str}.pdf')
+#     fig.savefig(path + f'{timestr}_{file}_trajectories_and_cross_ratios'
+#                        f'_{dynamics_str}_{graph_str}.png')
+#     # with open(path + f'{timestr}_{file}'
+#     #           f'_x_equilibrium_points_list'
+#     #           f'_complete_{dynamics_str}_{graph_str}.json', 'w') \
+#     #         as outfile:
+#     #     json.dump(x_equilibrium_points_list, outfile)
+#     # with open(path + f'{timestr}_{file}'
+#     #           f'_redx_equilibrium_points_list'
+#     #           f'_reduced_{dynamics_str}_{graph_str}.json',
+#     #           'w') as outfile:
+#     #     json.dump(redx_equilibrium_points_list, outfile)
+#     with open(path + f'{timestr}_{file}'
+#               f'_{dynamics_str}_{graph_str}_parameters_dictionary.json',
+#               'w') as outfile:
+#         json.dump(parameters_dictionary, outfile)
+# 

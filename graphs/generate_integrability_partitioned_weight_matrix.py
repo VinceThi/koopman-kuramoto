@@ -172,10 +172,10 @@ def random_weight_matrix(sizes_monomial, sizes_crossratio, size_nonintegrable, r
     probabilities: dictionary such that {"monomial":list of len(sizes_monomial) probabilities,
                    "crossratio":list of probabilities of size len(sizes_crossratio) x total number of parts
                    (equal to len(sizes_monomial) + len(sizes_crossratio) + len(sizes_nonintegrable)),
-                   "nonintegrable":list of probabilities of size total number of parts}
+                   "nonintegrable":list of probabilities of size total number of parts
     weights: dictionary such that {"monomial":real array with shape (sum(sizes_monomial), sum(sizes_monomial)),
              "crossratio": real array with shape (len(sizes_crossratio), N),
-             "nonintegrable": real array with shape (size_nonintegrable[0], N)}
+             "nonintegrable": real array with shape (size_nonintegrable[0], N)
     The values of the dictionaries must satisfy specific constraints based on the previously defined functions.
 
     Warning: C corresponds to C^T in the paper

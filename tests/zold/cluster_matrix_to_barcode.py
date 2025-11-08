@@ -6,19 +6,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import pdist
+# from graphs.backbone import get_backbone
 
+def jaccard(A):
+    A = A.astype(float)
+    N = A.shape[0]
+    D = np.diag(np.sum(A, axis=1))
+    J = np.ones((N, N), dtype=float)
+    return (A@A.T)*((D@J+J@D-A@A.T)**(-1))
 
 # --- Load weight matrix ---
-networkName = "mouse_meso"
+networkName = "pdumerilii_desmosomal"
 # "cintestinalis" "celegans_signed"  "celegans" "pdumerilii_neuronal" "pdumerilii_desmosomal"
 # "zebrafish meso" "mouse_meso"  "mouse_voxel"
 W = get_connectome_weight_matrix(networkName)
-plt.matshow(W != 0, aspect="auto")
+W = W > 1
+plt.scatter(W.flatten(), W.flatten(), s=4)
 plt.show()
+# fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+# ax.matshow(W, aspect="auto")
+# plt.show()
+
+
+S = jaccard(W > 1)
+nb_sources = np.count_nonzero(np.diag(S) == 0)
+print(nb_sources)
+
+print("number of vertices involved in cross-ratios (number of identical rows) = ", np.sum(np.sum((S > 0.99999), axis=1) >= 4))
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+ax.matshow(S, aspect="auto")
+plt.show()
+
+
+# print(W[:100, :100])
+
 W = W/np.linalg.norm(W, ord=2)   # Rescale matrix
 W = W - np.diag(np.diag(W))  # Remove 0 elements
 # TODO Use diagW later to define the natural frequencies ? omega_j - Wjj sin(alpha_jj) ? or simply set alphajj=0
-
 zero_rows = np.all(W == 0, axis=1)
 nb_zero_rows = np.sum(zero_rows)
 N = len(W[:, 0])
@@ -33,6 +58,7 @@ print(f"N = {N}",
       f"\nnb source vertices = {nb_sources}",
       f"\nnb sink vertices = {nb_sinks}",
       f"\nnb of distances = N choose 2 = {N*(N-1)/2}")
+
 
 # Is the graph connected ?
 A_sym = np.abs(W) + np.abs(W.T)
