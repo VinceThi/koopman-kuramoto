@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import graph_tool.all as gt
 from graph_tool.spectral import adjacency as gt_adjacency
+from graphs.get_graph_properties import largest_weakly_connected_component_sparse
 
 HERE = Path(__file__).resolve().parent
 IN_DIR  = HERE / "datasets" / "xml.zst"
@@ -92,6 +93,7 @@ def main(tol=1e-8):
         else:
             B = (np.abs(W) > tol)
         np.fill_diagonal(B, 0)
+        B = largest_weakly_connected_component_sparse(B)[0]
 
         out_path = OUT_DIR / f"{name}.npy"
         np.save(out_path, B.astype(np.bool_))

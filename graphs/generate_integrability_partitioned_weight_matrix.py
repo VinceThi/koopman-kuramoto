@@ -243,12 +243,12 @@ def random_gaussian_frequencies_pintegrable(m, c, sizes, calA, mean, std):
                 omega_list.append(reference_frequencies[gamma] + 2*np.imag(calA[gamma, j] - calA[gamma, ell_gamma]))
             row_blocks.append(np.array([omega_list]))
             increment += sizes[nu]
-    return np.concatenate(row_blocks, axis=1)[0]  # TODO TO TEST !!!
+    return np.concatenate(row_blocks, axis=1)[0]
 
 
 if __name__ == "__main__":
-    sizes_monomial = [1, 3, 100]
-    sizes_crossratio = [4, 4]
+    sizes_monomial = [1, 3, 10]
+    sizes_crossratio = [4, 40]
     size_nonintegrable = [5]
     sizes = np.concatenate([sizes_monomial, sizes_crossratio, size_nonintegrable])
     q = len(sizes)  # Number of parts

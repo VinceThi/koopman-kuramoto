@@ -7,6 +7,7 @@ import pandas as pd
 import scipy.io
 import warnings
 from pathlib import Path
+from graphs.get_graph_properties import largest_weakly_connected_component_sparse
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -182,10 +183,12 @@ def main():
         np.fill_diagonal(B, 0)
         # plt.matshow(B, aspect="auto")
         # plt.show()
+        B = largest_weakly_connected_component_sparse(B)[0]
 
         out_dir = Path(__file__).parent / "adjacency_matrices"
         out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / name
+        print(name)
+        out_path = out_dir / f"connectome_{name}.npy"
         np.save(out_path, B)
 
         print(f"[{name}] saved {out_path}  |  N={B.shape[0]}")

@@ -50,7 +50,7 @@ def similarity_matrix_cross_ratio(B):
     matrices to be similar (they only differ because a diagonal of zeros is going through them). The idea to do such
     thing is to replace the off-diagonal zero elements with the imaginary unit. In this way, two rows are identical when
     the scalar product of two rows divided by N - 2 is equal to one. The diagonal elements are (N-1)/(N-2) and thus,
-    subtracting by np.diag(1/(N-2)) provide a diagonal of ones, as desired (a row is similar to itself).
+    subtracting by np.diag(np.ones(N, dtype=complex)/(N - 2) provide a diagonal of ones, as desired (a row is similar to itself).
 
     Important note: If (1) row A and row B have a similarity of 1, row B and row C have a similarity of 1, than it does
     NOT mean that row A and row C have a similarity of 1. In other words, transitivity is not guaranteed.
@@ -72,10 +72,11 @@ def similarity_matrix_cross_ratio(B):
     return (A@A.conj().T)/(N - 2) - np.diag(np.ones(N, dtype=complex)/(N - 2))  # The subtraction converts the diagonal elements go to one
 
 
-def count_cross_ratio_motifs(B, S, atol=1e-8, rtol=1e-10):
+def count_conserved_cross_ratio(B, S, atol=1e-8, rtol=1e-10):
     """
-    Build an undirected graph where an edge (i,j) exists iff S_ij = 1,
-    find connected components that are maximal cliques, and then sum (n-3) over all maximal cliques of size n >= 4.
+    Build an undirected graph from the complex matrix S where an edge (i,j) exists iff S_ij = 1,
+    find maximal cliques of this graph, and then sum (n-3) over all maximal cliques of size n >= 4, which gives the
+    number of possible conserved cross-ratios.
     """
     # 1) Get binary matrix from the similarity matrix, using where there are ones
     mask = np.isclose(S, 1.0 + 0j, atol=atol, rtol=rtol)
@@ -87,13 +88,13 @@ def count_cross_ratio_motifs(B, S, atol=1e-8, rtol=1e-10):
     g = adjacency_matrix_to_graphtool_graph(mask)
 
     # 3) Count maximal cliques
-    nb_cross_ratio_motifs, sizes, motifs_label, max_indeg_motif_list  = 0, [], [], []
+    nb_conserved_cross_ratio, sizes, motifs_label, max_indeg_motif_list  = 0, [], [], []
     for c in gt.max_cliques(g): # each c is a list of vertex objects
         # Note: this does NOT recompute gt.max_cliques(g) at every loop, it avoids having it in cache
         clique = [int(v) for v in c]
         clique_size = len(clique)
         if clique_size >= 4:
-            nb_cross_ratio_motifs += clique_size - 3
+            nb_conserved_cross_ratio += clique_size - 3
             sizes.append(clique_size)
             motifs_label.append(clique)
 
@@ -101,7 +102,7 @@ def count_cross_ratio_motifs(B, S, atol=1e-8, rtol=1e-10):
             indeg_motif = np.sum(Bmotif, axis=1).astype(int)
             max_indeg_motif_list.append(int(indeg_motif.max()))
 
-    return nb_cross_ratio_motifs, sizes, motifs_label, max_indeg_motif_list
+    return nb_conserved_cross_ratio, sizes, motifs_label, max_indeg_motif_list
 
 
 """ Monomials """
@@ -139,3 +140,27 @@ def count_source_pairs(W):
     count = pairs.shape[0]
 
     return count, pairs
+
+
+def count_constants_of_motion(nb_sources, nb_2sources, nb_cross_ratios, directed_bool):
+    """
+    :param nb_sources: number of sources in the graph from count_single_sources(W)
+    :param nb_2sources: number of 2 sources in the graph from count_source_pairs(W)
+    :param nb_cross_ratios: number of cross-ratio motifs in the graph from count_cross_ratio_motifs(W)
+    :param directed_bool: whether the graph is directed or undirected
+    :return: number of constants of motion = (if directed and nb_sources >= 4)
+    number of sources (monomial, time-dependent constants of motion)
+    + number of 2sources (monomial, time-dependent constants of motion)
+    + number of conserved cross-ratio that does not come from the presence of sources (time independent)
+
+    Recall that if there are q sources in a graph there are q time-dependent conserved monomials and q - 3
+    conserved cross-ratio, but they are not functionally independent.
+    """
+    if directed_bool:
+        if nb_sources >= 4:
+            return nb_sources + nb_2sources + (nb_cross_ratios - (nb_sources - 3))
+        else:
+            return nb_sources + nb_2sources + nb_cross_ratios
+    else: # there cannot be sources and conserved monomials
+        return nb_cross_ratios
+
