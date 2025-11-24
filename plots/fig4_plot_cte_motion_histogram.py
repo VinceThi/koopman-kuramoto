@@ -140,6 +140,7 @@ df["nb_conserved_crossratio_nosource"] = cr_nosource
 # --- Compute ratios per vertex ---
 
 df["total_ratio"]  = df["nb_cte_motion"] / df["nb_vertices"]
+print(np.where(df["total_ratio"] > 1), np.max(df["total_ratio"]))
 df["1source_ratio"] = df["nb_sources"] / df["nb_vertices"]
 df["2source_ratio"] = df["nb_2sources"] / df["nb_vertices"]
 df["cr_ratio"]      = df["nb_conserved_crossratio_nosource"] / df["nb_vertices"]
@@ -208,8 +209,17 @@ bins = 40
 # 1) Lower-bound on the fraction nb_cte_motion / nb_vertices
 weights1 = np.ones_like(nz(df_directed["total_ratio"])) / len(nz(df_directed["total_ratio"]))
 weights11 = np.ones_like(nz(df_undirected["total_ratio"])) / len(nz(df_undirected["total_ratio"]))
-counts, bins, _ = ax1.hist(nz(df_directed["total_ratio"]),   bins=bins, alpha=0.7, label="Directed networks", weights=weights1, color="#333333")
+counts, bins, _ = ax1.hist(nz(df_directed["total_ratio"]),   bins=bins, alpha=0.7, label="Directed networks", weights=weights1, color="#424242")
 ax1.hist(nz(df_undirected["total_ratio"]), bins=bins, alpha=0.8, label="Undirected networks\n(\# cross-ratio)",  weights=weights11, color="#d1d1d1")
+
+# Compute means
+mean_dir = nz(df_directed["total_ratio"]).mean()
+mean_undir = nz(df_undirected["total_ratio"]).mean()
+print(mean_dir, mean_undir)
+
+# Add vertical dashed lines (same colors as bars)
+ax1.axvline(mean_dir,   color="#424242", linestyle="--", linewidth=1.2)
+ax1.axvline(mean_undir, color="#d1d1d1", linestyle="--", linewidth=1.2)
 ax1.set_xlabel("Lower bound on \# constants of motion / $N$")
 ax1.set_ylabel("Normalized frequency")
 ax1.set_yticks([0, 0.1, 0.2])
@@ -236,7 +246,7 @@ if pie_chart:
 
 # 2) Number of conserved cross-ratios (not sources_
 weights2 = np.ones_like(nz(df_directed["cr_ratio"])) / len(nz(df_directed["cr_ratio"]))
-ax2.hist(nz(df_directed["cr_ratio"]), bins=bins, alpha=0.7, label="Directed", weights=weights2, color="#333333")
+ax2.hist(nz(df_directed["cr_ratio"]), bins=bins, alpha=0.7, label="Directed", weights=weights2, color="#424242")
 # ax2.set_xlabel(r"\# cross-ratios / $N$") # (no sources)")
 # ax2.set_ylabel("Normalized frequency")
 # ax2.legend()
@@ -247,7 +257,7 @@ fix_xticks_replace_zero(ax2, nz(df_directed["cr_ratio"]), bins=50)
 
 # 3) Number of sources (here you plotted directed only; keep that choice)
 weights3 = np.ones_like(nz(df_directed["1source_ratio"])) / len(nz(df_directed["1source_ratio"]))
-ax3.hist(nz(df_directed["1source_ratio"]), bins=bins, alpha=0.7, label="Directed", weights=weights3, color="#333333")
+ax3.hist(nz(df_directed["1source_ratio"]), bins=bins, alpha=0.7, label="Directed", weights=weights3, color="#424242")
 # ax3.set_xlabel(r"\# sources / $N$")
 # ax3.set_ylabel("Normalized frequency")
 # ax3.legend()
@@ -258,7 +268,7 @@ fix_xticks_replace_zero(ax3, nz(df_directed["1source_ratio"]), bins=bins)
 
 # 4) Number of 2-sources (again directed only)
 weights4 = np.ones_like(nz(df_directed["2source_ratio"])) / len(nz(df_directed["2source_ratio"]))
-ax4.hist(nz(df_directed["2source_ratio"]), bins=50, alpha=0.7, label="Directed", weights=weights4, color="#333333")
+ax4.hist(nz(df_directed["2source_ratio"]), bins=50, alpha=0.7, label="Directed", weights=weights4, color="#424242")
 # ax4.set_xlabel(r"\# 2-sources / $N$")
 # ax4.set_ylabel("Normalized frequency")
 # ax4.legend()
