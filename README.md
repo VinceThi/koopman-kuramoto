@@ -7,13 +7,10 @@ Code and symbolic derivations associated with the article:
 
 arXiv: https://arxiv.org/abs/2504.06248
 
----
-
 ## Overview
 
 This repository provides the computational and symbolic framework supporting the results presented in the associated article. The work develops a Koopman operator formulation of the Kuramoto model, identifying classes of constants of motion, associated symmetries, and network motifs that constrain the dynamics.
 
----
 
 ## Repository Structure
 
@@ -25,8 +22,6 @@ The project is organized to facilitate the exploration of both analytical deriva
 - **`simulations/`**: Scripts for numerical verification of constants of motion and motif-driven dynamics  
 - **`plots/`**: Code used to generate figures in the manuscript  
 - **`tests/`**: Unit tests ensuring consistency of the implementations  
-
----
 
 ## Citation
 
@@ -41,13 +36,9 @@ If this repository contributes to your research, please cite:
 }
 ```
 
----
-
 ## Affiliation
 
 This work was conducted within the [Dynamica Research Lab](https://dynamicalab.github.io/) at Université Laval.
-
----
 
 ## License
 
