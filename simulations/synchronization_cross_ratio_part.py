@@ -17,7 +17,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMessageBox, QInputDialog
 
 plot_zeta_trajectories = True
-verif_validity_ws_equations = False
+verif_validity_ws_equations = True
 import_setup = False
 
 @njit(fastmath=True)

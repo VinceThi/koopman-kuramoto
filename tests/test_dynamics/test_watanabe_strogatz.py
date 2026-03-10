@@ -17,8 +17,9 @@ def test_ws_equations_kuramoto():
     alpha = 0
     N = 100
     W = np.ones((N, N))
-    omega = 1
-    coupling = 50/N
+
+    omega = 0
+    coupling = 2/N
     np.random.seed(499)
     theta0 = np.random.uniform(0, 2*np.pi, N)
 
@@ -48,6 +49,6 @@ def test_ws_equations_kuramoto():
     assert np.all(np.abs(theta - theta_ws) < 1e-6)
 
 
-# test_ws_equations_kuramoto()
-if __name__ == "__main__":
-    pytest.main()
+test_ws_equations_kuramoto()
+# if __name__ == "__main__":
+#     pytest.main()

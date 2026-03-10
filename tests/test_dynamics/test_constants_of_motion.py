@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-
 from dynamics.constants_of_motion import *
 from graphs.generate_integrability_partitioned_weight_matrix import *
 from graphs.get_real_connectomes import *
@@ -18,7 +16,7 @@ def test_similarity_matrix_crossratio_simplest():
                   [1, 0, 0, 0]])
     S = similarity_matrix_cross_ratio(B)
     expected_S = np.ones((4, 4))
-    print(S)
+    # print(S)
 
     assert np.all(np.abs(S - expected_S) < 1e-10)
 
@@ -80,9 +78,9 @@ def test_count_cross_ratio_motifs():
     """ Get similarity matrix and count conserved cross ratios"""
     B = W > 0
     S = similarity_matrix_cross_ratio(B)
-    nb_cross_ratios_totest = count_cross_ratio_motifs(S)
+    nb_cross_ratios_totest = count_conserved_cross_ratio(B, S)[0]
     expected_answer = 58
-    print(nb_cross_ratios_totest)
+    # print("", nb_cross_ratios_totest)
     assert nb_cross_ratios_totest == expected_answer
 
 
@@ -150,8 +148,6 @@ def test_ensure_cross_ratio_conservation_realnetwork2():
     # plt.matshow(B[598:602, 550:650], aspect="auto")
     # plt.show()
 
-
-
     """ Time parameters """
     t0, t1, dt = 0, 10, 0.01
     timelist = np.linspace(t0, t1, int(t1 / dt))
@@ -207,16 +203,16 @@ def test_count_cross_ratio_motifs_realnetwork():
     S = similarity_matrix_cross_ratio(B)
     # plt.matshow(W > 1e-9)
     # plt.show()
-    nb_cross_ratios_totest = count_cross_ratio_motifs(S)
+    nb_cross_ratios_totest = count_conserved_cross_ratio(B, S)[0]
     print(nb_cross_ratios_totest)
     assert nb_cross_ratios_totest == 890 + 3
 
-# test_similarity_matrix_crossratio_simplest()
+test_similarity_matrix_crossratio_simplest()
 # test_similarity_matrix_crossratio_simplest2()
 # test_similarity_matrix_crossratio_zero_rows()
-# test_count_cross_ratio_motifs()
+test_count_cross_ratio_motifs()
 # test_ensure_cross_ratio_conservation_realnetwork()
 test_ensure_cross_ratio_conservation_realnetwork2()
-# test_count_cross_ratio_motifs_realnetwork()
+test_count_cross_ratio_motifs_realnetwork()
 # if __name__ == "__main__":
 #     pytest.main()

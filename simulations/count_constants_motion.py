@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # @authors: Vincent Thibeault
 from pathlib import Path
-
-import numpy as np
-
 from dynamics.constants_of_motion import *
 from graphs.get_graph_properties import is_symmetric, count_edges_from_binary_matrix, has_tag
 from tqdm import tqdm
