@@ -16,10 +16,10 @@ This repository provides the computational and symbolic framework supporting the
 
 The project is organized to facilitate the exploration of both analytical derivations and numerical experiments:
 
-- **`symbolic/`**: Mathematica and Wolfram Language scripts for the analytical derivation of Koopman eigenfunctions and generators  
-- **`dynamics/`**: Core implementations of Kuramoto dynamics and Koopman-based operator frameworks  
+- **`symbolic/`**: Mathematica and Matlab scripts for the analytical derivation of symmetries and the proof of theorem 1
+- **`dynamics/`**: Implementations of the Kuramoto dynamics, the constants of motion and the partial integration
 - **`graphs/`**: Utilities for generating and analyzing network topologies and motifs  
-- **`simulations/`**: Scripts for numerical verification of constants of motion and motif-driven dynamics  
+- **`simulations/`**: Scripts for numerical verification of constants of motion and symmetries  
 - **`plots/`**: Code used to generate figures in the manuscript  
 - **`tests/`**: Unit tests ensuring consistency of the implementations  
 
