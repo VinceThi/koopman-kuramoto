@@ -3,3 +3,4 @@ __pycache__/
 run_gtk.sh
 test_interactive_window.py
 random_graph_weight_matrix.npy
+/tests/zold/
