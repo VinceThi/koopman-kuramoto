@@ -6,6 +6,7 @@ Code and symbolic derivations associated with the article:
 > Vincent Thibeault, Benjamin Claveau, Antoine Allard, and Patrick Desrosiers
 
 arXiv: https://arxiv.org/abs/2504.06248
+Zenodo DOI: 10.5281/zenodo.20599776
 
 ## Overview
 
