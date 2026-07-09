@@ -4,8 +4,7 @@
 import numpy as np
 from plots.config_rcparams import *
 from dynamics.dynamics import kuramoto_sakaguchi
-from dynamics.constants_of_motion import cross_ratio_theta,\
-    log_cross_ratio_theta
+from dynamics.constants_of_motion import cross_ratio_theta, log_cross_ratio_theta, ws_integral
 from dynamics.integrate import integrate_dopri45
 import time
 import json
@@ -110,6 +109,7 @@ for j in range(0, N):
 #          label="Log cross-ratio $log(c_{2345})$")
 # plt.plot(timelist, log_cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))
 plt.plot(timelist, log_cross_ratio_theta(x[:, 0], x[:, 1], x[:, 2], x[:, 3]))
+# plt.plot(timelist, ws_integral(x))
 # plt.plot(timelist, cross_ratio_theta(theta0[1], theta0[2], theta0[3], theta0[4])*np.ones(len(timelist)))
 # plt.plot(timelist, cross_ratio_theta(x[:, 1], x[:, 2], x[:, 3], x[:, 4]))  # label="Cross-ratio $c_{2345}$")
 #          label="Cross-ratio $log(c_{2345})$")

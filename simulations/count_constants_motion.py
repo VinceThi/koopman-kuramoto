@@ -50,7 +50,7 @@ for file in tqdm(sorted(path.glob("*.npy"))):
         elif has_tag(name, "Connectome"):
             gtype = "connectome"
         else:
-            raise ValueError("This network name is not associated to a valid tag (Connectome, Social, or powergrid).")
+            raise ValueError("This network name is not associated to a valid tag (Connectome, Social, or Powergrid).")
 
     if plot_graph:
         import graph_tool.all as gt

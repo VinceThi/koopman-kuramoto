@@ -164,3 +164,45 @@ def count_constants_of_motion(nb_sources, nb_2sources, nb_cross_ratios, directed
     else: # there cannot be sources and conserved monomials
         return nb_cross_ratios
 
+
+
+""" WS integrals """
+
+import numpy as np
+
+def ws_integral(theta: np.ndarray) -> np.ndarray:
+    """
+    Compute the WS product
+
+        I = prod_u sin((theta_u - theta_{u+1}) / 2),
+
+    with periodic indexing theta_{ell+1} = theta_1.
+
+    Parameters
+    ----------
+    theta : np.ndarray
+        Either:
+        - 1D array of shape (n_oscillators,)
+        - 2D array of shape (n_times, n_oscillators)
+
+    Returns
+    -------
+    np.ndarray
+        - scalar float if theta is 1D
+        - 1D array of shape (n_times,) if theta is 2D
+    """
+    theta = np.asarray(theta, dtype=float)
+
+    if theta.ndim == 1:
+        if theta.size < 2:
+            raise ValueError("theta must contain at least two phases")
+        theta_next = np.roll(theta, -1)
+        return float(np.prod(np.sin(0.5 * (theta - theta_next))))
+
+    if theta.ndim == 2:
+        if theta.shape[1] < 2:
+            raise ValueError("theta must contain at least two oscillators")
+        theta_next = np.roll(theta, -1, axis=1)
+        return np.prod(np.sin(0.5 * (theta - theta_next)), axis=1)
+
+    raise ValueError("theta must be a 1D or 2D array")

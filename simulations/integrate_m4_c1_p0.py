@@ -3,6 +3,7 @@
 # import matplotlib
 # matplotlib.use("Agg")
 # from plots.kuramoto_animation import animate_kuramoto_on_circle
+import matplotlib.pyplot as plt
 from plots.config_rcparams import *
 from graphs.generate_integrability_partitioned_weight_matrix import *
 from dynamics.dynamics import kuramoto

@@ -57,3 +57,32 @@ FullSimplify[K[((z3 - z1)(z4 - z2))/((z3 - z2)(z4 - z1))]]  (*Test: 0 iff w1 = w
 
 
 
+Clear["Global`*"];
+
+(* Variables *)
+vars = {z1, z2, z3, z4, z5};
+
+(* Cross-ratio C6 = c_{1234} *)
+C6 = ((z3 - z1) (z4 - z2))/((z3 - z2) (z4 - z1));
+
+(* Vector-field coefficient of S_eta acting on z_eta *)
+g[z_] := I (omega - omega1) z + A1 z1 - barA1 barz1 z^2;
+
+(* Direct computation of S_2[C6], S_3[C6], S_4[C6], S_5[C6] *)
+C7direct = FullSimplify[g[z2] D[C6, z2]];
+C8direct = FullSimplify[g[z3] D[C6, z3]];
+C9direct = FullSimplify[g[z4] D[C6, z4]];
+C10direct = FullSimplify[g[z5] D[C6, z5]];
+
+Print["D[C6,z2] = ", Factor[D[C6, z2]]];
+Print["D[C6,z3] = ", Factor[D[C6, z3]]];
+Print["D[C6,z4] = ", Factor[D[C6, z4]]];
+Print["D[C6,z5] = ", Factor[D[C6, z5]]];
+
+Print["C7direct = ", Factor[C7direct]];
+Print["C8direct = ", Factor[C8direct]];
+Print["C9direct = ", Factor[C9direct]];
+Print["C10direct = ", Factor[C10direct]];
+
+
+
